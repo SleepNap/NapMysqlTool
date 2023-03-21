@@ -1,0 +1,24 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" name="NapMysqlTool">
+    <output-path>$PROJECT_DIR$/out/artifacts/NapMysqlTool</output-path>
+    <properties id="javafx-properties">
+      <options>
+        <option name="appClass" value="cn.nap.MysqlToolApp" />
+        <option name="description" value="" />
+        <option name="height" value="200" />
+        <option name="htmlPlaceholderId" value="" />
+        <option name="nativeBundle" value="all" />
+        <option name="title" value="MySQL启停工具" />
+        <option name="vendor" value="nap" />
+        <option name="version" value="" />
+        <option name="width" value="400" />
+      </options>
+    </properties>
+    <root id="root">
+      <element id="archive" name="NapMysqlTool.jar">
+        <element id="module-output" name="NapMysqlTool" />
+        <element id="library" level="project" name="lib" />
+      </element>
+    </root>
+  </artifact>
+</component>
