@@ -1,4 +1,4 @@
-# NapMysqlTool
+## NapMysqlTool
 
 #### 介绍
 mysql启停软件，这个项目诞生其实是因为我的另一个项目HeavenMS-Nap。  
@@ -13,4 +13,5 @@ mysql启停软件，这个项目诞生其实是因为我的另一个项目Heaven
 
 补充：  
 1.mysql文件夹可以是我项目下的mysql文件夹，我项目的文件夹版本为MySQL5.7.40，也是mysql5.7最新的版本，取自于mysql官方。同时也支持PHPStudy下的mysql文件夹，PHPStudy下的mysql文件夹更精简  
-2.jre文件夹是可选的，如果已经安装了jdk1.8或者jre1.8就可以不用取这个，程序会自动寻找jre路径
+2.jre文件夹是可选的，如果已经安装了jdk1.8或者jre1.8就可以不用取这个，程序会自动寻找jre路径  
+3.如果mysql起不来，可能是缺少依赖库，需要安装一下vc++，vc++在mysql依赖库文件夹下
