@@ -9,9 +9,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="04912de9-2cfa-4f76-a4ef-58d1a8b4febe" name="Changes" comment="补充jre">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="04912de9-2cfa-4f76-a4ef-58d1a8b4febe" name="Changes" comment="初始化" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -114,6 +112,7 @@
       <workItem from="1679156396769" duration="2059000" />
       <workItem from="1679385296181" duration="534000" />
       <workItem from="1679386353854" duration="205000" />
+      <workItem from="1679386563153" duration="457000" />
     </task>
     <task id="LOCAL-00001" summary="首次提交">
       <created>1678104443066</created>
@@ -143,7 +142,21 @@
       <option name="project" value="LOCAL" />
       <updated>1679385509612</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="初始化">
+      <created>1679386707987</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1679386707987</updated>
+    </task>
+    <task id="LOCAL-00006" summary="初始化">
+      <created>1679386813446</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1679386813446</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -165,7 +178,8 @@
     <MESSAGE value="补充运行工具，发布版本" />
     <MESSAGE value="发布" />
     <MESSAGE value="补充jre" />
-    <option name="LAST_COMMIT_MESSAGE" value="补充jre" />
+    <MESSAGE value="初始化" />
+    <option name="LAST_COMMIT_MESSAGE" value="初始化" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
