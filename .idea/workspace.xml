@@ -9,251 +9,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="04912de9-2cfa-4f76-a4ef-58d1a8b4febe" name="Changes" comment="增加gitignore，避免污染mysql和jre">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/COPYRIGHT" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/LICENSE" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/README.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/THIRDPARTYLICENSEREADME-JAVAFX.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/THIRDPARTYLICENSEREADME.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/Welcome.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/JAWTAccessBridge-64.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/JavaAccessBridge-64.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/WindowsAccessBridge-64.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-console-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-datetime-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-debug-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-errorhandling-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-file-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-file-l1-2-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-file-l2-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-handle-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-heap-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-interlocked-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-libraryloader-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-localization-l1-2-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-memory-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-namedpipe-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-processenvironment-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-processthreads-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-processthreads-l1-1-1.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-profile-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-rtlsupport-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-string-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-synch-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-synch-l1-2-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-sysinfo-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-timezone-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-core-util-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-crt-conio-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-crt-convert-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-crt-environment-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-crt-filesystem-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-crt-heap-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-crt-locale-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-crt-math-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-crt-multibyte-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-crt-private-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-crt-process-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-crt-runtime-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-crt-stdio-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-crt-string-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-crt-time-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/api-ms-win-crt-utility-l1-1-0.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/attach.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/awt.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/bci.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/concrt140.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/dcpr.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/decora_sse.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/deploy.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/dt_shmem.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/dt_socket.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/dtplugin/deployJava1.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/dtplugin/npdeployJava1.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/eula.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/fontmanager.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/fxplugins.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/glass.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/glib-lite.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/gstreamer-lite.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/hprof.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/instrument.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/j2pcsc.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/j2pkcs11.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/jaas_nt.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/jabswitch.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/java-rmi.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/java.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/java.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/java_crw_demo.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/javacpl.cpl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/javacpl.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/javafx_font.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/javafx_font_t2k.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/javafx_iio.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/javaw.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/javaws.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/jawt.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/jdwp.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/jfr.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/jfxmedia.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/jfxwebkit.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/jjs.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/jli.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/jp2iexp.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/jp2launcher.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/jp2native.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/jp2ssv.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/jpeg.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/jsdt.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/jsound.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/jsoundds.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/keytool.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/kinit.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/klist.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/ktab.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/lcms.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/management.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/mlib_image.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/msvcp140.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/msvcr100.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/net.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/nio.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/npt.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/orbd.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/pack200.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/plugin2/msvcr100.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/plugin2/npjp2.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/policytool.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/prism_common.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/prism_d3d.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/prism_sw.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/resource.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/rmid.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/rmiregistry.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/sawindbg.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/server/Xusage.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/server/classes.jsa" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/server/jvm.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/servertool.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/splashscreen.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/ssv.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/ssvagent.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/sunec.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/sunmscapi.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/t2k.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/tnameserv.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/ucrtbase.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/unpack.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/unpack200.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/vcruntime140.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/verify.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/w2k_lsa_auth.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/wsdetect.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/bin/zip.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/accessibility.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/amd64/jvm.cfg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/calendars.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/charsets.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/classlist" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/cmm/CIEXYZ.pf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/cmm/GRAY.pf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/cmm/LINEAR_RGB.pf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/cmm/PYCC.pf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/cmm/sRGB.pf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/content-types.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/currency.data" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/deploy.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/deploy/ffjcext.zip" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/deploy/messages.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/deploy/messages_de.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/deploy/messages_es.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/deploy/messages_fr.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/deploy/messages_it.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/deploy/messages_ja.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/deploy/messages_ko.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/deploy/messages_pt_BR.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/deploy/messages_sv.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/deploy/messages_zh_CN.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/deploy/messages_zh_HK.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/deploy/messages_zh_TW.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/deploy/splash.gif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/deploy/splash@2x.gif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/deploy/splash_11-lic.gif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/deploy/splash_11@2x-lic.gif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/ext/access-bridge-64.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/ext/cldrdata.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/ext/dnsns.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/ext/jaccess.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/ext/jfxrt.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/ext/localedata.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/ext/meta-index" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/ext/nashorn.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/ext/sunec.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/ext/sunjce_provider.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/ext/sunmscapi.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/ext/sunpkcs11.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/ext/zipfs.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/flavormap.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/fontconfig.bfc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/fontconfig.properties.src" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/fonts/LucidaBrightDemiBold.ttf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/fonts/LucidaBrightDemiItalic.ttf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/fonts/LucidaBrightItalic.ttf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/fonts/LucidaBrightRegular.ttf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/fonts/LucidaSansDemiBold.ttf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/fonts/LucidaSansRegular.ttf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/fonts/LucidaTypewriterBold.ttf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/fonts/LucidaTypewriterRegular.ttf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/hijrah-config-umalqura.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/images/cursors/cursors.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/images/cursors/invalid32x32.gif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/images/cursors/win32_CopyDrop32x32.gif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/images/cursors/win32_CopyNoDrop32x32.gif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/images/cursors/win32_LinkDrop32x32.gif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/images/cursors/win32_LinkNoDrop32x32.gif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/images/cursors/win32_MoveDrop32x32.gif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/images/cursors/win32_MoveNoDrop32x32.gif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/javafx.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/javaws.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/jce.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/jfr.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/jfr/default.jfc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/jfr/profile.jfc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/jfxswt.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/jsse.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/jvm.hprof.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/logging.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/management-agent.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/management/jmxremote.access" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/management/jmxremote.password.template" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/management/management.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/management/snmp.acl.template" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/meta-index" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/net.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/plugin.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/psfont.properties.ja" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/psfontj2d.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/resources.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/rt.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/security/blacklist" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/security/blacklisted.certs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/security/cacerts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/security/java.policy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/security/java.security" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/security/javaws.policy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/security/policy/limited/US_export_policy.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/security/policy/limited/local_policy.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/security/policy/unlimited/US_export_policy.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/security/policy/unlimited/local_policy.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/security/trusted.libraries" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/sound.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/tzdb.dat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jre/lib/tzmappings" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-    </list>
+    <list default="true" id="04912de9-2cfa-4f76-a4ef-58d1a8b4febe" name="Changes" comment="增加gitignore，避免污染mysql和jre" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -286,27 +42,28 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;jdk.selected.JAVA_MODULE&quot;: &quot;1.8_64&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/LocalGit/GitHub/NapMysqlTool&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Artifacts&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;Groovy compiler&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "jdk.selected.JAVA_MODULE": "1.8_64",
+    "last_opened_file_path": "E:/LocalGit/GitHub/NapMysqlTool/mysql依赖库",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Artifacts",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "Groovy compiler"
   }
-}</component>
+}]]></component>
   <component name="RebelAgentSelection">
     <selection>jr</selection>
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\LocalGit\GitHub\NapMysqlTool\mysql依赖库" />
       <recent name="E:\LocalGit\GitHub\NapMysqlTool" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -356,7 +113,7 @@
       <workItem from="1679156396769" duration="2059000" />
       <workItem from="1679385296181" duration="534000" />
       <workItem from="1679386353854" duration="205000" />
-      <workItem from="1679386563153" duration="780000" />
+      <workItem from="1679386563153" duration="1214000" />
     </task>
     <task id="LOCAL-00001" summary="首次提交">
       <created>1678104443066</created>
@@ -407,7 +164,14 @@
       <option name="project" value="LOCAL" />
       <updated>1679387314708</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="增加gitignore，避免污染mysql和jre">
+      <created>1679387729292</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1679387729292</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
