@@ -9,7 +9,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="04912de9-2cfa-4f76-a4ef-58d1a8b4febe" name="Changes" comment="增加gitignore，避免污染mysql和jre" />
+    <list default="true" id="04912de9-2cfa-4f76-a4ef-58d1a8b4febe" name="Changes" comment="增加版本号">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cn/nap/MysqlToolApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/cn/nap/MysqlToolApp.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -50,7 +54,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
     "jdk.selected.JAVA_MODULE": "1.8_64",
-    "last_opened_file_path": "E:/LocalGit/GitHub/NapMysqlTool/mysql依赖库",
+    "last_opened_file_path": "E:/LocalGit/GitHub/NapMysqlTool/src/cn/nap",
     "nodejs_package_manager_path": "npm",
     "project.structure.last.edited": "Artifacts",
     "project.structure.proportion": "0.15",
@@ -63,10 +67,13 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\LocalGit\GitHub\NapMysqlTool\src\cn\nap" />
       <recent name="E:\LocalGit\GitHub\NapMysqlTool\mysql依赖库" />
       <recent name="E:\LocalGit\GitHub\NapMysqlTool" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\LocalGit\GitHub\NapMysqlTool\src\cn\nap" />
+      <recent name="E:\LocalGit\GitHub\NapMysqlTool\src" />
       <recent name="E:\LocalGit\GitHub\NapMysqlTool" />
       <recent name="E:\LocalGit\GitHub\NapMysqlTool\lib" />
     </key>
@@ -114,6 +121,8 @@
       <workItem from="1679385296181" duration="534000" />
       <workItem from="1679386353854" duration="205000" />
       <workItem from="1679386563153" duration="1214000" />
+      <workItem from="1679552509382" duration="923000" />
+      <workItem from="1680482201616" duration="9569000" />
     </task>
     <task id="LOCAL-00001" summary="首次提交">
       <created>1678104443066</created>
@@ -171,7 +180,14 @@
       <option name="project" value="LOCAL" />
       <updated>1679387729292</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="增加版本号">
+      <created>1679552783521</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1679552783521</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -195,7 +211,15 @@
     <MESSAGE value="补充jre" />
     <MESSAGE value="初始化" />
     <MESSAGE value="增加gitignore，避免污染mysql和jre" />
-    <option name="LAST_COMMIT_MESSAGE" value="增加gitignore，避免污染mysql和jre" />
+    <MESSAGE value="增加版本号" />
+    <option name="LAST_COMMIT_MESSAGE" value="增加版本号" />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="Application">
+        <watch expression="Objects.requireNonNull(this.getClass().getResource(&quot;favicon-32x32.png&quot;)).getFile()" language="JAVA" />
+      </configuration>
+    </watches-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

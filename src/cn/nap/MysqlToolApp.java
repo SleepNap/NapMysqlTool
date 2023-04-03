@@ -7,10 +7,12 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
+
+import java.util.Objects;
 
 public class MysqlToolApp extends Application {
     private final String DEFAULT_PATH = "mysql";
@@ -88,8 +90,7 @@ public class MysqlToolApp extends Application {
 
         primaryStage.setScene(scene);
         primaryStage.setTitle("MySQL启停工具 by Nap");
-        primaryStage.initStyle(StageStyle.UTILITY);
-        primaryStage.setAlwaysOnTop(true);
+        primaryStage.setResizable(false);
         primaryStage.show();
     }
 
