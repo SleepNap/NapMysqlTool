@@ -2,9 +2,11 @@ package cn.nap;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -13,6 +15,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class MysqlToolApp extends Application {
     private final String DEFAULT_PATH = "mysql";
@@ -20,6 +23,7 @@ public class MysqlToolApp extends Application {
     private Button stop;
     private Button restart;
     private Label status;
+    private Thread currThread;
 
     public static void main(String[] args) {
         launch(args);
@@ -72,19 +76,22 @@ public class MysqlToolApp extends Application {
         tips.setTextFill(Color.FIREBRICK);
 
         start.setOnAction(event -> {
-            start.setDisable(true);
+            disableAll();
             status.setText("启动中...");
-            startMysql();
+            currThread = new Thread(this::startMysql);
+            currThread.start();
         });
         stop.setOnAction(event -> {
-            stop.setDisable(true);
+            disableAll();
             status.setText("停止中...");
-            stopMysql();
+            currThread = new Thread(this::stopMysql);
+            currThread.start();
         });
         restart.setOnAction(event -> {
-            restart.setDisable(true);
+            disableAll();
             status.setText("重启中...");
-            restartMysql();
+            currThread = new Thread(this::restartMysql);
+            currThread.start();
         });
         updateStat();
 
@@ -96,41 +103,63 @@ public class MysqlToolApp extends Application {
 
     private void startMysql() {
         try {
-            MysqlOperator.start(DEFAULT_PATH);
+            MysqlOperator.start(DEFAULT_PATH).waitFor(1, TimeUnit.SECONDS);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        updateStat();
+        Platform.runLater(this::updateStat);
+        currThread.interrupt();
     }
 
     private void stopMysql() {
         try {
-            Process process = MysqlOperator.stop(DEFAULT_PATH);
-            process.waitFor();
+            MysqlOperator.stop(DEFAULT_PATH).waitFor();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        updateStat();
+        Platform.runLater(this::updateStat);
+        currThread.interrupt();
     }
 
     private void restartMysql() {
-        stopMysql();
-        startMysql();
+        try {
+            for (int i = 0; i < 3; i++) {
+                if (!MysqlOperator.isStarted()) {
+                    break;
+                }
+                MysqlOperator.stop(DEFAULT_PATH).waitFor();
+            }
+            for (int i = 0; i < 3; i++) {
+                if (MysqlOperator.isStarted()) {
+                    break;
+                }
+                MysqlOperator.start(DEFAULT_PATH);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Platform.runLater(this::updateStat);
+        currThread.interrupt();
+    }
+
+    private void disableAll() {
+        start.setDisable(true);
+        stop.setDisable(true);
+        restart.setDisable(true);
     }
 
     private void updateStat() {
-        Platform.runLater(() -> {
-            String stat = MysqlOperator.isStarted() ? "已启动" : "未启动";
-            status.setText(stat);
-            if ("已启动".equals(stat)) {
-                start.setDisable(true);
-                stop.setDisable(false);
-                restart.setDisable(false);
-            } else {
-                start.setDisable(false);
-                stop.setDisable(true);
-                restart.setDisable(false);
-            }
-        });
+        String stat = MysqlOperator.isStarted() ? "已启动" : "未启动";
+        status.setText(stat);
+        if ("已启动".equals(stat)) {
+            start.setDisable(true);
+            stop.setDisable(false);
+            restart.setDisable(false);
+        } else {
+            start.setDisable(false);
+            stop.setDisable(true);
+            restart.setDisable(false);
+        }
+        Runtime.getRuntime().gc();
     }
 }
