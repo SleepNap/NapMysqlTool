@@ -1,4 +1,4 @@
-out
-.idea
-mysql
-jre
+out/
+.idea/
+mysql/
+jre/
