@@ -31,7 +31,7 @@ public class MysqlToolApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Label version = new Label("1.23.0323 (MySQL5.7.40)");
+        Label version = new Label("1.23.0411 (MySQL5.7.40)");
         Label tips = new Label("Tips: 关闭本程序不会影响MySQL的启停状态");
         start = new Button("启动");
         stop = new Button("停止");
