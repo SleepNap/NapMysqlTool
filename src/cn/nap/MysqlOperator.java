@@ -40,4 +40,11 @@ public class MysqlOperator {
         String pass = iniProp.get("mysql配置").get("mysql密码");
         return Runtime.getRuntime().exec(path + File.separator + "bin" + File.separator + "mysqladmin.exe -u" + user + " -p" + pass + " shutdown");
     }
+
+    public static Process initSql(Map<String, Map<String, String>> iniProp, String db, String file) throws Exception {
+        String path = iniProp.get("mysql配置").get("mysql路径");
+        String user = iniProp.get("mysql配置").get("mysql账号");
+        String pass = iniProp.get("mysql配置").get("mysql密码");
+        return Runtime.getRuntime().exec("cmd.exe /C " + path + File.separator + "bin" + File.separator + "mysql.exe -u" + user + " -p" + pass + " " + db + " < " + file);
+    }
 }

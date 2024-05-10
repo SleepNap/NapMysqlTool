@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MysqlUtils {
@@ -56,8 +58,8 @@ public class MysqlUtils {
     }
 
     public static void writeIniFile(Map<String, Map<String, String>> iniMap, String file) {
-        try(FileWriter fw = new FileWriter(file);
-            BufferedWriter writer = new BufferedWriter(fw))  {
+        try (FileWriter fw = new FileWriter(file);
+             BufferedWriter writer = new BufferedWriter(fw)) {
             for (Map.Entry<String, Map<String, String>> sectionEntry : iniMap.entrySet()) {
                 writer.write("[" + sectionEntry.getKey() + "]");
                 writer.newLine();
@@ -67,6 +69,35 @@ public class MysqlUtils {
                 }
                 writer.newLine();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<String> readFinishedList(String file) {
+        List<String> finishedList = new ArrayList<>();
+        try (FileReader fr = new FileReader(file);
+             BufferedReader reader = new BufferedReader(fr)) {
+            String line;
+            while (null != (line = reader.readLine())) {
+                line = line.trim();
+                // 空白行跳过
+                if (line.isEmpty()) {
+                    continue;
+                }
+                finishedList.add(line);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return finishedList;
+    }
+
+    public static void appendFinishedList(String file, String finished) {
+        try (FileWriter fw = new FileWriter(file, true);
+             BufferedWriter writer = new BufferedWriter(fw)) {
+            writer.write(finished);
+            writer.newLine();
         } catch (Exception e) {
             e.printStackTrace();
         }

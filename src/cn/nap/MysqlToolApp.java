@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -28,30 +29,52 @@ public class MysqlToolApp extends Application {
     }
 
     @Override
-    public void init() throws Exception {
-        File currPath = new File(".");
-        File[] files = currPath.listFiles();
-        if (files == null) {
-            initDefault();
-            return;
-        }
-        for (File file : files) {
-            if (!file.getName().equals("config.ini")) {
-                continue;
-            }
-            Map<String, Map<String, String>> readedMap = MysqlUtils.readIniFile(file.getAbsolutePath());
+    public void init() {
+        // 初始化ini文件
+        File iniFile = new File("config.ini");
+        if (iniFile.exists()) {
+            Map<String, Map<String, String>> readedMap = MysqlUtils.readIniFile(iniFile.getAbsolutePath());
             if (readedMap != null) {
                 iniProp.putAll(readedMap);
-                return;
+            } else {
+                initDefaultIni();
             }
-            break;
+        } else {
+            initDefaultIni();
         }
-        initDefault();
+        // 检查配置，避免乱配导致的异常
+        Map<String, String> mysqlConf = iniProp.get("mysql配置");
+        if (mysqlConf == null) {
+            initDefaultIni();
+            mysqlConf = iniProp.get("mysql配置");
+        }
+        String mysqlPath = mysqlConf.get("mysql路径");
+        String mysqlUser = mysqlConf.get("mysql账号");
+        String mysqlPass = mysqlConf.get("mysql密码");
+        // 密码可为空字符，但不能为null
+        if (mysqlPath == null || mysqlUser == null || mysqlPass == null || mysqlPath.isEmpty() || mysqlUser.isEmpty()) {
+            initDefaultIni();
+        }
+        Map<String, String> toolConf = iniProp.get("工具配置");
+        if (toolConf == null) {
+            initDefaultIni();
+            toolConf = iniProp.get("工具配置");
+        }
+        String initPath = toolConf.get("初始化脚本路径");
+        if (initPath == null || initPath.isEmpty()) {
+            initDefaultIni();
+            toolConf = iniProp.get("工具配置");
+        }
+        File initDir = new File(toolConf.get("初始化脚本路径"));
+        // 创建init文件夹
+        if (!initDir.exists()) {
+            boolean ignore = initDir.mkdirs();
+        }
     }
 
     @Override
     public void start(Stage primaryStage) {
-        Label version = new Label("1.24.0510");
+        Label version = new Label("1.24.0511");
         Label tips = new Label("Tips: 关闭本程序不会影响MySQL的启停状态");
         start = new Button("启动");
         stop = new Button("停止");
@@ -98,12 +121,12 @@ public class MysqlToolApp extends Application {
         start.setOnAction(event -> {
             disableAll();
             status.setText("启动中...");
-            new Thread(this::startMysql).start();
+            new Thread(() -> startMysql(true)).start();
         });
         stop.setOnAction(event -> {
             disableAll();
             status.setText("停止中...");
-            new Thread(this::stopMysql).start();
+            new Thread(() -> stopMysql(true)).start();
         });
         restart.setOnAction(event -> {
             disableAll();
@@ -118,10 +141,11 @@ public class MysqlToolApp extends Application {
         primaryStage.show();
     }
 
-    private void startMysql() {
+    private void startMysql(boolean update) {
         for (int i = 0; i < 3; i++) {
             try {
                 if (MysqlOperator.isStarted(iniProp)) {
+                    initSqlScript();
                     break;
                 }
                 MysqlOperator.start(iniProp).waitFor(1, TimeUnit.SECONDS);
@@ -129,10 +153,12 @@ public class MysqlToolApp extends Application {
                 e.printStackTrace();
             }
         }
-        Platform.runLater(this::updateStat);
+        if (update) {
+            Platform.runLater(this::updateStat);
+        }
     }
 
-    private void stopMysql() {
+    private void stopMysql(boolean update) {
         for (int i = 0; i < 3; i++) {
             try {
                 if (!MysqlOperator.isStarted(iniProp)) {
@@ -142,28 +168,15 @@ public class MysqlToolApp extends Application {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+        if (update) {
             Platform.runLater(this::updateStat);
         }
     }
 
     private void restartMysql() {
-        try {
-            for (int i = 0; i < 3; i++) {
-                if (!MysqlOperator.isStarted(iniProp)) {
-                    break;
-                }
-                MysqlOperator.stop(iniProp).waitFor();
-            }
-            for (int i = 0; i < 3; i++) {
-                if (MysqlOperator.isStarted(iniProp)) {
-                    break;
-                }
-                MysqlOperator.start(iniProp);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        Platform.runLater(this::updateStat);
+        stopMysql(false);
+        startMysql(true);
     }
 
     private void disableAll() {
@@ -187,7 +200,7 @@ public class MysqlToolApp extends Application {
         Runtime.getRuntime().gc();
     }
 
-    private void initDefault() {
+    private void initDefaultIni() {
         Map<String, String> mysqlConf = new HashMap<>();
         mysqlConf.put("mysql路径", "mysql-5.7.44-winx64");
         mysqlConf.put("mysql账号", "root");
@@ -195,8 +208,48 @@ public class MysqlToolApp extends Application {
         mysqlConf.put("mysql.ini路径", "");
         iniProp.put("mysql配置", mysqlConf);
 
-//        Map<String, String> toolConf = new HashMap<>();
-//        iniProp.put("工具配置", toolConf);
+        Map<String, String> toolConf = new HashMap<>();
+        toolConf.put("初始化脚本路径", "init");
+        iniProp.put("工具配置", toolConf);
         MysqlUtils.writeIniFile(iniProp, "config.ini");
+    }
+
+    private void initSqlScript() throws Exception {
+        String initPath = iniProp.get("工具配置").get("初始化脚本路径");
+        File initDir = new File(initPath);
+        if (!initDir.exists()) {
+            boolean ignore = initDir.mkdirs();
+        }
+        File[] listFiles = initDir.listFiles();
+        if (listFiles == null) {
+            return;
+        }
+        List<String> finishedList = MysqlUtils.readFinishedList("已初始化列表(别乱动).txt");
+        Platform.runLater(() -> status.setText("初始化脚本中..."));
+        for (File file : listFiles) {
+            // 如果是文件夹，文件的名字就是要执行数据库的库名
+            if (file.isDirectory()) {
+                File[] listChildFiles = file.listFiles();
+                if (listChildFiles == null) {
+                    continue;
+                }
+                for (File childFile : listChildFiles) {
+                    if (finishedList.contains(childFile.getAbsolutePath())) {
+                        continue;
+                    }
+                    MysqlOperator.initSql(iniProp, file.getName(), childFile.getAbsolutePath()).waitFor();
+                    MysqlUtils.appendFinishedList("已初始化列表(别乱动).txt", childFile.getAbsolutePath());
+                }
+                continue;
+            }
+            // 如果不在文件夹里，就不指定库名更新
+            if (file.getName().endsWith(".sql")) {
+                if (finishedList.contains(file.getAbsolutePath())) {
+                    continue;
+                }
+                MysqlOperator.initSql(iniProp, "", file.getAbsolutePath()).waitFor();
+                MysqlUtils.appendFinishedList("已初始化列表(别乱动).txt", file.getAbsolutePath());
+            }
+        }
     }
 }
