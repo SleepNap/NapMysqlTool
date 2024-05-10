@@ -11,23 +11,47 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class MysqlToolApp extends Application {
-    private final String DEFAULT_PATH = "mysql";
     private Button start;
     private Button stop;
     private Button restart;
     private Label status;
-    private Thread currThread;
+    private final Map<String, Map<String, String>> iniProp = new HashMap<>();
 
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
-        Label version = new Label("1.23.0411 (MySQL5.7.40)");
+    public void init() throws Exception {
+        File currPath = new File(".");
+        File[] files = currPath.listFiles();
+        if (files == null) {
+            initDefault();
+            return;
+        }
+        for (File file : files) {
+            if (!file.getName().equals("config.ini")) {
+                continue;
+            }
+            Map<String, Map<String, String>> readedMap = MysqlUtils.readIniFile(file.getAbsolutePath());
+            if (readedMap != null) {
+                iniProp.putAll(readedMap);
+                return;
+            }
+            break;
+        }
+        initDefault();
+    }
+
+    @Override
+    public void start(Stage primaryStage) {
+        Label version = new Label("1.24.0510");
         Label tips = new Label("Tips: 关闭本程序不会影响MySQL的启停状态");
         start = new Button("启动");
         stop = new Button("停止");
@@ -74,20 +98,17 @@ public class MysqlToolApp extends Application {
         start.setOnAction(event -> {
             disableAll();
             status.setText("启动中...");
-            currThread = new Thread(this::startMysql);
-            currThread.start();
+            new Thread(this::startMysql).start();
         });
         stop.setOnAction(event -> {
             disableAll();
             status.setText("停止中...");
-            currThread = new Thread(this::stopMysql);
-            currThread.start();
+            new Thread(this::stopMysql).start();
         });
         restart.setOnAction(event -> {
             disableAll();
             status.setText("重启中...");
-            currThread = new Thread(this::restartMysql);
-            currThread.start();
+            new Thread(this::restartMysql).start();
         });
         updateStat();
 
@@ -98,44 +119,51 @@ public class MysqlToolApp extends Application {
     }
 
     private void startMysql() {
-        try {
-            MysqlOperator.start(DEFAULT_PATH).waitFor(1, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            e.printStackTrace();
+        for (int i = 0; i < 3; i++) {
+            try {
+                if (MysqlOperator.isStarted(iniProp)) {
+                    break;
+                }
+                MysqlOperator.start(iniProp).waitFor(1, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         Platform.runLater(this::updateStat);
-        currThread.interrupt();
     }
 
     private void stopMysql() {
-        try {
-            MysqlOperator.stop(DEFAULT_PATH).waitFor();
-        } catch (Exception e) {
-            e.printStackTrace();
+        for (int i = 0; i < 3; i++) {
+            try {
+                if (!MysqlOperator.isStarted(iniProp)) {
+                    break;
+                }
+                MysqlOperator.stop(iniProp).waitFor();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Platform.runLater(this::updateStat);
         }
-        Platform.runLater(this::updateStat);
-        currThread.interrupt();
     }
 
     private void restartMysql() {
         try {
             for (int i = 0; i < 3; i++) {
-                if (!MysqlOperator.isStarted()) {
+                if (!MysqlOperator.isStarted(iniProp)) {
                     break;
                 }
-                MysqlOperator.stop(DEFAULT_PATH).waitFor();
+                MysqlOperator.stop(iniProp).waitFor();
             }
             for (int i = 0; i < 3; i++) {
-                if (MysqlOperator.isStarted()) {
+                if (MysqlOperator.isStarted(iniProp)) {
                     break;
                 }
-                MysqlOperator.start(DEFAULT_PATH);
+                MysqlOperator.start(iniProp);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         Platform.runLater(this::updateStat);
-        currThread.interrupt();
     }
 
     private void disableAll() {
@@ -145,17 +173,30 @@ public class MysqlToolApp extends Application {
     }
 
     private void updateStat() {
-        String stat = MysqlOperator.isStarted() ? "已启动" : "未启动";
-        status.setText(stat);
-        if ("已启动".equals(stat)) {
+        if (MysqlOperator.isStarted(iniProp)) {
+            status.setText("已启动");
             start.setDisable(true);
             stop.setDisable(false);
             restart.setDisable(false);
         } else {
+            status.setText("未启动");
             start.setDisable(false);
             stop.setDisable(true);
             restart.setDisable(false);
         }
         Runtime.getRuntime().gc();
+    }
+
+    private void initDefault() {
+        Map<String, String> mysqlConf = new HashMap<>();
+        mysqlConf.put("mysql路径", "mysql-5.7.44-winx64");
+        mysqlConf.put("mysql账号", "root");
+        mysqlConf.put("mysql密码", "root");
+        mysqlConf.put("mysql.ini路径", "");
+        iniProp.put("mysql配置", mysqlConf);
+
+//        Map<String, String> toolConf = new HashMap<>();
+//        iniProp.put("工具配置", toolConf);
+        MysqlUtils.writeIniFile(iniProp, "config.ini");
     }
 }
