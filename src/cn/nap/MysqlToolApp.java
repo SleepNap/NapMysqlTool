@@ -74,7 +74,7 @@ public class MysqlToolApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        Label version = new Label("1.24.0511");
+        Label version = new Label("1.24.0815");
         Label tips = new Label("Tips: 关闭本程序不会影响MySQL的启停状态");
         start = new Button("启动");
         stop = new Button("停止");
@@ -202,7 +202,7 @@ public class MysqlToolApp extends Application {
 
     private void initDefaultIni() {
         Map<String, String> mysqlConf = new HashMap<>();
-        mysqlConf.put("mysql路径", "mysql-5.7.44-winx64");
+        mysqlConf.put("mysql路径", "mysql-8.0.37-winx64");
         mysqlConf.put("mysql账号", "root");
         mysqlConf.put("mysql密码", "root");
         mysqlConf.put("mysql.ini路径", "");
