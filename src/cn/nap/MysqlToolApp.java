@@ -1,5 +1,6 @@
 package cn.nap;
 
+import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -16,8 +17,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MysqlToolApp extends Application {
+    private final AtomicBoolean changed = new AtomicBoolean();
+    private Button change;
     private Button start;
     private Button stop;
     private Button restart;
@@ -74,7 +78,9 @@ public class MysqlToolApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        Label version = new Label("1.24.0901");
+        Label version = new Label("1.24.0905");
+        change = new Button("切换");
+
         Label tips = new Label("Tips: 关闭本程序不会影响MySQL的启停状态");
         start = new Button("启动");
         stop = new Button("停止");
@@ -88,22 +94,36 @@ public class MysqlToolApp extends Application {
         gridPane.setVgap(20);
         gridPane.setPadding(new Insets(25, 25, 25, 25));
 
-        int columnIndex = 0;
-        int rowIndex = 0;
-        gridPane.add(version, columnIndex, rowIndex, 2, 1);
-        rowIndex++;
-        gridPane.add(tips, columnIndex, rowIndex, 3, 1);
-        rowIndex++;
-        gridPane.add(start, columnIndex, rowIndex);
-        gridPane.add(stop, columnIndex + 1, rowIndex);
-        gridPane.add(restart, columnIndex + 2, rowIndex);
-        rowIndex++;
-        gridPane.add(text, columnIndex, rowIndex, 2, 1);
-        gridPane.add(status, columnIndex + 2, rowIndex);
+        gridPane.add(version, 0, 0);
+        gridPane.add(change, 2, 0);
+        gridPane.add(tips, 0, 1, 3, 1);
+        gridPane.add(start, 0, 2);
+        gridPane.add(stop, 1, 2);
+        gridPane.add(restart, 2, 2);
+        gridPane.add(text, 0, 3, 2, 1);
+        gridPane.add(status, 2, 3);
 
         Scene scene = new Scene(gridPane, 400, 200);
 
         gridPane.setStyle("-fx-background-color: rgb(43, 43, 43)");
+
+        change.setStyle("-fx-background-color: green;-fx-text-fill: white;-fx-min-width: 80;-fx-min-height: 20");
+        change.setOnAction(event -> {
+            disableAll();
+            changed.set(!changed.get());
+            if (changed.get()) {
+                start.setText("修复");
+                stop.setText("导出");
+                restart.setText("导入");
+            } else {
+                start.setText("启动");
+                stop.setText("停止");
+                restart.setText("重启");
+            }
+            updateStat();
+            PlatformImpl.runAndWait(() -> change.setDisable(false));
+        });
+
         double width = Math.ceil((400 - 20 - 50) / 3D);
         double height = 40;
         version.setStyle("-fx-text-fill: rgb(199, 199, 209)");
@@ -119,20 +139,54 @@ public class MysqlToolApp extends Application {
         tips.setTextFill(Color.FIREBRICK);
 
         start.setOnAction(event -> {
+            if (changed.get()) {
+                new Thread(() -> {
+                    stopMysql(true);
+                    PlatformImpl.runAndWait(() -> {
+                        disableAll();
+                        status.setText("修复中...");
+                    });
+                    fixMysql();
+                }).start();
+                return;
+            }
             disableAll();
             status.setText("启动中...");
             new Thread(() -> startMysql(true)).start();
         });
         stop.setOnAction(event -> {
             disableAll();
+            if (changed.get()) {
+                new Thread(() -> {
+                    startMysql(true);
+                    PlatformImpl.runAndWait(() -> {
+                        disableAll();
+                        status.setText("导出中...");
+                    });
+                    exportMysql();
+                }).start();
+                return;
+            }
             status.setText("停止中...");
             new Thread(() -> stopMysql(true)).start();
         });
         restart.setOnAction(event -> {
+            if (changed.get()) {
+                new Thread(() -> {
+                    startMysql(true);
+                    PlatformImpl.runAndWait(() -> {
+                        disableAll();
+                        status.setText("导入中...");
+                    });
+                    importMysql();
+                }).start();
+                return;
+            }
             disableAll();
             status.setText("重启中...");
             new Thread(this::restartMysql).start();
         });
+        disableAll();
         updateStat();
 
         primaryStage.setScene(scene);
@@ -179,25 +233,102 @@ public class MysqlToolApp extends Application {
         startMysql(true);
     }
 
+    private void fixMysql() {
+        boolean started = MysqlOperator.isStarted(iniProp);
+        if (started) {
+            Platform.runLater(() -> {
+                updateStat();
+                status.setText("请先停止MySQL!");
+            });
+            return;
+        }
+        MysqlOperator.fix(iniProp);
+        Platform.runLater(() -> {
+            updateStat();
+            status.setText("修复完成");
+        });
+    }
+
+    private void exportMysql() {
+        boolean started = MysqlOperator.isStarted(iniProp);
+        if (!started) {
+            Platform.runLater(() -> {
+                updateStat();
+                status.setText("请先启动MySQL!");
+            });
+            return;
+        }
+        try {
+            MysqlOperator.outDb(iniProp).waitFor();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Platform.runLater(() -> {
+            updateStat();
+            status.setText("导出完成");
+        });
+    }
+
+    private void importMysql() {
+        boolean started = MysqlOperator.isStarted(iniProp);
+        if (!started) {
+            Platform.runLater(() -> {
+                updateStat();
+                status.setText("请先启动MySQL!");
+            });
+            return;
+        }
+        File file = new File("output.sql");
+        if (!file.exists()) {
+            Platform.runLater(() -> {
+                updateStat();
+                status.setText("请先导出!");
+            });
+            return;
+        }
+        try {
+            MysqlOperator.initSql(iniProp, "", file.getAbsolutePath()).waitFor();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Platform.runLater(() -> {
+            updateStat();
+            status.setText("导入完成");
+        });
+    }
+
     private void disableAll() {
+        change.setDisable(true);
         start.setDisable(true);
         stop.setDisable(true);
         restart.setDisable(true);
     }
 
     private void updateStat() {
-        if (MysqlOperator.isStarted(iniProp)) {
-            status.setText("已启动");
-            start.setDisable(true);
+        change.setDisable(false);
+        if (changed.get()) {
+            start.setDisable(false);
             stop.setDisable(false);
             restart.setDisable(false);
-        } else {
-            status.setText("未启动");
-            start.setDisable(false);
-            stop.setDisable(true);
-            restart.setDisable(false);
+            return;
         }
-        Runtime.getRuntime().gc();
+        new Thread(() -> {
+            boolean started = MysqlOperator.isStarted(iniProp);
+            PlatformImpl.runAndWait(() -> {
+                if (started) {
+                    status.setText("已启动");
+                    start.setDisable(true);
+                    stop.setDisable(false);
+                    restart.setDisable(false);
+                } else {
+                    status.setText("未启动");
+                    start.setDisable(false);
+                    stop.setDisable(true);
+                    restart.setDisable(false);
+                }
+                Runtime.getRuntime().gc();
+            });
+        }).start();
     }
 
     private void initDefaultIni() {
@@ -210,6 +341,8 @@ public class MysqlToolApp extends Application {
 
         Map<String, String> toolConf = new HashMap<>();
         toolConf.put("初始化脚本路径", "init");
+        toolConf.put("导出的库名，多个用空格分割", "beidou");
+
         iniProp.put("工具配置", toolConf);
         MysqlUtils.writeIniFile(iniProp, "config.ini");
     }

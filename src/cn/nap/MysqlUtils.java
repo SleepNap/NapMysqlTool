@@ -1,9 +1,6 @@
 package cn.nap;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -76,7 +73,11 @@ public class MysqlUtils {
 
     public static List<String> readFinishedList(String file) {
         List<String> finishedList = new ArrayList<>();
-        try (FileReader fr = new FileReader(file);
+        File finishedFile = new File(file);
+        if (!finishedFile.exists()) {
+            return finishedList;
+        }
+        try (FileReader fr = new FileReader(finishedFile);
              BufferedReader reader = new BufferedReader(fr)) {
             String line;
             while (null != (line = reader.readLine())) {
@@ -98,6 +99,15 @@ public class MysqlUtils {
              BufferedWriter writer = new BufferedWriter(fw)) {
             writer.write(finished);
             writer.newLine();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void clearFile(File file) {
+        try {
+            FileWriter fw = new FileWriter(file, false);
+            fw.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

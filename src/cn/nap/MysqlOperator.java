@@ -47,4 +47,31 @@ public class MysqlOperator {
         String pass = iniProp.get("mysql配置").get("mysql密码");
         return Runtime.getRuntime().exec("cmd.exe /C " + path + File.separator + "bin" + File.separator + "mysql.exe -u" + user + " -p" + pass + " " + db + " < " + file);
     }
+
+    public static void fix(Map<String, Map<String, String>> iniProp) {
+        String path = iniProp.get("mysql配置").get("mysql路径");
+        File file = new File(path + File.separator + "data");
+        if (!file.exists() || !file.isDirectory()) {
+            return;
+        }
+        File[] files = file.listFiles();
+        if (files == null) {
+            return;
+        }
+        for (File childFile : files) {
+            if ("binlog.index".equals(childFile.getName())) {
+                MysqlUtils.clearFile(childFile);
+            } else if (childFile.getName().startsWith("binlog")) {
+                boolean ignore = childFile.delete();
+            }
+        }
+    }
+
+    public static Process outDb(Map<String, Map<String, String>> iniProp) throws Exception {
+        String path = iniProp.get("mysql配置").get("mysql路径");
+        String user = iniProp.get("mysql配置").get("mysql账号");
+        String pass = iniProp.get("mysql配置").get("mysql密码");
+        String dbs = iniProp.get("工具配置").get("导出的库名，多个用空格分割");
+        return Runtime.getRuntime().exec("cmd.exe /C " + path + File.separator + "bin" + File.separator + "mysqldump.exe -u" + user + " -p" + pass + " --databases " + dbs + " > output.sql");
+    }
 }
