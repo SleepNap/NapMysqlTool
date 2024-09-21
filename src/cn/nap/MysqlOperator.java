@@ -21,9 +21,30 @@ public class MysqlOperator {
         try {
             DriverManager.setLoginTimeout(2);
             Connection conn = DriverManager.getConnection(url, user, pass);
-            return null != conn;
+            if (conn != null) {
+                conn.close();
+                return true;
+            }
         } catch (SQLException ignore) {
 
+        }
+        return false;
+    }
+
+    public static boolean hasPid(Map<String, Map<String, String>> iniProp) {
+        String path = iniProp.get("mysql配置").get("mysql路径");
+        File dataDir = new File(path + File.separator + "data");
+        if (!dataDir.exists()) {
+            return false;
+        }
+        File[] files = dataDir.listFiles();
+        if (files == null) {
+            return false;
+        }
+        for (File file : files) {
+            if (file.getName().endsWith(".pid")) {
+                return true;
+            }
         }
         return false;
     }
@@ -31,7 +52,7 @@ public class MysqlOperator {
     public static Process start(Map<String, Map<String, String>> iniProp) throws Exception {
         String path = iniProp.get("mysql配置").get("mysql路径");
         String mysqlIni = Optional.ofNullable(iniProp.get("mysql配置").get("mysql.ini路径")).orElse("");
-        return Runtime.getRuntime().exec(path + File.separator + "bin" + File.separator + "mysqld.exe" + (mysqlIni.isEmpty() ? "" : " --defaults-file=" + mysqlIni));
+        return Runtime.getRuntime().exec("cmd.exe /C " + path + File.separator + "bin" + File.separator + "mysqld.exe" + (mysqlIni.isEmpty() ? "" : " --defaults-file=" + mysqlIni));
     }
 
     public static Process stop(Map<String, Map<String, String>> iniProp) throws Exception {

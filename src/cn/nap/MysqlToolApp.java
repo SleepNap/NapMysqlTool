@@ -78,7 +78,7 @@ public class MysqlToolApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        Label version = new Label("1.24.0905");
+        Label version = new Label("1.24.0921");
         change = new Button("切换");
 
         Label tips = new Label("Tips: 关闭本程序不会影响MySQL的启停状态");
@@ -121,7 +121,6 @@ public class MysqlToolApp extends Application {
                 restart.setText("重启");
             }
             updateStat();
-            PlatformImpl.runAndWait(() -> change.setDisable(false));
         });
 
         double width = Math.ceil((400 - 20 - 50) / 3D);
@@ -139,8 +138,10 @@ public class MysqlToolApp extends Application {
         tips.setTextFill(Color.FIREBRICK);
 
         start.setOnAction(event -> {
+            disableAll();
             if (changed.get()) {
                 new Thread(() -> {
+                    PlatformImpl.runAndWait(() -> status.setText("停止中..."));
                     stopMysql(true);
                     PlatformImpl.runAndWait(() -> {
                         disableAll();
@@ -150,7 +151,6 @@ public class MysqlToolApp extends Application {
                 }).start();
                 return;
             }
-            disableAll();
             status.setText("启动中...");
             new Thread(() -> startMysql(true)).start();
         });
@@ -158,6 +158,7 @@ public class MysqlToolApp extends Application {
             disableAll();
             if (changed.get()) {
                 new Thread(() -> {
+                    PlatformImpl.runAndWait(() -> status.setText("启动中..."));
                     startMysql(true);
                     PlatformImpl.runAndWait(() -> {
                         disableAll();
@@ -171,8 +172,10 @@ public class MysqlToolApp extends Application {
             new Thread(() -> stopMysql(true)).start();
         });
         restart.setOnAction(event -> {
+            disableAll();
             if (changed.get()) {
                 new Thread(() -> {
+                    PlatformImpl.runAndWait(() -> status.setText("启动中..."));
                     startMysql(true);
                     PlatformImpl.runAndWait(() -> {
                         disableAll();
@@ -182,7 +185,6 @@ public class MysqlToolApp extends Application {
                 }).start();
                 return;
             }
-            disableAll();
             status.setText("重启中...");
             new Thread(this::restartMysql).start();
         });
@@ -198,7 +200,7 @@ public class MysqlToolApp extends Application {
     private void startMysql(boolean update) {
         for (int i = 0; i < 3; i++) {
             try {
-                if (MysqlOperator.isStarted(iniProp)) {
+                if (MysqlOperator.hasPid(iniProp)) {
                     initSqlScript();
                     break;
                 }
@@ -215,10 +217,10 @@ public class MysqlToolApp extends Application {
     private void stopMysql(boolean update) {
         for (int i = 0; i < 3; i++) {
             try {
-                if (!MysqlOperator.isStarted(iniProp)) {
+                if (!MysqlOperator.hasPid(iniProp)) {
                     break;
                 }
-                MysqlOperator.stop(iniProp).waitFor();
+                MysqlOperator.stop(iniProp).waitFor(1, TimeUnit.SECONDS);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -234,7 +236,7 @@ public class MysqlToolApp extends Application {
     }
 
     private void fixMysql() {
-        boolean started = MysqlOperator.isStarted(iniProp);
+        boolean started = MysqlOperator.hasPid(iniProp);
         if (started) {
             Platform.runLater(() -> {
                 updateStat();
@@ -250,7 +252,7 @@ public class MysqlToolApp extends Application {
     }
 
     private void exportMysql() {
-        boolean started = MysqlOperator.isStarted(iniProp);
+        boolean started = MysqlOperator.hasPid(iniProp);
         if (!started) {
             Platform.runLater(() -> {
                 updateStat();
@@ -270,7 +272,7 @@ public class MysqlToolApp extends Application {
     }
 
     private void importMysql() {
-        boolean started = MysqlOperator.isStarted(iniProp);
+        boolean started = MysqlOperator.hasPid(iniProp);
         if (!started) {
             Platform.runLater(() -> {
                 updateStat();
@@ -305,15 +307,15 @@ public class MysqlToolApp extends Application {
     }
 
     private void updateStat() {
-        change.setDisable(false);
         if (changed.get()) {
             start.setDisable(false);
             stop.setDisable(false);
             restart.setDisable(false);
+            change.setDisable(false);
             return;
         }
         new Thread(() -> {
-            boolean started = MysqlOperator.isStarted(iniProp);
+            boolean started = MysqlOperator.hasPid(iniProp);
             PlatformImpl.runAndWait(() -> {
                 if (started) {
                     status.setText("已启动");
@@ -327,6 +329,7 @@ public class MysqlToolApp extends Application {
                     restart.setDisable(false);
                 }
                 Runtime.getRuntime().gc();
+                change.setDisable(false);
             });
         }).start();
     }
