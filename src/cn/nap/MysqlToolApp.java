@@ -78,7 +78,7 @@ public class MysqlToolApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        Label version = new Label("1.24.0921");
+        Label version = new Label("1.24.0929");
         change = new Button("切换");
 
         Label tips = new Label("Tips: 关闭本程序不会影响MySQL的启停状态");
@@ -204,7 +204,19 @@ public class MysqlToolApp extends Application {
                     initSqlScript();
                     break;
                 }
-                MysqlOperator.start(iniProp).waitFor(1, TimeUnit.SECONDS);
+                // 强制等待1.5s
+                MysqlOperator.start(iniProp).waitFor(1500, TimeUnit.MILLISECONDS);
+                long startTime = System.currentTimeMillis();
+                // 最多等待3s
+                while (System.currentTimeMillis() - startTime < 1500) {
+                    if (MysqlOperator.isStarted(iniProp)) {
+                        break;
+                    }
+                }
+                // 3s内或3s后完成则不重试下一次
+                if (MysqlOperator.isStarted(iniProp)) {
+                    break;
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
