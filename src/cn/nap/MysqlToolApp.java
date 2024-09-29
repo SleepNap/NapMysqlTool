@@ -209,7 +209,7 @@ public class MysqlToolApp extends Application {
                 long startTime = System.currentTimeMillis();
                 // 最多等待3s
                 while (System.currentTimeMillis() - startTime < 1500) {
-                    if (MysqlOperator.isStarted(iniProp)) {
+                    if (MysqlOperator.hasPid(iniProp)) {
                         break;
                     }
                 }

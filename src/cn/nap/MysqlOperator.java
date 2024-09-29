@@ -18,9 +18,8 @@ public class MysqlOperator {
         String url = "jdbc:mysql://localhost:3306/mysql";
         String user = iniProp.get("mysql配置").get("mysql账号");
         String pass = iniProp.get("mysql配置").get("mysql密码");
-        try {
-            DriverManager.setLoginTimeout(2);
-            Connection conn = DriverManager.getConnection(url, user, pass);
+        DriverManager.setLoginTimeout(2);
+        try(Connection conn = DriverManager.getConnection(url, user, pass)) {
             if (conn != null) {
                 conn.close();
                 return true;
