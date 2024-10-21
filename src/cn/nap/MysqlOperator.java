@@ -51,7 +51,7 @@ public class MysqlOperator {
     public static Process start(Map<String, Map<String, String>> iniProp) throws Exception {
         String path = iniProp.get("mysql配置").get("mysql路径");
         String mysqlIni = Optional.ofNullable(iniProp.get("mysql配置").get("mysql.ini路径")).orElse("");
-        return Runtime.getRuntime().exec("cmd.exe /C " + path + File.separator + "bin" + File.separator + "mysqld.exe" + (mysqlIni.isEmpty() ? "" : " --defaults-file=" + mysqlIni));
+        return Runtime.getRuntime().exec(path + File.separator + "bin" + File.separator + "mysqld.exe --console " + (mysqlIni.isEmpty() ? "" : " --defaults-file=" + mysqlIni));
     }
 
     public static Process stop(Map<String, Map<String, String>> iniProp) throws Exception {

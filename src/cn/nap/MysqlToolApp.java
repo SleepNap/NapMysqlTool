@@ -12,11 +12,10 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-import java.io.File;
+import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MysqlToolApp extends Application {
@@ -78,7 +77,7 @@ public class MysqlToolApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        Label version = new Label("1.24.0929");
+        Label version = new Label("1.24.1021");
         change = new Button("切换");
 
         Label tips = new Label("Tips: 关闭本程序不会影响MySQL的启停状态");
@@ -204,18 +203,18 @@ public class MysqlToolApp extends Application {
                     initSqlScript();
                     break;
                 }
-                // 强制等待1.5s
-                MysqlOperator.start(iniProp).waitFor(1500, TimeUnit.MILLISECONDS);
+                Process process = MysqlOperator.start(iniProp);
+                // 惊了，输出为什么在ErrorStream里？
+                InputStream inputStream = process.getErrorStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                 long startTime = System.currentTimeMillis();
                 // 最多等待3s
-                while (System.currentTimeMillis() - startTime < 1500) {
-                    if (MysqlOperator.hasPid(iniProp)) {
+                while (System.currentTimeMillis() - startTime < 5000) {
+                    String output = reader.readLine();
+                    System.out.println(output);
+                    if (output != null && output.contains("ready for connections")) {
                         break;
                     }
-                }
-                // 3s内或3s后完成则不重试下一次
-                if (MysqlOperator.isStarted(iniProp)) {
-                    break;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -232,7 +231,7 @@ public class MysqlToolApp extends Application {
                 if (!MysqlOperator.hasPid(iniProp)) {
                     break;
                 }
-                MysqlOperator.stop(iniProp).waitFor(1, TimeUnit.SECONDS);
+                MysqlOperator.stop(iniProp).waitFor();
             } catch (Exception e) {
                 e.printStackTrace();
             }
