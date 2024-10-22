@@ -247,11 +247,10 @@ public class MysqlToolApp extends Application {
     }
 
     private void fixMysql() {
-        boolean started = MysqlOperator.hasPid(iniProp);
-        if (started) {
+        if (MysqlOperator.hasPid(iniProp) && MysqlOperator.isStarted(iniProp)) {
             Platform.runLater(() -> {
                 updateStat();
-                status.setText("请先停止MySQL!");
+                status.setText("请先停止!");
             });
             return;
         }
@@ -267,7 +266,7 @@ public class MysqlToolApp extends Application {
         if (!started) {
             Platform.runLater(() -> {
                 updateStat();
-                status.setText("请先启动MySQL!");
+                status.setText("请先启动!");
             });
             return;
         }
@@ -287,7 +286,7 @@ public class MysqlToolApp extends Application {
         if (!started) {
             Platform.runLater(() -> {
                 updateStat();
-                status.setText("请先启动MySQL!");
+                status.setText("请先启动!");
             });
             return;
         }

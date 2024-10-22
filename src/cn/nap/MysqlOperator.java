@@ -81,7 +81,7 @@ public class MysqlOperator {
         for (File childFile : files) {
             if ("binlog.index".equals(childFile.getName())) {
                 MysqlUtils.clearFile(childFile);
-            } else if (childFile.getName().startsWith("binlog")) {
+            } else if (childFile.getName().startsWith("binlog") || childFile.getName().endsWith(".pid")) {
                 boolean ignore = childFile.delete();
             }
         }
