@@ -3,14 +3,13 @@ package cn.nap;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 import java.io.*;
 import java.util.HashMap;
@@ -19,13 +18,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MysqlToolApp extends Application {
-    private final AtomicBoolean changed = new AtomicBoolean();
-    private Button change;
-    private Button start;
-    private Button stop;
-    private Button restart;
-    private Label status;
     private final Map<String, Map<String, String>> iniProp = new HashMap<>();
+    private final AtomicBoolean operating = new AtomicBoolean(false);
 
     public static void main(String[] args) {
         launch(args);
@@ -77,130 +71,60 @@ public class MysqlToolApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        Label version = new Label("1.24.1028");
-        change = new Button("切换");
+        NapTheme.INSTANCE.setPrimaryStage(primaryStage);
 
-        Label tips = new Label("Tips: 关闭本程序不会影响MySQL的启停状态");
-        start = new Button("启动");
-        stop = new Button("停止");
-        restart = new Button("重启");
-        Label text = new Label("当前MySQL状态: ");
-        status = new Label("初始化中...");
+        BorderPane root = new BorderPane();
+        NapTheme.INSTANCE.targetsProperty().put(root, new Pair<>(
+                () -> root.setStyle("-fx-background-color: #F2F2F2;"),
+                () -> root.setStyle("-fx-background-color: #2b2b2b;")
+        ));
 
-        GridPane gridPane = new GridPane();
-        gridPane.setAlignment(Pos.CENTER);
-        gridPane.setHgap(10);
-        gridPane.setVgap(20);
-        gridPane.setPadding(new Insets(25, 25, 25, 25));
+        BorderPane top = new BorderPane();
+        ToggleGroup typeGroup = new ToggleGroup();
+        top.setRight(createThemeButton());
+        NapTheme.ToggleLabel startStopType = createSelectedLabel("启停功能");
+        NapTheme.ToggleLabel importExportType = createSelectedLabel("其他功能");
+        startStopType.setToggleGroup(typeGroup);
+        importExportType.setToggleGroup(typeGroup);
 
-        gridPane.add(version, 0, 0);
-        gridPane.add(change, 2, 0);
-        gridPane.add(tips, 0, 1, 3, 1);
-        gridPane.add(start, 0, 2);
-        gridPane.add(stop, 1, 2);
-        gridPane.add(restart, 2, 2);
-        gridPane.add(text, 0, 3, 2, 1);
-        gridPane.add(status, 2, 3);
+        HBox topCenter = new HBox(startStopType, importExportType);
+        topCenter.setStyle("-fx-alignment: center;-fx-spacing: 20");
+        top.setCenter(topCenter);
 
-        Scene scene = new Scene(gridPane, 400, 200);
+        GridPane bottom = new GridPane();
+        NapTheme.INSTANCE.targetsProperty().put(bottom, new Pair<>(
+                () -> bottom.setStyle("-fx-background-color: transparent;-fx-alignment: center;-fx-hgap: 100;-fx-vgap: 10;-fx-padding: 10"),
+                () -> bottom.setStyle("-fx-background-color: transparent;-fx-alignment: center;-fx-hgap: 100;-fx-vgap: 10;-fx-padding: 10")
+        ));
+        Label version = createNormalLabel("2.25.0101");
+        Label status = createNormalLabel("初始化中...");
+        bottom.add(version, 0, 0);
+        bottom.add(status, 1, 0);
 
-        gridPane.setStyle("-fx-background-color: rgb(43, 43, 43)");
-
-        change.setStyle("-fx-background-color: green;-fx-text-fill: white;-fx-min-width: 80;-fx-min-height: 20");
-        change.setOnAction(event -> {
-            disableAll();
-            changed.set(!changed.get());
-            if (changed.get()) {
-                start.setText("修复");
-                stop.setText("导出");
-                restart.setText("导入");
-            } else {
-                start.setText("启动");
-                stop.setText("停止");
-                restart.setText("重启");
-            }
-            updateStat();
-        });
-
-        double width = Math.ceil((400 - 20 - 50) / 3D);
-        double height = 40;
-        version.setStyle("-fx-text-fill: rgb(199, 199, 209)");
-        start.setMinSize(width, height);
-        start.setStyle("-fx-background-color: rgb(199, 199, 209);-fx-font-size: 14");
-        stop.setMinSize(width, height);
-        stop.setStyle("-fx-background-color: rgb(199, 199, 209);-fx-font-size: 14");
-        restart.setMinSize(width, height);
-        restart.setStyle("-fx-background-color: rgb(199, 199, 209);-fx-font-size: 14");
-        text.setStyle("-fx-text-fill: rgb(199, 199, 209)");
-        status.setTextFill(Color.GREEN);
-        status.setStyle("-fx-font-size: 16");
-        tips.setTextFill(Color.FIREBRICK);
-
-        start.setOnAction(event -> {
-            disableAll();
-            if (changed.get()) {
-                new Thread(() -> {
-                    PlatformImpl.runAndWait(() -> status.setText("停止中..."));
-                    stopMysql(true);
-                    PlatformImpl.runAndWait(() -> {
-                        disableAll();
-                        status.setText("修复中...");
-                    });
-                    fixMysql();
-                }).start();
-                return;
-            }
-            status.setText("启动中...");
-            new Thread(() -> startMysql(true)).start();
-        });
-        stop.setOnAction(event -> {
-            disableAll();
-            if (changed.get()) {
-                new Thread(() -> {
-                    PlatformImpl.runAndWait(() -> status.setText("启动中..."));
-                    startMysql(true);
-                    PlatformImpl.runAndWait(() -> {
-                        disableAll();
-                        status.setText("导出中...");
-                    });
-                    exportMysql();
-                }).start();
-                return;
-            }
-            status.setText("停止中...");
-            new Thread(() -> stopMysql(true)).start();
-        });
-        restart.setOnAction(event -> {
-            disableAll();
-            if (changed.get()) {
-                new Thread(() -> {
-                    PlatformImpl.runAndWait(() -> status.setText("启动中..."));
-                    startMysql(true);
-                    PlatformImpl.runAndWait(() -> {
-                        disableAll();
-                        status.setText("导入中...");
-                    });
-                    importMysql();
-                }).start();
-                return;
-            }
-            status.setText("重启中...");
-            new Thread(this::restartMysql).start();
-        });
-        disableAll();
-        updateStat();
-
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("MySQL启停工具 by Nap");
+        root.setTop(top);
+        root.setBottom(bottom);
+        primaryStage.setScene(new Scene(root, 400, 150));
         primaryStage.setResizable(false);
+        primaryStage.setTitle("MySQL启停工具 by Nap");
         primaryStage.show();
+
+        typeGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == startStopType) {
+                startStopUI(root, status);
+            } else if (newValue == importExportType) {
+                importExportUI(root, status);
+            }
+        });
+        typeGroup.selectToggle(startStopType);
+        NapTheme.INSTANCE.applyThemeChange();
     }
 
-    private void startMysql(boolean update) {
+    private void startMysql(Label status) {
+        operating.set(true);
         for (int i = 0; i < 3; i++) {
             try {
                 if (MysqlOperator.hasPid(iniProp)) {
-                    initSqlScript();
+                    initSqlScript(status);
                     break;
                 }
                 Process process = MysqlOperator.start(iniProp);
@@ -220,12 +144,10 @@ public class MysqlToolApp extends Application {
                 e.printStackTrace();
             }
         }
-        if (update) {
-            Platform.runLater(this::updateStat);
-        }
+        operating.set(false);
     }
 
-    private void stopMysql(boolean update) {
+    private void stopMysql() {
         for (int i = 0; i < 3; i++) {
             try {
                 if (!MysqlOperator.hasPid(iniProp)) {
@@ -236,38 +158,21 @@ public class MysqlToolApp extends Application {
                 e.printStackTrace();
             }
         }
-        if (update) {
-            Platform.runLater(this::updateStat);
-        }
     }
 
-    private void restartMysql() {
-        stopMysql(false);
-        startMysql(true);
-    }
-
-    private void fixMysql() {
+    private void fixMysql(Label status) {
         if (MysqlOperator.hasPid(iniProp) && MysqlOperator.isStarted(iniProp)) {
-            Platform.runLater(() -> {
-                updateStat();
-                status.setText("请先停止!");
-            });
+            Platform.runLater(() -> status.setText("修复失败，MySQL未停止"));
             return;
         }
         MysqlOperator.fix(iniProp);
-        Platform.runLater(() -> {
-            updateStat();
-            status.setText("修复完成");
-        });
+        Platform.runLater(() -> status.setText("修复完成"));
     }
 
-    private void exportMysql() {
+    private void exportMysql(Label status) {
         boolean started = MysqlOperator.hasPid(iniProp);
         if (!started) {
-            Platform.runLater(() -> {
-                updateStat();
-                status.setText("请先启动!");
-            });
+            Platform.runLater(() -> status.setText("导出失败，MySQL未启动"));
             return;
         }
         try {
@@ -275,27 +180,18 @@ public class MysqlToolApp extends Application {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Platform.runLater(() -> {
-            updateStat();
-            status.setText("导出完成");
-        });
+        Platform.runLater(() -> status.setText("导出完成"));
     }
 
-    private void importMysql() {
+    private void importMysql(Label status) {
         boolean started = MysqlOperator.hasPid(iniProp);
         if (!started) {
-            Platform.runLater(() -> {
-                updateStat();
-                status.setText("请先启动!");
-            });
+            Platform.runLater(() -> status.setText("导入失败，MySQL未启动"));
             return;
         }
         File file = new File("output.sql");
         if (!file.exists()) {
-            Platform.runLater(() -> {
-                updateStat();
-                status.setText("请先导出!");
-            });
+            Platform.runLater(() -> status.setText("导入失败，导入文件不存在"));
             return;
         }
         try {
@@ -303,45 +199,7 @@ public class MysqlToolApp extends Application {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Platform.runLater(() -> {
-            updateStat();
-            status.setText("导入完成");
-        });
-    }
-
-    private void disableAll() {
-        change.setDisable(true);
-        start.setDisable(true);
-        stop.setDisable(true);
-        restart.setDisable(true);
-    }
-
-    private void updateStat() {
-        if (changed.get()) {
-            start.setDisable(false);
-            stop.setDisable(false);
-            restart.setDisable(false);
-            change.setDisable(false);
-            return;
-        }
-        new Thread(() -> {
-            boolean started = MysqlOperator.hasPid(iniProp);
-            PlatformImpl.runAndWait(() -> {
-                if (started) {
-                    status.setText("已启动");
-                    start.setDisable(true);
-                    stop.setDisable(false);
-                    restart.setDisable(false);
-                } else {
-                    status.setText("未启动");
-                    start.setDisable(false);
-                    stop.setDisable(true);
-                    restart.setDisable(false);
-                }
-                Runtime.getRuntime().gc();
-                change.setDisable(false);
-            });
-        }).start();
+        Platform.runLater(() -> status.setText("导入完成"));
     }
 
     private void initDefaultIni() {
@@ -360,7 +218,7 @@ public class MysqlToolApp extends Application {
         MysqlUtils.writeIniFile(iniProp, "config.ini");
     }
 
-    private void initSqlScript() throws Exception {
+    private void initSqlScript(Label status) throws Exception {
         String initPath = iniProp.get("工具配置").get("初始化脚本路径");
         File initDir = new File(initPath);
         if (!initDir.exists()) {
@@ -397,5 +255,174 @@ public class MysqlToolApp extends Application {
                 MysqlUtils.appendFinishedList("已初始化列表(别乱动).txt", file.getAbsolutePath());
             }
         }
+    }
+
+    private Button createThemeButton() {
+        Button button = new Button();
+        NapTheme.INSTANCE.targetsProperty().put(button, new Pair<>(
+                () -> {
+                    button.setStyle("-fx-background-color: transparent;");
+                    button.setGraphic(NapTheme.INSTANCE.createGraphic(NapTheme.SVG_DARK, "#5c5c5c", 12));
+                },
+                () -> {
+                    button.setStyle("-fx-background-color: transparent;");
+                    button.setGraphic(NapTheme.INSTANCE.createGraphic(NapTheme.SVG_LIGHT, "#FFFFFF", 12));
+                }
+        ));
+        button.setOnAction(event -> NapTheme.INSTANCE.setDark(!NapTheme.INSTANCE.isDark()));
+        return button;
+    }
+
+    private NapTheme.ToggleLabel createSelectedLabel(String text) {
+        NapTheme.ToggleLabel label = new NapTheme.ToggleLabel(text);
+        NapTheme.INSTANCE.targetsProperty().put(label, new Pair<>(
+                () -> label.setStyle("-fx-background-color: transparent;-fx-text-fill: #5c5c5c;-fx-font-weight: bold;-fx-font-size: 14px"),
+                () -> label.setStyle("-fx-background-color: transparent;-fx-text-fill: #FFFFFF;-fx-font-weight: bold;-fx-font-size: 14px")
+        ));
+        return label;
+    }
+
+    private Label createNormalLabel(String text) {
+        Label label = new Label(text);
+        NapTheme.INSTANCE.targetsProperty().put(label, new Pair<>(
+                () -> label.setStyle("-fx-text-fill: #5c5c5c;-fx-font-size: 14px"),
+                () -> label.setStyle("-fx-text-fill: #FFFFFF;-fx-font-size: 14px")
+        ));
+        return label;
+    }
+
+    private void startStopUI(BorderPane root, Label status) {
+        TilePane center = createCenter(root);
+        Button start = createOperateButton("启动");
+        Button stop = createOperateButton("停止");
+        stop.setDisable(true);
+        Button restart = createOperateButton("重启");
+        center.getChildren().addAll(start, stop, restart);
+        root.setCenter(center);
+
+        disableAll(start, stop, restart);
+        updateOperateStat(status, start, stop, restart);
+        start.setOnAction(event -> {
+            disableAll(start, stop, restart);
+            status.setText("启动中...");
+            new Thread(() -> {
+                startMysql(status);
+                Platform.runLater(() -> updateOperateStat(status, start, stop, restart));
+            }).start();
+        });
+        stop.setOnAction(event -> {
+            disableAll(start, stop, restart);
+            status.setText("停止中...");
+            new Thread(() -> {
+                stopMysql();
+                Platform.runLater(() -> updateOperateStat(status, start, stop, restart));
+            }).start();
+        });
+        restart.setOnAction(event -> {
+            disableAll(start, stop, restart);
+            status.setText("重启中...");
+            new Thread(() -> {
+                stopMysql();
+                startMysql(status);
+                Platform.runLater(() -> updateOperateStat(status, start, stop, restart));
+            }).start();
+        });
+    }
+
+    private void importExportUI(BorderPane root, Label status) {
+        TilePane center = createCenter(root);
+        Button repair = createOperateButton("修复");
+        Button imp = createOperateButton("导入");
+        Button exp = createOperateButton("导出");
+        center.getChildren().addAll(repair, imp, exp);
+        root.setCenter(center);
+        disableAll(repair, imp, exp);
+        updateToolStat(repair, imp, exp);
+
+        repair.setOnAction(event -> {
+            disableAll(repair, imp, exp);
+            status.setText("停止中...");
+            new Thread(() -> {
+                stopMysql();
+                PlatformImpl.runAndWait(() -> status.setText("修复中..."));
+                fixMysql(status);
+                PlatformImpl.runAndWait(() -> updateToolStat(repair, imp, exp));
+            }).start();
+        });
+        imp.setOnAction(event -> {
+            disableAll(repair, imp, exp);
+            status.setText("启动中...");
+            new Thread(() -> {
+                startMysql(status);
+                PlatformImpl.runAndWait(() -> status.setText("导入中..."));
+                importMysql(status);
+                PlatformImpl.runAndWait(() -> updateToolStat(repair, imp, exp));
+            }).start();
+        });
+        exp.setOnAction(event -> {
+            disableAll(repair, imp, exp);
+            status.setText("启动中...");
+            new Thread(() -> {
+                startMysql(status);
+                PlatformImpl.runAndWait(() -> status.setText("导出中..."));
+                exportMysql(status);
+                PlatformImpl.runAndWait(() -> updateToolStat(repair, imp, exp));
+            }).start();
+        });
+    }
+
+    private TilePane createCenter(BorderPane root) {
+        Pane lastNode = (Pane) root.getCenter();
+        if (lastNode != null) {
+            lastNode.getChildren().forEach(node -> NapTheme.INSTANCE.targetsProperty().remove(node));
+            NapTheme.INSTANCE.targetsProperty().remove(lastNode);
+        }
+
+        TilePane center = new TilePane();
+        NapTheme.INSTANCE.targetsProperty().put(center, new Pair<>(
+                () -> center.setStyle("-fx-background-color: transparent;-fx-alignment: center;-fx-hgap: 10;-fx-vgap: 10"),
+                () -> center.setStyle("-fx-background-color: transparent;-fx-alignment: center;-fx-hgap: 10;-fx-vgap: 10")
+        ));
+        return center;
+    }
+
+    private Button createOperateButton(String text) {
+        Button button = new Button(text);
+        NapTheme.INSTANCE.targetsProperty().put(button, new Pair<>(
+                () -> button.setStyle("-fx-background-color: #5c5c5c;-fx-text-fill: #F5F5F5;-fx-font-size: 14px;-fx-pref-width: 100px;-fx-pref-height: 40px"),
+                () -> button.setStyle("-fx-background-color: #414654;-fx-text-fill: #FFFFFF;-fx-font-size: 14px;-fx-pref-width: 100px;-fx-pref-height: 40px")
+        ));
+        return button;
+    }
+
+    private void disableAll(Button... buttons) {
+        for (Button button : buttons) {
+            button.setDisable(true);
+        }
+    }
+
+    private void enableAll(Button... buttons) {
+        for (Button button : buttons) {
+            button.setDisable(false);
+        }
+    }
+
+    private void updateOperateStat(Label status, Button start, Button stop, Button restart) {
+        if (MysqlOperator.hasPid(iniProp)) {
+            status.setText("已启动");
+            enableAll(stop, restart);
+            return;
+        }
+        status.setText("未启动");
+        enableAll(start, restart);
+    }
+
+    private void updateToolStat(Button repair, Button imp, Button exp) {
+        File file = new File("output.sql");
+        if (file.exists()) {
+            enableAll(repair, imp, exp);
+            return;
+        }
+        enableAll(repair, exp);
     }
 }
