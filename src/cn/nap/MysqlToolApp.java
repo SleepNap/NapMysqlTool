@@ -169,6 +169,9 @@ public class MysqlToolApp extends Application {
                     break;
                 }
                 MysqlOperator.stop(iniProp).waitFor();
+                if (i == 2) {
+                    MysqlOperator.killPid(iniProp);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }

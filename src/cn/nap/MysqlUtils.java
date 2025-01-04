@@ -112,4 +112,14 @@ public class MysqlUtils {
             e.printStackTrace();
         }
     }
+
+    public static String readFirstLine(File file) {
+        try (FileReader fr = new FileReader(file);
+             BufferedReader reader = new BufferedReader(fr)) {
+            return reader.readLine();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

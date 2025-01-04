@@ -31,21 +31,43 @@ public class MysqlOperator {
     }
 
     public static boolean hasPid(Map<String, Map<String, String>> iniProp) {
+        return getPidFile(iniProp) != null;
+    }
+
+    public static void killPid(Map<String, Map<String, String>> iniProp) {
+        File pidFile = getPidFile(iniProp);
+        if (pidFile == null) {
+            return;
+        }
+        String pidStr = MysqlUtils.readFirstLine(pidFile);
+        if (pidStr != null) {
+            int pid = Integer.parseInt(pidStr.trim());
+            try {
+                Runtime.getRuntime().exec("taskkill /f /pid " + pid);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("hack stop kill pid " + pidStr);
+        boolean ignore = pidFile.delete();
+    }
+
+    private static File getPidFile(Map<String, Map<String, String>> iniProp) {
         String path = iniProp.get("mysql配置").get("mysql路径");
         File dataDir = new File(path + File.separator + "data");
         if (!dataDir.exists()) {
-            return false;
+            return null;
         }
         File[] files = dataDir.listFiles();
         if (files == null) {
-            return false;
+            return null;
         }
         for (File file : files) {
             if (file.getName().endsWith(".pid")) {
-                return true;
+                return file;
             }
         }
-        return false;
+        return null;
     }
 
     public static Process start(Map<String, Map<String, String>> iniProp) throws Exception {
