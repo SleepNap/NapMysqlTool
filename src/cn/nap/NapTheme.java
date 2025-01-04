@@ -6,7 +6,6 @@ import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinNT;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableMap;
 import javafx.event.EventTarget;
 import javafx.scene.control.Label;
 import javafx.scene.control.Toggle;
@@ -18,6 +17,9 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Pair;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -123,7 +125,8 @@ public class NapTheme {
     private Stage primaryStage;
     private final BooleanProperty dark = new SimpleBooleanProperty(false) {
         @Override
-        protected void invalidated() {
+        public void set(boolean newValue) {
+            super.set(newValue);
             applyThemeChange();
         }
     };
@@ -155,7 +158,50 @@ public class NapTheme {
     }
 
     private boolean isWin11() {
-        return "Windows 11".equals(System.getProperty("os.name"));
+        String osName = System.getProperty("os.name");
+        if (!osName.startsWith("Windows")) {
+            return false;
+        }
+        if ("Windows 11".equals(osName)) {
+            return true;
+        }
+
+        Process process = null;
+        BufferedReader reader = null;
+        try {
+            process = Runtime.getRuntime().exec("wmic os get version");
+            reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.startsWith("10")) {
+                    continue;
+                }
+                String[] splits = line.split("\\.");
+                if (splits.length != 3) {
+                    continue;
+                }
+                if (splits[2].length() < 2) {
+                    continue;
+                }
+                int build = Integer.parseInt(splits[2].trim());
+                return build >= 22000;
+            }
+            process.destroy();
+            reader.close();
+        } catch (IOException e) {
+            if (process != null) {
+                process.destroy();
+            }
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public void setWindowFrameColor() {

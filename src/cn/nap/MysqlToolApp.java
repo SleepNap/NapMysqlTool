@@ -15,11 +15,9 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MysqlToolApp extends Application {
     private final Map<String, Map<String, String>> iniProp = new HashMap<>();
-    private final AtomicBoolean operating = new AtomicBoolean(false);
 
     public static void main(String[] args) {
         launch(args);
@@ -62,6 +60,16 @@ public class MysqlToolApp extends Application {
             initDefaultIni();
             toolConf = iniProp.get("工具配置");
         }
+        String dbName = toolConf.get("导出的库名，多个用空格分割");
+        if (dbName == null || dbName.isEmpty()) {
+            initDefaultIni();
+            toolConf = iniProp.get("工具配置");
+        }
+        String theme = toolConf.get("主题");
+        if (theme == null || theme.isEmpty()) {
+            initDefaultIni();
+            toolConf = iniProp.get("工具配置");
+        }
         File initDir = new File(toolConf.get("初始化脚本路径"));
         // 创建init文件夹
         if (!initDir.exists()) {
@@ -96,7 +104,7 @@ public class MysqlToolApp extends Application {
                 () -> bottom.setStyle("-fx-background-color: transparent;-fx-alignment: center;-fx-hgap: 100;-fx-vgap: 10;-fx-padding: 10"),
                 () -> bottom.setStyle("-fx-background-color: transparent;-fx-alignment: center;-fx-hgap: 100;-fx-vgap: 10;-fx-padding: 10")
         ));
-        Label version = createNormalLabel("2.25.0101");
+        Label version = createNormalLabel("2.25.0102");
         Label status = createNormalLabel("初始化中...");
         bottom.add(version, 0, 0);
         bottom.add(status, 1, 0);
@@ -116,11 +124,19 @@ public class MysqlToolApp extends Application {
             }
         });
         typeGroup.selectToggle(startStopType);
-        NapTheme.INSTANCE.applyThemeChange();
+        // 设置默认主题
+        Map<String, String> toolConf = iniProp.get("工具配置");
+        NapTheme.INSTANCE.setDark("dark".equals(toolConf.get("主题")));
+    }
+
+    @Override
+    public void stop() throws Exception {
+        Map<String, String> toolConf = iniProp.get("工具配置");
+        toolConf.put("主题", NapTheme.INSTANCE.isDark() ? "dark" : "light");
+        MysqlUtils.writeIniFile(iniProp, "config.ini");
     }
 
     private void startMysql(Label status) {
-        operating.set(true);
         for (int i = 0; i < 3; i++) {
             try {
                 if (MysqlOperator.hasPid(iniProp)) {
@@ -144,7 +160,6 @@ public class MysqlToolApp extends Application {
                 e.printStackTrace();
             }
         }
-        operating.set(false);
     }
 
     private void stopMysql() {
@@ -213,6 +228,7 @@ public class MysqlToolApp extends Application {
         Map<String, String> toolConf = new HashMap<>();
         toolConf.put("初始化脚本路径", "init");
         toolConf.put("导出的库名，多个用空格分割", "beidou");
+        toolConf.put("主题", "dark");
 
         iniProp.put("工具配置", toolConf);
         MysqlUtils.writeIniFile(iniProp, "config.ini");
