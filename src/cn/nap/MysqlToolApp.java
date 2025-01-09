@@ -8,6 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
@@ -111,7 +112,12 @@ public class MysqlToolApp extends Application {
 
         root.setTop(top);
         root.setBottom(bottom);
-        primaryStage.setScene(new Scene(root, 400, 150));
+        Scene scene = new Scene(root, 400, 150);
+        NapTheme.INSTANCE.targetsProperty().put(scene, new Pair<>(
+                () -> scene.setFill(Color.web("#F2F2F2")),
+                () -> scene.setFill(Color.web("#2b2b2b"))
+        ));
+        primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.setTitle("MySQL启停工具 by Nap");
         primaryStage.show();
