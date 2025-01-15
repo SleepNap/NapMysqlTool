@@ -25,6 +25,54 @@ import java.util.Arrays;
 import java.util.List;
 
 public class NapTheme {
+    private static final BooleanProperty isZh = new SimpleBooleanProperty(false);
+    public enum I18n {
+        TITLE("MySQL启停工具 by Nap", "MySQL Tool by Nap"),
+        START_STOP("启停功能", "Start/Stop"),
+        OTHERS("其他功能", "Others"),
+        START("启动", "Start"),
+        STOP("停止", "Stop"),
+        RESTART("重启", "Restart"),
+        REPAIR("修复", "Repair"),
+        IMPORT("导入", "Import"),
+        EXPORT("导出", "Export"),
+
+        OUTPUT_INITIALIZING("初始化中...", "Initializing..."),
+        OUTPUT_STARTING("启动中...", "Starting..."),
+        OUTPUT_STOPPING("停止中...", "Stopping..."),
+        OUTPUT_RESTARTING("重启中...", "Restarting..."),
+        OUTPUT_REPAIRING("修复中...", "Repairing..."),
+        OUTPUT_IMPORTING("导入中...", "Importing..."),
+        OUTPUT_EXPORTING("导出中...", "Exporting..."),
+
+        START_SUCCESS("已启动", "Started"),
+        START_FAILED("未启动", "Not Started"),
+        REPAIR_SUCCESS("修复完成", "Repair success."),
+        REPAIR_ERR1("修复失败，MySQL未停止", "Repair failed, MySQL did not stop."),
+        EXPORT_SUCCESS("导出完成", "Export success."),
+        EXPORT_ERR1("导出失败，MySQL未启动", "Export failed, MySQL did not start."),
+        IMPORT_SUCCESS("导入完成", "Import success."),
+        IMPORT_ERR1("导入失败，MySQL未启动", "Import failed, MySQL did not start."),
+        IMPORT_ERR2("导入失败，导入文件不存在", "Import failed, import file output.sql not found."),
+        ;
+
+        public final String zh;
+        public final String en;
+
+        I18n(String zh, String en) {
+            this.zh = zh;
+            this.en = en;
+        }
+
+        public String get() {
+            return isZh.get()? zh : en;
+        }
+    }
+
+    public static void setI18n(boolean zh) {
+        isZh.set(zh);
+    }
+
     public interface DwmApi extends Library {
         DwmApi INSTANCE = Native.load("dwmapi", DwmApi.class);
 

@@ -71,6 +71,12 @@ public class MysqlToolApp extends Application {
             initDefaultIni();
             toolConf = iniProp.get("工具配置");
         }
+        String i18n = toolConf.get("多语言");
+        if (i18n == null || i18n.isEmpty()) {
+            initDefaultIni();
+            toolConf = iniProp.get("工具配置");
+        }
+        NapTheme.setI18n("zh-CN".equals(toolConf.get("多语言")));
         File initDir = new File(toolConf.get("初始化脚本路径"));
         // 创建init文件夹
         if (!initDir.exists()) {
@@ -91,8 +97,8 @@ public class MysqlToolApp extends Application {
         BorderPane top = new BorderPane();
         ToggleGroup typeGroup = new ToggleGroup();
         top.setRight(createThemeButton());
-        NapTheme.ToggleLabel startStopType = createSelectedLabel("启停功能");
-        NapTheme.ToggleLabel importExportType = createSelectedLabel("其他功能");
+        NapTheme.ToggleLabel startStopType = createSelectedLabel(NapTheme.I18n.START_STOP.get());
+        NapTheme.ToggleLabel importExportType = createSelectedLabel(NapTheme.I18n.OTHERS.get());
         startStopType.setToggleGroup(typeGroup);
         importExportType.setToggleGroup(typeGroup);
 
@@ -106,7 +112,7 @@ public class MysqlToolApp extends Application {
                 () -> bottom.setStyle("-fx-background-color: transparent;-fx-alignment: center;-fx-hgap: 100;-fx-vgap: 10;-fx-padding: 10")
         ));
         Label version = createNormalLabel("2.25.0102");
-        Label status = createNormalLabel("初始化中...");
+        Label status = createNormalLabel(NapTheme.I18n.OUTPUT_INITIALIZING.get());
         bottom.add(version, 0, 0);
         bottom.add(status, 1, 0);
 
@@ -119,7 +125,7 @@ public class MysqlToolApp extends Application {
         ));
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
-        primaryStage.setTitle("MySQL启停工具 by Nap");
+        primaryStage.setTitle(NapTheme.I18n.TITLE.get());
         primaryStage.show();
 
         typeGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
@@ -186,17 +192,17 @@ public class MysqlToolApp extends Application {
 
     private void fixMysql(Label status) {
         if (MysqlOperator.hasPid(iniProp) && MysqlOperator.isStarted(iniProp)) {
-            Platform.runLater(() -> status.setText("修复失败，MySQL未停止"));
+            Platform.runLater(() -> status.setText(NapTheme.I18n.REPAIR_ERR1.get()));
             return;
         }
         MysqlOperator.fix(iniProp);
-        Platform.runLater(() -> status.setText("修复完成"));
+        Platform.runLater(() -> status.setText(NapTheme.I18n.REPAIR_SUCCESS.get()));
     }
 
     private void exportMysql(Label status) {
         boolean started = MysqlOperator.hasPid(iniProp);
         if (!started) {
-            Platform.runLater(() -> status.setText("导出失败，MySQL未启动"));
+            Platform.runLater(() -> status.setText(NapTheme.I18n.EXPORT_ERR1.get()));
             return;
         }
         try {
@@ -204,18 +210,18 @@ public class MysqlToolApp extends Application {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Platform.runLater(() -> status.setText("导出完成"));
+        Platform.runLater(() -> status.setText(NapTheme.I18n.EXPORT_SUCCESS.get()));
     }
 
     private void importMysql(Label status) {
         boolean started = MysqlOperator.hasPid(iniProp);
         if (!started) {
-            Platform.runLater(() -> status.setText("导入失败，MySQL未启动"));
+            Platform.runLater(() -> status.setText(NapTheme.I18n.IMPORT_ERR1.get()));
             return;
         }
         File file = new File("output.sql");
         if (!file.exists()) {
-            Platform.runLater(() -> status.setText("导入失败，导入文件不存在"));
+            Platform.runLater(() -> status.setText(NapTheme.I18n.IMPORT_ERR2.get()));
             return;
         }
         try {
@@ -223,7 +229,7 @@ public class MysqlToolApp extends Application {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Platform.runLater(() -> status.setText("导入完成"));
+        Platform.runLater(() -> status.setText(NapTheme.I18n.IMPORT_SUCCESS.get()));
     }
 
     private void initDefaultIni() {
@@ -238,6 +244,7 @@ public class MysqlToolApp extends Application {
         toolConf.put("初始化脚本路径", "init");
         toolConf.put("导出的库名，多个用空格分割", "beidou");
         toolConf.put("主题", "dark");
+        toolConf.put("多语言", "zh-CN");
 
         iniProp.put("工具配置", toolConf);
         MysqlUtils.writeIniFile(iniProp, "config.ini");
@@ -318,10 +325,10 @@ public class MysqlToolApp extends Application {
 
     private void startStopUI(BorderPane root, Label status) {
         TilePane center = createCenter(root);
-        Button start = createOperateButton("启动");
-        Button stop = createOperateButton("停止");
+        Button start = createOperateButton(NapTheme.I18n.START.get());
+        Button stop = createOperateButton(NapTheme.I18n.STOP.get());
         stop.setDisable(true);
-        Button restart = createOperateButton("重启");
+        Button restart = createOperateButton(NapTheme.I18n.RESTART.get());
         center.getChildren().addAll(start, stop, restart);
         root.setCenter(center);
 
@@ -329,7 +336,7 @@ public class MysqlToolApp extends Application {
         updateOperateStat(status, start, stop, restart);
         start.setOnAction(event -> {
             disableAll(start, stop, restart);
-            status.setText("启动中...");
+            status.setText(NapTheme.I18n.OUTPUT_STARTING.get());
             new Thread(() -> {
                 startMysql(status);
                 Platform.runLater(() -> updateOperateStat(status, start, stop, restart));
@@ -337,7 +344,7 @@ public class MysqlToolApp extends Application {
         });
         stop.setOnAction(event -> {
             disableAll(start, stop, restart);
-            status.setText("停止中...");
+            status.setText(NapTheme.I18n.OUTPUT_STOPPING.get());
             new Thread(() -> {
                 stopMysql();
                 Platform.runLater(() -> updateOperateStat(status, start, stop, restart));
@@ -345,7 +352,7 @@ public class MysqlToolApp extends Application {
         });
         restart.setOnAction(event -> {
             disableAll(start, stop, restart);
-            status.setText("重启中...");
+            status.setText(NapTheme.I18n.OUTPUT_RESTARTING.get());
             new Thread(() -> {
                 stopMysql();
                 startMysql(status);
@@ -356,9 +363,9 @@ public class MysqlToolApp extends Application {
 
     private void importExportUI(BorderPane root, Label status) {
         TilePane center = createCenter(root);
-        Button repair = createOperateButton("修复");
-        Button imp = createOperateButton("导入");
-        Button exp = createOperateButton("导出");
+        Button repair = createOperateButton(NapTheme.I18n.REPAIR.get());
+        Button imp = createOperateButton(NapTheme.I18n.IMPORT.get());
+        Button exp = createOperateButton(NapTheme.I18n.EXPORT.get());
         center.getChildren().addAll(repair, imp, exp);
         root.setCenter(center);
         disableAll(repair, imp, exp);
@@ -366,30 +373,30 @@ public class MysqlToolApp extends Application {
 
         repair.setOnAction(event -> {
             disableAll(repair, imp, exp);
-            status.setText("停止中...");
+            status.setText(NapTheme.I18n.OUTPUT_STOPPING.get());
             new Thread(() -> {
                 stopMysql();
-                PlatformImpl.runAndWait(() -> status.setText("修复中..."));
+                PlatformImpl.runAndWait(() -> status.setText(NapTheme.I18n.OUTPUT_REPAIRING.get()));
                 fixMysql(status);
                 PlatformImpl.runAndWait(() -> updateToolStat(repair, imp, exp));
             }).start();
         });
         imp.setOnAction(event -> {
             disableAll(repair, imp, exp);
-            status.setText("启动中...");
+            status.setText(NapTheme.I18n.OUTPUT_STARTING.get());
             new Thread(() -> {
                 startMysql(status);
-                PlatformImpl.runAndWait(() -> status.setText("导入中..."));
+                PlatformImpl.runAndWait(() -> status.setText(NapTheme.I18n.OUTPUT_IMPORTING.get()));
                 importMysql(status);
                 PlatformImpl.runAndWait(() -> updateToolStat(repair, imp, exp));
             }).start();
         });
         exp.setOnAction(event -> {
             disableAll(repair, imp, exp);
-            status.setText("启动中...");
+            status.setText(NapTheme.I18n.OUTPUT_STARTING.get());
             new Thread(() -> {
                 startMysql(status);
-                PlatformImpl.runAndWait(() -> status.setText("导出中..."));
+                PlatformImpl.runAndWait(() -> status.setText(NapTheme.I18n.OUTPUT_EXPORTING.get()));
                 exportMysql(status);
                 PlatformImpl.runAndWait(() -> updateToolStat(repair, imp, exp));
             }).start();
@@ -434,11 +441,11 @@ public class MysqlToolApp extends Application {
 
     private void updateOperateStat(Label status, Button start, Button stop, Button restart) {
         if (MysqlOperator.hasPid(iniProp)) {
-            status.setText("已启动");
+            status.setText(NapTheme.I18n.START_SUCCESS.get());
             enableAll(stop, restart);
             return;
         }
-        status.setText("未启动");
+        status.setText(NapTheme.I18n.START_FAILED.get());
         enableAll(start, restart);
     }
 
