@@ -114,6 +114,6 @@ public class MysqlOperator {
         String user = iniProp.get("mysql配置").get("mysql账号");
         String pass = iniProp.get("mysql配置").get("mysql密码");
         String dbs = iniProp.get("工具配置").get("导出的库名，多个用空格分割");
-        return Runtime.getRuntime().exec("cmd.exe /C " + path + File.separator + "bin" + File.separator + "mysqldump.exe -u" + user + " -p" + pass + " --databases " + dbs + " > output.sql");
+        return Runtime.getRuntime().exec("cmd.exe /C " + path + File.separator + "bin" + File.separator + "mysqldump.exe -u" + user + " -p" + pass + " --databases " + dbs + " --hex-blob > output.sql");
     }
 }

@@ -111,7 +111,7 @@ public class MysqlToolApp extends Application {
                 () -> bottom.setStyle("-fx-background-color: transparent;-fx-alignment: center;-fx-hgap: 100;-fx-vgap: 10;-fx-padding: 10"),
                 () -> bottom.setStyle("-fx-background-color: transparent;-fx-alignment: center;-fx-hgap: 100;-fx-vgap: 10;-fx-padding: 10")
         ));
-        Label version = createNormalLabel("2.25.0702");
+        Label version = createNormalLabel("2.25.0715");
         Label status = createNormalLabel(NapTheme.I18n.OUTPUT_INITIALIZING.get());
         bottom.add(version, 0, 0);
         bottom.add(status, 1, 0);
