@@ -2,3 +2,4 @@ out/
 .idea/
 jre/
 mysql依赖库/
+.claude

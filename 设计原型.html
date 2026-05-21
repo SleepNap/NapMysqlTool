@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>NapMysqlTool 3.x</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Microsoft YaHei", "Segoe UI", sans-serif;
+    background: #f0f0f0;
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 40px;
+  }
+
+  /* ===== 变量 ===== */
+  .dark {
+    --bg-page: #111;
+    --bg-window: #1a1a1a;
+    --bg-bar: #1a1a1a;
+    --bg-card: #222;
+    --bg-input: #2a2a2a;
+    --border: #333;
+    --text: #ddd;
+    --text-secondary: #888;
+    --text-placeholder: #666;
+    --accent: #fff;
+    --btn-text: #aaa;
+    --btn-bg: #2a2a2a;
+    --btn-hover: #333;
+    --on: #4ade80;
+    --off: #f87171;
+    --warn: #fbbf24;
+    --start: #60a5fa;
+    --radius: 6px;
+  }
+
+  .light {
+    --bg-page: #f0f0f0;
+    --bg-window: #fff;
+    --bg-bar: #fafafa;
+    --bg-card: #fff;
+    --bg-input: #f5f5f5;
+    --border: #e0e0e0;
+    --text: #333;
+    --text-secondary: #999;
+    --text-placeholder: #ccc;
+    --accent: #000;
+    --btn-text: #666;
+    --btn-bg: #f5f5f5;
+    --btn-hover: #eee;
+    --on: #16a34a;
+    --off: #dc2626;
+    --warn: #d97706;
+    --start: #2563eb;
+    --radius: 6px;
+  }
+
+  .page-header {
+    margin: 0 0 24px;
+    text-align: center;
+  }
+  .page-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--accent);
+  }
+  .page-header p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  .window {
+    width: 560px;
+    background: var(--bg-window);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .titlebar {
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    background: var(--bg-bar);
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+  }
+  .titlebar-title {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .titlebar-dots { display: flex; gap: 7px; }
+  .titlebar-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .titlebar-dot.red { background: var(--off); }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-tabs { display: flex; gap: 4px; }
+  .nav-tab {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    padding: 4px 12px;
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active {
+    color: var(--accent);
+    background: var(--btn-bg);
+    font-weight: 600;
+  }
+  .nav-right { display: flex; align-items: center; gap: 8px; }
+  .btn-add {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--btn-bg);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+  .btn-icon {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .content { padding: 12px 14px; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .global-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .btn-global {
+    flex: 1;
+    padding: 8px 0;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--btn-bg);
+    color: var(--btn-text);
+    cursor: pointer;
+  }
+  .btn-global:hover { background: var(--btn-hover); }
+
+  .instance-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 6px;
+    background: var(--bg-card);
+    gap: 10px;
+  }
+  .instance-row:hover { border-color: var(--text-secondary); }
+  .instance-row.warn { border-color: var(--warn); }
+
+  .instance-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+  }
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .status-dot.on { background: var(--on); }
+  .status-dot.off { background: var(--off); }
+  .status-dot.warn { background: var(--warn); }
+  .status-dot.starting { background: var(--start); }
+
+  .instance-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .instance-meta {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: 4px;
+    min-width: 72px;
+    justify-content: center;
+    border: 1px solid var(--border);
+    background: var(--btn-bg);
+    color: var(--btn-text);
+  }
+  .tag.port { font-variant-numeric: tabular-nums; }
+  .tag.on { color: var(--on); border-color: var(--on); }
+  .tag.off { color: var(--off); border-color: var(--off); }
+  .tag.starting { color: var(--start); border-color: var(--start); }
+  .tag.warn { color: var(--warn); border-color: var(--warn); }
+
+  .instance-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--btn-bg);
+    color: var(--btn-text);
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--btn-hover); }
+  .btn:disabled { opacity: 0.3; cursor: default; }
+  .btn:disabled:hover { background: var(--btn-bg); }
+
+  .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 14px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .footer-version { font-weight: 600; color: var(--accent); }
+
+  /* ini管理 */
+  .ini-layout {
+    display: flex;
+    gap: 10px;
+    height: 280px;
+    min-width: 0;
+  }
+  .ini-sidebar {
+    width: 200px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 4px;
+    background: var(--bg-card);
+  }
+  .ini-item {
+    padding: 6px 8px;
+    font-size: 12px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    white-space: nowrap;
+    color: var(--text);
+  }
+  .ini-item:hover { background: var(--btn-bg); }
+  .ini-item.active { background: var(--btn-bg); color: var(--accent); font-weight: 600; }
+  .badge {
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+  .ini-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    min-width: 0;
+  }
+  .ini-card {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    background: var(--bg-card);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+  }
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    max-height: 140px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .form-row { display: flex; align-items: center; gap: 6px; }
+  .form-key {
+    font-size: 11px;
+    color: var(--text-secondary);
+    min-width: 85px;
+  }
+  .form-input {
+    flex: 1;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: var(--radius);
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .text-area {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px;
+    font-size: 12px;
+    font-family: "Consolas", "Courier New", monospace;
+    border-radius: var(--radius);
+    resize: none;
+    min-height: 0;
+    line-height: 1.5;
+    outline: none;
+  }
+  .text-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 0;
+    min-width: 0;
+  }
+  .text-area:focus { border-color: var(--accent); }
+  .ini-actions { display: flex; justify-content: flex-end; gap: 6px; }
+  .ini-btn {
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--btn-bg);
+    color: var(--btn-text);
+    cursor: pointer;
+  }
+  .ini-btn:hover { background: var(--btn-hover); }
+  .ini-btn.primary { color: var(--accent); border-color: var(--accent); }
+
+  /* 对话框 */
+  .overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+  }
+  .overlay.show { display: flex; align-items: center; justify-content: center; }
+  .dialog {
+    width: 380px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .dialog-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--accent);
+  }
+  .dialog-fields { display: flex; flex-direction: column; gap: 10px; }
+  .dialog-field { display: flex; align-items: center; gap: 8px; }
+  .dialog-label { font-size: 12px; min-width: 70px; color: var(--text-secondary); }
+  .dialog-input {
+    flex: 1;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: var(--radius);
+    outline: none;
+  }
+  .dialog-input:focus { border-color: var(--accent); }
+  .dialog-footer { display: flex; gap: 6px; justify-content: flex-end; margin-top: 16px; }
+  .dlg-btn {
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--btn-bg);
+    color: var(--btn-text);
+    cursor: pointer;
+  }
+  .dlg-btn:hover { background: var(--btn-hover); }
+  .dlg-btn.primary { color: var(--accent); }
+  .dlg-btn.danger { color: var(--off); }
+
+  .alert-detail {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: var(--bg-input);
+    border-radius: var(--radius);
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .notes {
+    margin: 24px 0 40px;
+    width: 560px;
+    padding: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+  .notes strong { color: var(--accent); }
+
+  .demo { text-align: center; margin: 16px 0 40px; font-size: 12px; color: var(--text-secondary); }
+  .demo .dlg-btn { margin-left: 6px; }
+
+  .theme-btn {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    background: var(--btn-bg);
+    color: var(--btn-text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+</style>
+</head>
+<body class="dark">
+
+<button class="theme-btn" onclick="toggleTheme()">切换主题</button>
+
+<div class="page-header">
+  <h2>NapMysqlTool 3.x</h2>
+  <p>UI设计原型</p>
+</div>
+
+<div class="window">
+  <div class="titlebar">
+    <span class="titlebar-title">MySQL启停工具 by Nap</span>
+    <div class="titlebar-dots">
+      <span class="titlebar-dot"></span>
+      <span class="titlebar-dot"></span>
+      <span class="titlebar-dot red"></span>
+    </div>
+  </div>
+
+  <div class="nav">
+    <div class="nav-tabs">
+      <span class="nav-tab active" onclick="switchPage('startstop')">启停功能</span>
+      <span class="nav-tab" onclick="switchPage('others')">其他功能</span>
+      <span class="nav-tab" onclick="switchPage('ini')">ini管理</span>
+    </div>
+    <div class="nav-right">
+      <button class="btn-add" onclick="showDialog('add')">+ 添加实例</button>
+      <button class="btn-icon" title="切换主题">&#9788;</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div id="page-startstop" class="page active">
+      <div class="global-actions">
+        <button class="btn-global">全部启动</button>
+        <button class="btn-global">全部停止</button>
+      </div>
+
+      <div class="instance-row">
+        <div class="instance-left">
+          <span class="status-dot on"></span>
+          <span class="instance-name">冒险岛5.7</span>
+        </div>
+        <div class="instance-meta">
+          <span class="tag port">3306</span>
+          <span class="tag on">已启动</span>
+        </div>
+        <div class="instance-actions">
+          <button class="btn" disabled>启动</button>
+          <button class="btn">停止</button>
+          <button class="btn">重启</button>
+          <button class="btn" style="min-width:24px;padding:4px 6px;">&#10005;</button>
+        </div>
+      </div>
+
+      <div class="instance-row">
+        <div class="instance-left">
+          <span class="status-dot off"></span>
+          <span class="instance-name">冒险岛8</span>
+        </div>
+        <div class="instance-meta">
+          <span class="tag port">3307</span>
+          <span class="tag off">未启动</span>
+        </div>
+        <div class="instance-actions">
+          <button class="btn">启动</button>
+          <button class="btn" disabled>停止</button>
+          <button class="btn" disabled>重启</button>
+          <button class="btn" style="min-width:24px;padding:4px 6px;">&#10005;</button>
+        </div>
+      </div>
+
+      <div class="instance-row">
+        <div class="instance-left">
+          <span class="status-dot starting"></span>
+          <span class="instance-name">测试库</span>
+        </div>
+        <div class="instance-meta">
+          <span class="tag port">3308</span>
+          <span class="tag starting">启动中</span>
+        </div>
+        <div class="instance-actions">
+          <button class="btn" disabled>启动</button>
+          <button class="btn" disabled>停止</button>
+          <button class="btn" disabled>重启</button>
+          <button class="btn" style="min-width:24px;padding:4px 6px;">&#10005;</button>
+        </div>
+      </div>
+
+      <div class="instance-row warn">
+        <div class="instance-left">
+          <span class="status-dot warn"></span>
+          <span class="instance-name">备份库</span>
+        </div>
+        <div class="instance-meta">
+          <span class="tag port">3306</span>
+          <span class="tag warn">端口冲突</span>
+        </div>
+        <div class="instance-actions">
+          <button class="btn" disabled>启动</button>
+          <button class="btn" disabled>停止</button>
+          <button class="btn" disabled>重启</button>
+          <button class="btn" style="min-width:24px;padding:4px 6px;">&#10005;</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-others" class="page">
+      <div class="instance-row">
+        <div class="instance-left">
+          <span class="status-dot on"></span>
+          <span class="instance-name">冒险岛5.7</span>
+        </div>
+        <div class="instance-meta">
+          <span class="tag port">3306</span>
+          <span class="tag on">已启动</span>
+        </div>
+        <div class="instance-actions">
+          <button class="btn">修复</button>
+          <button class="btn">导入</button>
+          <button class="btn">导出</button>
+        </div>
+      </div>
+
+      <div class="instance-row">
+        <div class="instance-left">
+          <span class="status-dot off"></span>
+          <span class="instance-name">冒险岛8</span>
+        </div>
+        <div class="instance-meta">
+          <span class="tag port">3307</span>
+          <span class="tag off">未启动</span>
+        </div>
+        <div class="instance-actions">
+          <button class="btn">修复</button>
+          <button class="btn" disabled>导入</button>
+          <button class="btn" disabled>导出</button>
+        </div>
+      </div>
+
+      <div class="instance-row">
+        <div class="instance-left">
+          <span class="status-dot off"></span>
+          <span class="instance-name">测试库</span>
+        </div>
+        <div class="instance-meta">
+          <span class="tag port">3308</span>
+          <span class="tag off">未启动</span>
+        </div>
+        <div class="instance-actions">
+          <button class="btn">修复</button>
+          <button class="btn" disabled>导入</button>
+          <button class="btn" disabled>导出</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-ini" class="page">
+      <div class="ini-layout">
+        <div class="ini-sidebar">
+          <div class="ini-item active">
+            <span>冒险岛5.7</span>
+            <span class="badge">有ini</span>
+          </div>
+          <div class="ini-item">
+            <span>冒险岛8</span>
+            <span class="badge">无</span>
+          </div>
+          <div class="ini-item">
+            <span>测试库</span>
+            <span class="badge">无</span>
+          </div>
+          <div class="ini-item">
+            <span>备份库</span>
+            <span class="badge">有ini</span>
+          </div>
+        </div>
+        <div class="ini-main">
+          <div class="ini-card">
+            <div>
+              <div class="section-label">常用参数</div>
+              <div class="form-grid">
+                <div class="form-row">
+                  <span class="form-key">datadir</span>
+                  <input class="form-input" value="data5.7">
+                </div>
+                <div class="form-row">
+                  <span class="form-key">max_connections</span>
+                  <input class="form-input" value="151">
+                </div>
+                <div class="form-row">
+                  <span class="form-key">character_set</span>
+                  <input class="form-input" value="utf8mb4">
+                </div>
+                <div class="form-row">
+                  <span class="form-key">buffer_pool</span>
+                  <input class="form-input" value="128M">
+                </div>
+              </div>
+            </div>
+            <div class="text-section">
+              <div class="section-label">ini全文</div>
+              <textarea class="text-area">[mysqld]
+datadir=data5.7
+port=3306
+max_connections=151
+character_set_server=utf8mb4
+innodb_buffer_pool_size=128M</textarea>
+            </div>
+            <div class="ini-actions">
+              <button class="ini-btn">删除ini</button>
+              <button class="ini-btn primary">保存</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span class="footer-version">3.26.0521</span>
+  </div>
+</div>
+
+<div class="notes">
+  <strong>JavaFX对应：</strong>所有样式均可通过 -fx-style 实现，无边框阴影、无动画、无过渡。
+  实例行用 HBox + Circle(状态点) + Label + Button，ini管理用 VBox + GridPane + TextArea。
+</div>
+
+<div class="demo">
+  对话框演示：
+  <button class="dlg-btn primary" onclick="showDialog('add')">添加实例</button>
+  <button class="dlg-btn danger" onclick="showDialog('port')">端口冲突</button>
+</div>
+
+<div id="dialog-add" class="overlay">
+  <div class="dialog">
+    <div class="dialog-title">添加实例</div>
+    <div class="dialog-fields">
+      <div class="dialog-field"><span class="dialog-label">实例名称</span><input class="dialog-input" placeholder="冒险岛8"></div>
+      <div class="dialog-field"><span class="dialog-label">mysql路径</span><input class="dialog-input" placeholder="mysql-8.0.39-winx64"></div>
+      <div class="dialog-field"><span class="dialog-label">端口</span><input class="dialog-input" placeholder="3307" style="width:70px"></div>
+      <div class="dialog-field"><span class="dialog-label">账号</span><input class="dialog-input" placeholder="root"></div>
+      <div class="dialog-field"><span class="dialog-label">密码</span><input class="dialog-input" placeholder="root"></div>
+      <div class="dialog-field"><span class="dialog-label">数据目录</span><input class="dialog-input" placeholder="data8"></div>
+      <div class="dialog-field"><span class="dialog-label">导出库名</span><input class="dialog-input" placeholder="beidou"></div>
+      <div class="dialog-field"><span class="dialog-label">ini文件</span><input class="dialog-input" placeholder="可选"></div>
+    </div>
+    <div class="dialog-footer">
+      <button class="dlg-btn" onclick="hideDialog('add')">取消</button>
+      <button class="dlg-btn primary" onclick="hideDialog('add')">添加</button>
+    </div>
+  </div>
+</div>
+
+<div id="dialog-port" class="overlay">
+  <div class="dialog">
+    <div class="dialog-title">端口冲突</div>
+    <div style="font-size:13px;line-height:1.6;color:var(--text);margin-bottom:10px;">
+      端口 <strong style="color:var(--warn);font-size:14px;">3306</strong> 被外部进程占用
+    </div>
+    <div class="alert-detail">进程：mysqld.exe · PID：1234<br>该进程非本工具管理。</div>
+    <div class="dialog-footer">
+      <button class="dlg-btn" onclick="hideDialog('port')">取消启动</button>
+      <button class="dlg-btn danger" onclick="hideDialog('port')">终止进程并启动</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleTheme() { document.body.classList.toggle('dark'); document.body.classList.toggle('light'); }
+function switchPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  const map = { startstop: 0, others: 1, ini: 2 };
+  document.querySelectorAll('.nav-tab')[map[name]].classList.add('active');
+}
+function showDialog(id) { document.getElementById('dialog-' + id).classList.add('show'); }
+function hideDialog(id) { document.getElementById('dialog-' + id).classList.remove('show'); }
+</script>
+</body>
+</html>
