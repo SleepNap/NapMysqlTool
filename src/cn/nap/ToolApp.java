@@ -1,19 +1,29 @@
 package cn.nap;
 
 import javafx.application.Application;
+import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javafx.util.Pair;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 import static cn.nap.ToolCommon.I18n;
 import static cn.nap.ToolCommon.ThemeColor;
+import static cn.nap.ToolCommon.Status;
 
 public class ToolApp extends Application {
+    public static void main(String[] args) {
+        System.setProperty("prism.allowhidpi", "false");
+        System.setProperty("prism.lcdtext", "false");
+        launch(args);
+    }
+
     private final ToolService toolService = new ToolService();
     private Thread initThread;
     private Stage primaryStage;
@@ -31,6 +41,7 @@ public class ToolApp extends Application {
     public void start(Stage primaryStage) throws Exception {
         initThread.join(10000);
         this.primaryStage = primaryStage;
+        root = new StackPane();
         loadRoot();
         Scene scene = new Scene(root, 560, 400);
         primaryStage.setScene(scene);
@@ -44,7 +55,7 @@ public class ToolApp extends Application {
         } else {
             ToolUtil.setWindowDarkMode(toolService.isWin11(), primaryStage, toolService.isDark());
         }
-        root = new StackPane();
+        root.setStyle(String.format("-fx-background-color: %s", ThemeColor.ROOT_BG.color(toolService.isDark())));
         loadBody();
     }
 
@@ -53,26 +64,159 @@ public class ToolApp extends Application {
         body.setStyle(String.format("-fx-background-color: %s", ThemeColor.ROOT_BG.color(toolService.isDark())));
 
         loadTop();
+        loadBottom();
         root.getChildren().add(body);
     }
 
     private void loadTop() {
         ToggleGroup topGroup = new ToggleGroup();
-        ToggleButton operate = ToolComponent.largeToggleButton(topGroup, i18n(I18n.TAB_OPERATE), toolService.isDark());
-        ToggleButton other = ToolComponent.largeToggleButton(topGroup, i18n(I18n.TAB_OTHER), toolService.isDark());
-        ToggleButton ini = ToolComponent.largeToggleButton(topGroup, i18n(I18n.TAB_INI), toolService.isDark());
-        topGroup.selectToggle(operate);
+        ToggleButton operate = ToolComponent.menu(topGroup, i18n(I18n.TAB_OPERATE), toolService.isDark());
+        ToggleButton other = ToolComponent.menu(topGroup, i18n(I18n.TAB_EXT), toolService.isDark());
+        ToggleButton ini = ToolComponent.menu(topGroup, i18n(I18n.TAB_INI), toolService.isDark());
 
         Region spacer = new Region();
 
-        Button create = ToolComponent.largeButton(i18n(I18n.CREATE), toolService.isDark());
-        Button icon = ToolComponent.themeIcon(toolService.isDark());
+        Button create = ToolComponent.icon(ToolCommon.SVG_ADD, toolService.isDark());
+        Button theme = ToolComponent.themeIcon(toolService.isDark());
 
-        HBox top = new HBox(operate, other, ini, spacer, create, icon);
+        topGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null) {
+                topGroup.selectToggle(oldVal);
+            }
+            if (Objects.equals(newVal, other)) {
+
+            } else if (Objects.equals(newVal, ini)) {
+
+            } else {
+                loadOperateMenu();
+            }
+        });
+
+        theme.setOnAction(event -> {
+            toolService.changeTheme();
+            loadRoot();
+        });
+
+        topGroup.selectToggle(operate);
+        HBox top = new HBox(operate, other, ini, spacer, create, theme);
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        top.setStyle("-fx-spacing: 10px;-fx-padding: 10px;-fx-alignment: center;");
+        top.setStyle("-fx-spacing: 10px;-fx-alignment: center;");
 
-        body.setTop(top);
+        VBox topBox = new VBox(top, ToolComponent.line(toolService.isDark()));
+        topBox.setStyle("-fx-spacing: 10px;-fx-padding: 10px;");
+
+        body.setTop(topBox);
+    }
+
+    private void loadOperateMenu() {
+        Button startAll = ToolComponent.highButton(i18n(I18n.START_ALL), toolService.isDark());
+        Button stopAll = ToolComponent.highButton(i18n(I18n.STOP_ALL), toolService.isDark());
+        Button restartAll = ToolComponent.highButton(i18n(I18n.RESTART_ALL), toolService.isDark());
+        Button[] operateAll = {startAll, stopAll, restartAll};
+
+        HBox operateMenus = new HBox(operateAll);
+        HBox.setHgrow(startAll, Priority.ALWAYS);
+        HBox.setHgrow(stopAll, Priority.ALWAYS);
+        HBox.setHgrow(restartAll, Priority.ALWAYS);
+        startAll.setMaxWidth(Double.MAX_VALUE);
+        stopAll.setMaxWidth(Double.MAX_VALUE);
+        restartAll.setMaxWidth(Double.MAX_VALUE);
+        operateMenus.setStyle("-fx-spacing: 10px;-fx-alignment: center;");
+
+
+        VBox instanceBox = new VBox();
+        instanceBox.setStyle("-fx-spacing: 10px");
+        List<ToolConfig.Instance> instances = toolService.getConfig().instances;
+        List<Button[]> operateSingleList = new ArrayList<>();
+        if (instances != null && !instances.isEmpty()) {
+            for (ToolConfig.Instance instance : instances) {
+                Button start = ToolComponent.button(i18n(I18n.START), toolService.isDark());
+                Button stop = ToolComponent.button(i18n(I18n.STOP), toolService.isDark());
+                Button restart = ToolComponent.button(i18n(I18n.RESTART), toolService.isDark());
+                Button[] operateSingle = {start, stop, restart};
+                operateSingleList.add(operateSingle);
+                List<Node> buttons = Arrays.asList(operateSingle);
+                instanceBox.getChildren().add(createInstance(instance, buttons));
+            }
+        }
+
+        ScrollPane instanceScroll = ToolComponent.scrollPane(toolService.isDark());
+        instanceScroll.setFitToWidth(true);
+        instanceScroll.setContent(instanceBox);
+
+        refreshOperateButton(operateAll, operateSingleList);
+        VBox center = new VBox(operateMenus, instanceScroll);
+        VBox.setVgrow(instanceScroll, Priority.ALWAYS);
+        center.setStyle("-fx-spacing: 10px;-fx-alignment: top_center;-fx-padding: 0 10 0 10;");
+        body.setCenter(center);
+    }
+
+    private void loadBottom() {
+        Label version = ToolComponent.label(ToolCommon.VERSION, toolService.isDark());
+        Region spacer = new Region();
+        HBox bottom = new HBox(version, spacer);
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        bottom.setStyle("-fx-spacing: 10px;-fx-alignment: center;");
+
+        VBox bottomBox = new VBox(ToolComponent.line(toolService.isDark()), bottom);
+        bottomBox.setStyle("-fx-spacing: 10px;-fx-padding: 10px;");
+
+        body.setBottom(bottomBox);
+    }
+
+    private GridPane createInstance(ToolConfig.Instance instance, List<Node> buttons) {
+        Label portLabel = ToolComponent.label(instance.port.data, toolService.isDark());
+        Status status = Status.fromType(instance.status);
+        Label statusLabel = ToolComponent.label(i18n(status.i18n()), toolService.isDark());
+        statusLabel.setStyle(String.format("-fx-text-fill: %s;", status.color().color(toolService.isDark())));
+        return ToolComponent.instanceInfo(instance.section.data, Arrays.asList(portLabel, statusLabel), buttons, toolService.isDark());
+    }
+
+    private void refreshOperateButton(Button[] operateAll, List<Button[]> operateSingleList) {
+        List<ToolConfig.Instance> instances = toolService.getConfig().instances;
+        boolean allStarted = true;
+        boolean allStopped = true;
+        boolean allStarting = true;
+        for (int i = 0; i < instances.size(); i++) {
+            ToolConfig.Instance instance = instances.get(i);
+            Button[] operateSingle = operateSingleList.get(i);
+            if (Status.STARTED.type() == instance.status) {
+                allStopped = false;
+                allStarting = false;
+                operateSingle[0].setDisable(true);
+                operateSingle[1].setDisable(false);
+                operateSingle[2].setDisable(false);
+            } else if (Status.STARTING.type() == instance.status) {
+                allStarted = false;
+                allStopped = false;
+                operateSingle[0].setDisable(true);
+                operateSingle[1].setDisable(true);
+                operateSingle[2].setDisable(true);
+            } else {
+                allStarted = false;
+                allStarting = false;
+                operateSingle[0].setDisable(false);
+                operateSingle[1].setDisable(true);
+                operateSingle[2].setDisable(false);
+            }
+        }
+        if (allStarting) {
+            operateAll[0].setDisable(true);
+            operateAll[1].setDisable(true);
+            operateAll[2].setDisable(true);
+        } else if (allStarted) {
+            operateAll[0].setDisable(true);
+            operateAll[1].setDisable(false);
+            operateAll[2].setDisable(false);
+        } else if (allStopped) {
+            operateAll[0].setDisable(false);
+            operateAll[1].setDisable(true);
+            operateAll[2].setDisable(false);
+        } else {
+            operateAll[0].setDisable(false);
+            operateAll[1].setDisable(false);
+            operateAll[2].setDisable(false);
+        }
     }
 
     private String i18n(I18n i18n) {

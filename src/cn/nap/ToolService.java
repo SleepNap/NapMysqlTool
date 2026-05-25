@@ -45,6 +45,10 @@ public class ToolService {
         return Theme.DARK.type().equals(config.core.theme.data);
     }
 
+    public void changeTheme() {
+        config.core.theme.data = isDark() ? Theme.LIGHT.type() : Theme.DARK.type();
+    }
+
     private ToolConfig parseConfig(List<ToolUtil.SectionObj> sectionList) {
         if (sectionList == null || sectionList.isEmpty()) {
             return initDefaultConfig();
@@ -73,7 +77,7 @@ public class ToolService {
         return new ToolConfig.Core(
                 new ToolConfig.Info<>(I18n.CORE_SECTION.EN(), 0, I18n.TOOL_CONFIG_COMMAND.comment()),
                 new ToolConfig.Info<>(Language.ZH_CN.type(), 0, I18n.LANGUAGE_COMMAND.comment()),
-                new ToolConfig.Info<>(Theme.DARK.type(), 1, I18n.THEME_COMMAND.comment())
+                new ToolConfig.Info<>(Theme.LIGHT.type(), 1, I18n.THEME_COMMAND.comment())
         );
     }
 

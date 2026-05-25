@@ -4,8 +4,46 @@ public class ToolCommon {
     public static final String DEFAULT_CONFIG_FILE = "config.ini";
     public static final String SVG_DARK = "M593.054 120.217C483.656 148.739 402.91 248.212 402.91 366.546c0 140.582 113.962 254.544 254.544 254.544 118.334 0 217.808-80.746 246.328-190.144C909.17 457.12 912 484.23 912 512c0 220.914-179.086 400-400 400S112 732.914 112 512s179.086-400 400-400c27.77 0 54.88 2.83 81.054 8.217z";
     public static final String SVG_LIGHT = "M512 831.508c16.264 0 29.792 11.72 32.597 27.176l0.534 5.955v62.23C545.13 945.167 530.298 960 512 960c-16.265 0-29.792-11.72-32.597-27.175l-0.534-5.956v-62.23c0-18.298 14.833-33.13 33.131-33.13z m267.584-97.826l5.197 4.245 44.002 44.002c12.938 12.938 12.938 33.916 0 46.854-11.321 11.321-28.797 12.736-41.656 4.245l-5.198-4.245-44.002-44.002c-12.938-12.938-12.938-33.915 0-46.854 11.321-11.32 28.797-12.736 41.657-4.245z m-493.511 4.246c11.32 11.32 12.736 28.796 4.245 41.656l-4.246 5.197-44.002 44.002c-12.939 12.938-33.916 12.938-46.854 0-11.32-11.321-12.736-28.797-4.245-41.657l4.245-5.197 44.003-44.002c12.938-12.938 33.916-12.938 46.854 0zM512 274.932c130.929 0 237.068 106.14 237.068 237.068 0 130.929-106.14 237.068-237.068 237.068-130.929 0-237.068-106.14-237.068-237.068 0-130.929 106.14-237.068 237.068-237.068z m414.87 203.937c18.297 0 33.13 14.833 33.13 33.131 0 16.264-11.72 29.792-27.175 32.597l-5.956 0.534h-62.23c-18.298 0-33.13-14.833-33.13-33.131 0-16.265 11.72-29.792 27.175-32.597l5.955-0.534h62.23z m-767.509 0c18.298 0 33.13 14.833 33.13 33.131 0 16.264-11.72 29.792-27.175 32.597l-5.955 0.534h-62.23C78.833 545.13 64 530.298 64 512c0-16.265 11.72-29.792 27.175-32.597l5.956-0.534h62.23z m669.422-283.653c11.321 11.32 12.736 28.797 4.246 41.656l-4.246 5.198-44.002 44.002c-12.938 12.939-33.915 12.94-46.853 0-11.322-11.32-12.737-28.796-4.246-41.656l4.245-5.197 44.002-44.003c12.938-12.938 33.915-12.938 46.854 0z m-591.91-4.245l5.197 4.245 44.003 44.003c12.938 12.938 12.938 33.915 0 46.854-11.321 11.32-28.797 12.736-41.657 4.245l-5.197-4.245-44.003-44.003c-12.938-12.938-12.938-33.915 0-46.854 11.321-11.32 28.797-12.736 41.657-4.245zM512 64c16.264 0 29.792 11.72 32.597 27.175l0.534 5.956v62.23c0 18.298-14.833 33.13-33.131 33.13-16.265 0-29.792-11.72-32.597-27.175l-0.534-5.955v-62.23C478.87 78.833 493.702 64 512 64z";
+    public static final String SVG_ADD = "M105 480a8 8 0 0 1 8-8h799a8 8 0 0 1 8 8v64a8 8 0 0 1-8 8H113a8 8 0 0 1-8-8v-64z M480 920a8 8 0 0 1-8-8V112a8 8 0 0 1 8-8h64a8 8 0 0 1 8 8v800a8 8 0 0 1-8 8h-64z";
+    public static final String VERSION = "3.26.0525";
 
 
+    public enum Status {
+        STARTED(1, I18n.STARTED, ThemeColor.PRIMARY),
+        STOPPED(0, I18n.STOPPED, ThemeColor.DANGER),
+        STARTING(2, I18n.STARTING, ThemeColor.FONT_BG);
+
+        private final int type;
+        private final I18n i18n;
+        private final ThemeColor color;
+
+        Status(int type, I18n i18n, ThemeColor color) {
+            this.type = type;
+            this.i18n = i18n;
+            this.color = color;
+        }
+
+        public int type() {
+            return type;
+        }
+
+        public I18n i18n() {
+            return i18n;
+        }
+
+        public ThemeColor color() {
+            return color;
+        }
+
+        public static Status fromType(int type) {
+            for (Status status : values()) {
+                if (status.type == type) {
+                    return status;
+                }
+            }
+            return STOPPED;
+        }
+    }
 
     public enum ThemeColor {
         WINDOW_BG("#374357", "#5c5c5c"),
@@ -14,11 +52,20 @@ public class ToolCommon {
 
         BUTTON_BG("#2a2a2a", "#f5f5f5"),
         BUTTON_HOVER("#333", "#eee"),
+        BUTTON_BORDER("#666", "#999"),
+        BUTTON_BORDER_HOVER("#666", "#999"),
 
         CARD_BG("#222", "#fff"),
 
-        FONT_BG("#888", "#999"),
+        FONT_BG("#aaa", "#555"),
         FONT_HOVER("#fff", "#000"),
+
+        SCROLL_BG("#1a1a1a", "#fff"),
+
+        PRIMARY("#1677ff", "#1677ff"),
+        PRIMARY_HOVER("#4096ff", "#4096ff"),
+        DANGER("#ff4d4f", "#ff4d4f"),
+        DANGER_HOVER("#ff7875", "#ff7875"),
         ;
 
         private final String dark;
@@ -100,9 +147,21 @@ public class ToolCommon {
         // ui
         TOOL_TITLE("MySQL启停工具 by Nap", "MySQL Tool by Nap"),
         TAB_OPERATE("启停功能", "Start/Stop"),
-        TAB_OTHER("其他功能", "Other"),
-        TAB_INI("INI配置", "Ini"),
+        TAB_EXT("扩展功能", "Extension"),
+        TAB_INI("实例管理", "Instance"),
         CREATE("添加实例", "CreateInstance"),
+
+        START_ALL("启动全部", "StartAll"),
+        STOP_ALL("停止全部", "StopAll"),
+        RESTART_ALL("重启全部", "RestartAll"),
+        START("启动", "Start"),
+        STOP("停止", "Stop"),
+        RESTART("重启", "Restart"),
+
+        STARTED("已启动", "Started"),
+        STOPPED("未启动", "Stopped"),
+        STARTING("启动中", "Starting"),
+
         ;
 
         private final String zh;

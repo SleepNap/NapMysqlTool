@@ -43,6 +43,7 @@ public class ToolConfig {
         public Info<String> password;
         public Info<String> port;
         public Info<String> database;
+        public int status;
 
         public Instance() {
         }
