@@ -43,7 +43,7 @@ public class ToolApp extends Application {
         this.primaryStage = primaryStage;
         root = new StackPane();
         loadRoot();
-        Scene scene = new Scene(root, 560, 400);
+        Scene scene = new Scene(root, 400, 500);
         primaryStage.setScene(scene);
         primaryStage.setTitle(i18n(I18n.TOOL_TITLE));
         primaryStage.show();
