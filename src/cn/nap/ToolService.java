@@ -82,6 +82,94 @@ public class ToolService {
     }
 
 
+    public void start(ToolConfig.Instance instance) {
+        if (MysqlOperator.hasPid(toIniProp(instance))) {
+            return;
+        }
+        try {
+            Process process = MysqlOperator.start(toIniProp(instance));
+            java.io.InputStream inputStream = process.getErrorStream();
+            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(inputStream));
+            long startTime = System.currentTimeMillis();
+            while (System.currentTimeMillis() - startTime < 5000) {
+                String output = reader.readLine();
+                if (output != null && output.contains("ready for connections")) {
+                    instance.status = ToolCommon.Status.STARTED.type();
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (MysqlOperator.hasPid(toIniProp(instance))) {
+            instance.status = ToolCommon.Status.STARTED.type();
+        }
+    }
+
+    public void stop(ToolConfig.Instance instance) {
+        for (int i = 0; i < 3; i++) {
+            try {
+                if (!MysqlOperator.hasPid(toIniProp(instance))) {
+                    instance.status = ToolCommon.Status.STOPPED.type();
+                    return;
+                }
+                MysqlOperator.stop(toIniProp(instance)).waitFor();
+                if (i == 2) {
+                    MysqlOperator.killPid(toIniProp(instance));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        instance.status = ToolCommon.Status.STOPPED.type();
+    }
+
+    public void startAll() {
+        if (config.instances == null) return;
+        for (ToolConfig.Instance instance : config.instances) {
+            instance.status = ToolCommon.Status.STARTING.type();
+            start(instance);
+        }
+    }
+
+    public void stopAll() {
+        if (config.instances == null) return;
+        for (ToolConfig.Instance instance : config.instances) {
+            stop(instance);
+        }
+    }
+
+    public void restartAll() {
+        stopAll();
+        startAll();
+    }
+
+    public boolean isRunning(ToolConfig.Instance instance) {
+        return MysqlOperator.hasPid(toIniProp(instance));
+    }
+
+    public void refreshStatus() {
+        if (config.instances == null) return;
+        for (ToolConfig.Instance instance : config.instances) {
+            if (instance.status == ToolCommon.Status.STARTING.type()) {
+                continue;
+            }
+            instance.status = isRunning(instance) ? ToolCommon.Status.STARTED.type() : ToolCommon.Status.STOPPED.type();
+        }
+    }
+
+    private java.util.Map<String, java.util.Map<String, String>> toIniProp(ToolConfig.Instance instance) {
+        java.util.Map<String, String> mysqlConf = new java.util.HashMap<>();
+        mysqlConf.put("mysql路径", instance.path.data);
+        mysqlConf.put("mysql账号", instance.username.data);
+        mysqlConf.put("mysql密码", instance.password.data);
+        mysqlConf.put("mysql.ini路径", "");
+
+        java.util.Map<String, java.util.Map<String, String>> iniProp = new java.util.HashMap<>();
+        iniProp.put("mysql配置", mysqlConf);
+        return iniProp;
+    }
+
     private List<ToolConfig.Instance> initDefaultInstances() {
         AtomicInteger instanceSort = new AtomicInteger(0);
         AtomicInteger mysql8Sort = new AtomicInteger(0);

@@ -1,16 +1,22 @@
 package cn.nap;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Font;
+import javafx.util.Duration;
 
 import java.util.List;
 
@@ -18,11 +24,11 @@ import static cn.nap.ToolCommon.ThemeColor;
 
 public class ToolComponent {
 
-    public static Button button(String text, boolean dark) {
-        return button(text, null, dark);
+    public static Button restartButton(String text, boolean dark) {
+        return restartButton(text, null, dark);
     }
 
-    public static Button button(String text, String svg, boolean dark) {
+    public static Button restartButton(String text, String svg, boolean dark) {
         Button button = new Button(text);
         final String color = ThemeColor.FONT_BG.color(dark);
         final String hoverColor = ThemeColor.FONT_HOVER.color(dark);
@@ -48,7 +54,7 @@ public class ToolComponent {
     }
 
     public static Button highButton(String text, boolean dark) {
-        Button button = button(text, dark);
+        Button button = restartButton(text, dark);
         button.setPadding(new Insets(12, 0, 12, 0));
         return button;
     }
@@ -171,14 +177,14 @@ public class ToolComponent {
     }
 
     private static void addMenuToggleStyle(ToggleButton button, boolean dark) {
-        button.setStyle(String.format("-fx-background-color: %s;-fx-text-fill: #fff;-fx-border-color: transparent;-fx-background-radius: 10px;-fx-font-size: 14px;-fx-font-weight: bold;", ThemeColor.PRIMARY.color(dark)));
+        button.setStyle(String.format("-fx-background-color: %s;-fx-text-fill: #fff;-fx-border-color: transparent;-fx-background-radius: 8px;-fx-font-size: 14px;-fx-font-weight: bold;", ThemeColor.PRIMARY.color(dark)));
         button.setOnMouseEntered(null);
         button.setOnMouseExited(null);
     }
 
     private static void addMenuNormalStyle(ToggleButton button, boolean dark) {
-        String exitStyle = String.format("-fx-background-color: transparent;-fx-text-fill: %s;-fx-border-color: transparent;-fx-background-radius: 10px;-fx-font-size: 14px;", ThemeColor.FONT_BG.color(dark));
-        String enterStyle = String.format("-fx-background-color: transparent;-fx-text-fill: %s;-fx-border-color: transparent;-fx-background-radius: 10px;-fx-font-size: 14px;", ThemeColor.FONT_HOVER.color(dark));
+        String exitStyle = String.format("-fx-background-color: transparent;-fx-text-fill: %s;-fx-border-color: transparent;-fx-background-radius: 8px;-fx-font-size: 14px;", ThemeColor.FONT_BG.color(dark));
+        String enterStyle = String.format("-fx-background-color: transparent;-fx-text-fill: %s;-fx-border-color: transparent;-fx-background-radius: 8px;-fx-font-size: 14px;", ThemeColor.FONT_HOVER.color(dark));
         button.setStyle(exitStyle);
         button.setOnMouseEntered((e) -> button.setStyle(enterStyle));
         button.setOnMouseExited((e) -> button.setStyle(exitStyle));
@@ -235,6 +241,40 @@ public class ToolComponent {
         Label label = new Label(text);
         label.setStyle(String.format("-fx-text-fill: %s;", ThemeColor.FONT_BG.color(dark)));
         return label;
+    }
+
+    public static HBox statusWithDot(String text, String dotColor, boolean dark) {
+        // 实心小圆点
+        Circle dot = new Circle(3);
+        dot.setFill(Color.web(dotColor));
+
+        // 发光阴影并脉动
+        DropShadow glow = new DropShadow();
+        glow.setColor(Color.web(dotColor));
+        glow.setRadius(4);
+        glow.setSpread(0.3);
+
+        Timeline pulse = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                        new KeyValue(glow.radiusProperty(), 1),
+                        new KeyValue(glow.spreadProperty(), 0.1)),
+                new KeyFrame(Duration.millis(1200),
+                        new KeyValue(glow.radiusProperty(), 5),
+                        new KeyValue(glow.spreadProperty(), 0.4)),
+                new KeyFrame(Duration.millis(2400),
+                        new KeyValue(glow.radiusProperty(), 1),
+                        new KeyValue(glow.spreadProperty(), 0.1))
+        );
+        pulse.setCycleCount(Timeline.INDEFINITE);
+        pulse.play();
+        dot.setEffect(glow);
+
+        Label textLabel = new Label(text);
+        textLabel.setStyle(String.format("-fx-text-fill: %s;", dotColor));
+
+        HBox box = new HBox(6, dot, textLabel);
+        box.setAlignment(Pos.CENTER_LEFT);
+        return box;
     }
 
     public static VBox instanceInfo(String name, List<Node> statusList, List<Node> operateList, boolean dark) {

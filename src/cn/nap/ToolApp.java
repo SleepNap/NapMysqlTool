@@ -114,7 +114,7 @@ public class ToolApp extends Application {
         startAll.setPadding(new Insets(12, 0, 12, 0));
         Button stopAll = ToolComponent.stopButton(i18n(I18n.STOP_ALL), ToolCommon.SVG_STOP, toolService.isDark());
         stopAll.setPadding(new Insets(12, 0, 12, 0));
-        Button restartAll = ToolComponent.button(i18n(I18n.RESTART_ALL), ToolCommon.SVG_RESTART, toolService.isDark());
+        Button restartAll = ToolComponent.restartButton(i18n(I18n.RESTART_ALL), ToolCommon.SVG_RESTART, toolService.isDark());
         restartAll.setPadding(new Insets(12, 0, 12, 0));
         Button[] operateAll = {startAll, stopAll, restartAll};
 
@@ -136,7 +136,7 @@ public class ToolApp extends Application {
             for (ToolConfig.Instance instance : instances) {
                 Button start = ToolComponent.startButton(i18n(I18n.START), ToolCommon.SVG_START, toolService.isDark());
                 Button stop = ToolComponent.stopButton(i18n(I18n.STOP), ToolCommon.SVG_STOP, toolService.isDark());
-                Button restart = ToolComponent.button(i18n(I18n.RESTART), ToolCommon.SVG_RESTART, toolService.isDark());
+                Button restart = ToolComponent.restartButton(i18n(I18n.RESTART), ToolCommon.SVG_RESTART, toolService.isDark());
                 Button[] operateSingle = {start, stop, restart};
                 operateSingleList.add(operateSingle);
                 List<Node> buttons = Arrays.asList(operateSingle);
@@ -169,11 +169,11 @@ public class ToolApp extends Application {
     }
 
     private VBox createInstance(ToolConfig.Instance instance, List<Node> buttons) {
-        Label portLabel = ToolComponent.label(instance.port.data, toolService.isDark());
+        boolean dark = toolService.isDark();
+        Label portLabel = ToolComponent.label(instance.port.data, dark);
         Status status = Status.fromType(instance.status);
-        Label statusLabel = ToolComponent.label(i18n(status.i18n()), toolService.isDark());
-        statusLabel.setStyle(String.format("-fx-text-fill: %s;", status.color().color(toolService.isDark())));
-        return ToolComponent.instanceInfo(instance.section.data, Arrays.asList(portLabel, statusLabel), buttons, toolService.isDark());
+        HBox statusWithDot = ToolComponent.statusWithDot(i18n(status.i18n()), status.color().color(dark), dark);
+        return ToolComponent.instanceInfo(instance.section.data, Arrays.asList(portLabel, statusWithDot), buttons, dark);
     }
 
     private void refreshOperateButton(Button[] operateAll, List<Button[]> operateSingleList) {
