@@ -66,9 +66,9 @@ public class ToolComponent {
     public static Region line(boolean dark) {
         Region region = new Region();
         region.setMaxWidth(Double.MAX_VALUE);
-        region.setPrefHeight(0.1);
-        region.setMaxHeight(0.1);
-        region.setStyle(String.format("-fx-background-color: %s;", ThemeColor.FONT_BG.color(dark)));
+        region.setPrefHeight(0);
+        region.setMaxHeight(0);
+        region.setStyle(String.format("-fx-border-color: %s; -fx-border-width: 0.5 0 0 0;", ThemeColor.FONT_BG.color(dark)));
         return region;
     }
 
