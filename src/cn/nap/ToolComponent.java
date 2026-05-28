@@ -1,12 +1,14 @@
 package cn.nap;
 
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Font;
 
@@ -17,23 +19,105 @@ import static cn.nap.ToolCommon.ThemeColor;
 public class ToolComponent {
 
     public static Button button(String text, boolean dark) {
+        return button(text, null, dark);
+    }
+
+    public static Button button(String text, String svg, boolean dark) {
         Button button = new Button(text);
-        addButtonStyle(button, dark);
+        final String color = ThemeColor.FONT_BG.color(dark);
+        final String hoverColor = ThemeColor.FONT_HOVER.color(dark);
+        final String exitStyle = String.format("-fx-background-color: transparent;-fx-text-fill: %s;-fx-border-color: %s;-fx-border-radius: 8px;-fx-background-radius: 8px;", color, color);
+        final String enterStyle = String.format("-fx-background-color: transparent;-fx-text-fill: %s;-fx-border-color: %s;-fx-border-radius: 8px;-fx-background-radius: 8px;", hoverColor, hoverColor);
+        button.setStyle(exitStyle);
+        if (svg != null) {
+            button.setGraphic(createIconNode(svg, color));
+            button.setGraphicTextGap(6);
+            button.setOnMouseEntered((e) -> {
+                button.setStyle(enterStyle);
+                button.setGraphic(createIconNode(svg, hoverColor));
+            });
+            button.setOnMouseExited((e) -> {
+                button.setStyle(exitStyle);
+                button.setGraphic(createIconNode(svg, color));
+            });
+        } else {
+            button.setOnMouseEntered((e) -> button.setStyle(enterStyle));
+            button.setOnMouseExited((e) -> button.setStyle(exitStyle));
+        }
         return button;
     }
 
     public static Button highButton(String text, boolean dark) {
         Button button = button(text, dark);
-        button.setPadding(new Insets(10, 0, 10, 0));
+        button.setPadding(new Insets(12, 0, 12, 0));
         return button;
     }
 
-    private static void addButtonStyle(ButtonBase button, boolean dark) {
-        final String exitStyle = String.format("-fx-background-color: %s;-fx-text-fill: %s;-fx-border-color: transparent;-fx-background-radius: 5px;-fx-border-color: %s;-fx-border-radius: 5px;", ThemeColor.BUTTON_BG.color(dark), ThemeColor.FONT_BG.color(dark), ThemeColor.BUTTON_BORDER.color(dark));
-        final String enterStyle = String.format("-fx-background-color: %s;-fx-text-fill: %s;-fx-border-color: transparent;-fx-background-radius: 5px;-fx-border-color: %s;-fx-border-radius: 5px;", ThemeColor.BUTTON_HOVER.color(dark), ThemeColor.FONT_HOVER.color(dark), ThemeColor.BUTTON_BORDER_HOVER.color(dark));
+    public static Button startButton(String text, boolean dark) {
+        return startButton(text, null, dark);
+    }
+
+    public static Button startButton(String text, String svg, boolean dark) {
+        Button button = new Button(text);
+        final String outlineStyle = String.format("-fx-background-color: transparent;-fx-text-fill: %s;-fx-border-color: %s;-fx-border-radius: 8px;-fx-background-radius: 8px;", ThemeColor.PRIMARY.color(dark), ThemeColor.PRIMARY.color(dark));
+        final String filledStyle = String.format("-fx-background-color: %s;-fx-text-fill: #fff;-fx-border-color: %s;-fx-border-radius: 8px;-fx-background-radius: 8px;", ThemeColor.PRIMARY.color(dark), ThemeColor.PRIMARY.color(dark));
+        button.setStyle(outlineStyle);
+        if (svg != null) {
+            button.setGraphic(createIconNode(svg, ThemeColor.PRIMARY.color(dark)));
+            button.setGraphicTextGap(6);
+            button.setOnMouseEntered((e) -> {
+                button.setStyle(filledStyle);
+                button.setGraphic(createIconNode(svg, "#fff"));
+            });
+            button.setOnMouseExited((e) -> {
+                button.setStyle(outlineStyle);
+                button.setGraphic(createIconNode(svg, ThemeColor.PRIMARY.color(dark)));
+            });
+        } else {
+            button.setOnMouseEntered((e) -> button.setStyle(filledStyle));
+            button.setOnMouseExited((e) -> button.setStyle(outlineStyle));
+        }
+        return button;
+    }
+
+    public static Button stopButton(String text, boolean dark) {
+        return stopButton(text, null, dark);
+    }
+
+    public static Button stopButton(String text, String svg, boolean dark) {
+        Button button = new Button(text);
+        final String color = ThemeColor.FONT_BG.color(dark);
+        final String exitStyle = String.format("-fx-background-color: transparent;-fx-text-fill: %s;-fx-border-color: %s;-fx-border-radius: 8px;-fx-background-radius: 8px;", color, color);
+        final String enterStyle = String.format("-fx-background-color: transparent;-fx-text-fill: %s;-fx-border-color: %s;-fx-border-radius: 8px;-fx-background-radius: 8px;", ThemeColor.DANGER.color(dark), ThemeColor.DANGER.color(dark));
         button.setStyle(exitStyle);
-        button.setOnMouseEntered((e) -> button.setStyle(enterStyle));
-        button.setOnMouseExited((e) -> button.setStyle(exitStyle));
+        if (svg != null) {
+            button.setGraphic(createIconNode(svg, color));
+            button.setGraphicTextGap(6);
+            button.setOnMouseEntered((e) -> {
+                button.setStyle(enterStyle);
+                button.setGraphic(createIconNode(svg, ThemeColor.DANGER.color(dark)));
+            });
+            button.setOnMouseExited((e) -> {
+                button.setStyle(exitStyle);
+                button.setGraphic(createIconNode(svg, color));
+            });
+        } else {
+            button.setOnMouseEntered((e) -> button.setStyle(enterStyle));
+            button.setOnMouseExited((e) -> button.setStyle(exitStyle));
+        }
+        return button;
+    }
+
+    private static Region createIconNode(String svg, String color) {
+        SVGPath svgPath = new SVGPath();
+        svgPath.setContent(svg);
+        Region region = new Region();
+        region.setShape(svgPath);
+        region.setStyle(String.format("-fx-background-color: %s;", color));
+        region.setPrefSize(12, 12);
+        region.setMaxSize(12, 12);
+        region.setMinSize(12, 12);
+        return region;
     }
 
     public static Button themeIcon(boolean dark) {
@@ -68,7 +152,7 @@ public class ToolComponent {
         region.setMaxWidth(Double.MAX_VALUE);
         region.setPrefHeight(0);
         region.setMaxHeight(0);
-        region.setStyle(String.format("-fx-border-color: %s; -fx-border-width: 0.5 0 0 0;", ThemeColor.FONT_BG.color(dark)));
+        region.setStyle(String.format("-fx-border-color: %s; -fx-border-width: 0.5 0 0 0;", ThemeColor.BUTTON_BORDER.color(dark)));
         return region;
     }
 
@@ -87,7 +171,7 @@ public class ToolComponent {
     }
 
     private static void addMenuToggleStyle(ToggleButton button, boolean dark) {
-        button.setStyle(String.format("-fx-background-color: %s;-fx-text-fill: %s;-fx-border-color: transparent;-fx-background-radius: 10px;-fx-font-size: 14px;-fx-font-weight: bold;", ThemeColor.BUTTON_BG.color(dark), ThemeColor.FONT_HOVER.color(dark)));
+        button.setStyle(String.format("-fx-background-color: %s;-fx-text-fill: #fff;-fx-border-color: transparent;-fx-background-radius: 10px;-fx-font-size: 14px;-fx-font-weight: bold;", ThemeColor.PRIMARY.color(dark)));
         button.setOnMouseEntered(null);
         button.setOnMouseExited(null);
     }
@@ -153,40 +237,30 @@ public class ToolComponent {
         return label;
     }
 
-    public static GridPane instanceInfo(String name, List<Node> statusList, List<Node> operateList, boolean dark) {
-        GridPane gridPane = getInstanceGrid(dark);
-
-        int columnIndex = 0;
-        HBox nameBox = new HBox();
-        nameBox.setFillHeight(true);
-        nameBox.setMaxWidth(Double.MAX_VALUE);
-        nameBox.setStyle("-fx-alignment: center_left;-fx-spacing: 10px;");
-        nameBox.getChildren().add(label(name, dark));
-        gridPane.add(nameBox, columnIndex, 0);
-        columnIndex++;
-
-        HBox statusBox = new HBox();
-        statusBox.setStyle("-fx-alignment: center_left;-fx-spacing: 10px;");
+    public static VBox instanceInfo(String name, List<Node> statusList, List<Node> operateList, boolean dark) {
+        // 上排：名称 + 状态
+        Label nameLabel = label(name, dark);
+        nameLabel.setStyle(String.format("-fx-text-fill: %s;-fx-font-size: 14px;-fx-font-weight: bold;", ThemeColor.FONT_HOVER.color(dark)));
+        HBox topRow = new HBox(10, nameLabel);
+        topRow.setAlignment(Pos.CENTER_LEFT);
+        HBox statusBox = new HBox(10);
+        statusBox.setAlignment(Pos.CENTER_LEFT);
         statusBox.getChildren().addAll(statusList);
-        gridPane.add(statusBox, columnIndex, 0);
-        columnIndex++;
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        topRow.getChildren().addAll(spacer, statusBox);
 
-        HBox operateBox = new HBox();
-        operateBox.setStyle("-fx-alignment: center_left;-fx-spacing: 10px;");
-        operateBox.getChildren().addAll(operateList);
-        gridPane.add(operateBox, columnIndex, 0);
+        // 下排：按钮
+        HBox bottomRow = new HBox(8);
+        bottomRow.setAlignment(Pos.CENTER_RIGHT);
+        bottomRow.getChildren().addAll(operateList);
 
-        GridPane.setHgrow(nameBox, Priority.ALWAYS);
-        return gridPane;
-    }
-
-    private static GridPane getInstanceGrid(boolean dark) {
-        GridPane gridPane = new GridPane();
-        final String exitStyle = String.format("-fx-alignment: center_left;-fx-hgap: 30px;-fx-padding: 10px;-fx-border-color: %s;-fx-border-radius: 5px;", ThemeColor.BUTTON_BORDER.color(dark));
-        final String enterStyle = String.format("-fx-alignment: center_left;-fx-hgap: 30px;-fx-padding: 10px;-fx-border-color: %s;-fx-border-radius: 5px;", ThemeColor.FONT_HOVER.color(dark));
-        gridPane.setStyle(exitStyle);
-        gridPane.setOnMouseEntered((e) -> gridPane.setStyle(enterStyle));
-        gridPane.setOnMouseExited((e) -> gridPane.setStyle(exitStyle));
-        return gridPane;
+        VBox card = new VBox(10, topRow, bottomRow);
+        final String exitStyle = String.format("-fx-background-color: %s;-fx-padding: 15px;-fx-border-color: %s;-fx-border-radius: 8px;-fx-background-radius: 8px;", ThemeColor.CARD_BG.color(dark), ThemeColor.BUTTON_BORDER.color(dark));
+        final String enterStyle = String.format("-fx-background-color: %s;-fx-padding: 15px;-fx-border-color: %s;-fx-border-radius: 8px;-fx-background-radius: 8px;", ThemeColor.CARD_BG.color(dark), ThemeColor.FONT_HOVER.color(dark));
+        card.setStyle(exitStyle);
+        card.setOnMouseEntered((e) -> card.setStyle(enterStyle));
+        card.setOnMouseExited((e) -> card.setStyle(exitStyle));
+        return card;
     }
 }

@@ -1,6 +1,7 @@
 package cn.nap;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -103,15 +104,18 @@ public class ToolApp extends Application {
         top.setStyle("-fx-spacing: 10px;-fx-alignment: center;");
 
         VBox topBox = new VBox(top, ToolComponent.line(toolService.isDark()));
-        topBox.setStyle("-fx-spacing: 10px;-fx-padding: 10px;");
+        topBox.setStyle("-fx-spacing: 10px;-fx-padding: 12 15 8 15;");
 
         body.setTop(topBox);
     }
 
     private void loadOperateMenu() {
-        Button startAll = ToolComponent.highButton(i18n(I18n.START_ALL), toolService.isDark());
-        Button stopAll = ToolComponent.highButton(i18n(I18n.STOP_ALL), toolService.isDark());
-        Button restartAll = ToolComponent.highButton(i18n(I18n.RESTART_ALL), toolService.isDark());
+        Button startAll = ToolComponent.startButton(i18n(I18n.START_ALL), ToolCommon.SVG_START, toolService.isDark());
+        startAll.setPadding(new Insets(12, 0, 12, 0));
+        Button stopAll = ToolComponent.stopButton(i18n(I18n.STOP_ALL), ToolCommon.SVG_STOP, toolService.isDark());
+        stopAll.setPadding(new Insets(12, 0, 12, 0));
+        Button restartAll = ToolComponent.button(i18n(I18n.RESTART_ALL), ToolCommon.SVG_RESTART, toolService.isDark());
+        restartAll.setPadding(new Insets(12, 0, 12, 0));
         Button[] operateAll = {startAll, stopAll, restartAll};
 
         HBox operateMenus = new HBox(operateAll);
@@ -130,9 +134,9 @@ public class ToolApp extends Application {
         List<Button[]> operateSingleList = new ArrayList<>();
         if (instances != null && !instances.isEmpty()) {
             for (ToolConfig.Instance instance : instances) {
-                Button start = ToolComponent.button(i18n(I18n.START), toolService.isDark());
-                Button stop = ToolComponent.button(i18n(I18n.STOP), toolService.isDark());
-                Button restart = ToolComponent.button(i18n(I18n.RESTART), toolService.isDark());
+                Button start = ToolComponent.startButton(i18n(I18n.START), ToolCommon.SVG_START, toolService.isDark());
+                Button stop = ToolComponent.stopButton(i18n(I18n.STOP), ToolCommon.SVG_STOP, toolService.isDark());
+                Button restart = ToolComponent.button(i18n(I18n.RESTART), ToolCommon.SVG_RESTART, toolService.isDark());
                 Button[] operateSingle = {start, stop, restart};
                 operateSingleList.add(operateSingle);
                 List<Node> buttons = Arrays.asList(operateSingle);
@@ -147,7 +151,7 @@ public class ToolApp extends Application {
         refreshOperateButton(operateAll, operateSingleList);
         VBox center = new VBox(operateMenus, instanceScroll);
         VBox.setVgrow(instanceScroll, Priority.ALWAYS);
-        center.setStyle("-fx-spacing: 10px;-fx-alignment: top_center;-fx-padding: 0 10 0 10;");
+        center.setStyle("-fx-spacing: 10px;-fx-alignment: top_center;-fx-padding: 0 15 0 15;");
         body.setCenter(center);
     }
 
@@ -159,12 +163,12 @@ public class ToolApp extends Application {
         bottom.setStyle("-fx-spacing: 10px;-fx-alignment: center;");
 
         VBox bottomBox = new VBox(ToolComponent.line(toolService.isDark()), bottom);
-        bottomBox.setStyle("-fx-spacing: 10px;-fx-padding: 10px;");
+        bottomBox.setStyle("-fx-spacing: 10px;-fx-padding: 8 15 12 15;");
 
         body.setBottom(bottomBox);
     }
 
-    private GridPane createInstance(ToolConfig.Instance instance, List<Node> buttons) {
+    private VBox createInstance(ToolConfig.Instance instance, List<Node> buttons) {
         Label portLabel = ToolComponent.label(instance.port.data, toolService.isDark());
         Status status = Status.fromType(instance.status);
         Label statusLabel = ToolComponent.label(i18n(status.i18n()), toolService.isDark());
