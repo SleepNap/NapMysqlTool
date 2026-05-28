@@ -25,7 +25,7 @@ public class ToolApp extends Application {
         launch(args);
     }
 
-    private final ToolService toolService = new ToolService();
+    private final ToolService toolService = ToolService.getInstance();
     private Thread initThread;
     private Stage primaryStage;
     private StackPane root;
@@ -44,25 +44,25 @@ public class ToolApp extends Application {
         this.primaryStage = primaryStage;
         root = new StackPane();
         loadRoot();
-        Scene scene = new Scene(root, 400, 500);
+        Scene scene = new Scene(root, ToolCommon.MAX_STAGE_WIDTH, ToolCommon.MAX_STAGE_HEIGHT);
         primaryStage.setScene(scene);
-        primaryStage.setTitle(i18n(I18n.TOOL_TITLE));
+        primaryStage.setTitle(I18n.TOOL_TITLE.translate(toolService.getLanguage()));
         primaryStage.show();
     }
 
     private void loadRoot() {
         if (toolService.isWin11()) {
-            ToolUtil.setWindowFrameColor(primaryStage, ToolUtil.toRGBInt(Color.web(ThemeColor.WINDOW_BG.color(toolService.isDark()))));
+            ToolUtil.setWindowFrameColor(primaryStage, ToolUtil.toRGBInt(Color.web(ThemeColor.WINDOW_BG.color())));
         } else {
             ToolUtil.setWindowDarkMode(toolService.isWin11(), primaryStage, toolService.isDark());
         }
-        root.setStyle(String.format("-fx-background-color: %s", ThemeColor.ROOT_BG.color(toolService.isDark())));
+        root.setStyle(String.format("-fx-background-color: %s", ThemeColor.ROOT_BG.color()));
         loadBody();
     }
 
     private void loadBody() {
         body = new BorderPane();
-        body.setStyle(String.format("-fx-background-color: %s", ThemeColor.ROOT_BG.color(toolService.isDark())));
+        body.setStyle(String.format("-fx-background-color: %s", ThemeColor.ROOT_BG.color()));
 
         loadTop();
         loadBottom();
@@ -71,14 +71,14 @@ public class ToolApp extends Application {
 
     private void loadTop() {
         ToggleGroup topGroup = new ToggleGroup();
-        ToggleButton operate = ToolComponent.menu(topGroup, i18n(I18n.TAB_OPERATE), toolService.isDark());
-        ToggleButton other = ToolComponent.menu(topGroup, i18n(I18n.TAB_EXT), toolService.isDark());
-        ToggleButton ini = ToolComponent.menu(topGroup, i18n(I18n.TAB_INI), toolService.isDark());
+        ToggleButton operate = ToolComponent.menu(topGroup, I18n.TAB_OPERATE.translate(toolService.getLanguage()));
+        ToggleButton other = ToolComponent.menu(topGroup, I18n.TAB_EXT.translate(toolService.getLanguage()));
+        ToggleButton ini = ToolComponent.menu(topGroup, I18n.TAB_INSTANCE.translate(toolService.getLanguage()));
 
         Region spacer = new Region();
 
-        Button create = ToolComponent.icon(ToolCommon.SVG_ADD, toolService.isDark());
-        Button theme = ToolComponent.themeIcon(toolService.isDark());
+        Button create = ToolComponent.icon(ToolCommon.SVG_ADD);
+        Button theme = ToolComponent.themeIcon();
 
         topGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == null) {
@@ -101,20 +101,20 @@ public class ToolApp extends Application {
         topGroup.selectToggle(operate);
         HBox top = new HBox(operate, other, ini, spacer, create, theme);
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        top.setStyle("-fx-spacing: 10px;-fx-alignment: center;");
+        top.setStyle("-fx-spacing: 10px;-fx-alignment: center;-fx-padding: 0 15 0 15;");
 
-        VBox topBox = new VBox(top, ToolComponent.line(toolService.isDark()));
-        topBox.setStyle("-fx-spacing: 10px;-fx-padding: 12 15 8 15;");
+        VBox topBox = new VBox(top, ToolComponent.line());
+        topBox.setStyle("-fx-spacing: 10px;-fx-padding: 10 0 10 0;");
 
         body.setTop(topBox);
     }
 
     private void loadOperateMenu() {
-        Button startAll = ToolComponent.startButton(i18n(I18n.START_ALL), ToolCommon.SVG_START, toolService.isDark());
+        Button startAll = ToolComponent.startButton(I18n.START_ALL.translate(toolService.getLanguage()), ToolCommon.SVG_START);
         startAll.setPadding(new Insets(12, 0, 12, 0));
-        Button stopAll = ToolComponent.stopButton(i18n(I18n.STOP_ALL), ToolCommon.SVG_STOP, toolService.isDark());
+        Button stopAll = ToolComponent.stopButton(I18n.STOP_ALL.translate(toolService.getLanguage()), ToolCommon.SVG_STOP);
         stopAll.setPadding(new Insets(12, 0, 12, 0));
-        Button restartAll = ToolComponent.restartButton(i18n(I18n.RESTART_ALL), ToolCommon.SVG_RESTART, toolService.isDark());
+        Button restartAll = ToolComponent.button(I18n.RESTART_ALL.translate(toolService.getLanguage()), ToolCommon.SVG_RESTART);
         restartAll.setPadding(new Insets(12, 0, 12, 0));
         Button[] operateAll = {startAll, stopAll, restartAll};
 
@@ -134,17 +134,18 @@ public class ToolApp extends Application {
         List<Button[]> operateSingleList = new ArrayList<>();
         if (instances != null && !instances.isEmpty()) {
             for (ToolConfig.Instance instance : instances) {
-                Button start = ToolComponent.startButton(i18n(I18n.START), ToolCommon.SVG_START, toolService.isDark());
-                Button stop = ToolComponent.stopButton(i18n(I18n.STOP), ToolCommon.SVG_STOP, toolService.isDark());
-                Button restart = ToolComponent.restartButton(i18n(I18n.RESTART), ToolCommon.SVG_RESTART, toolService.isDark());
+                Button start = ToolComponent.startButton(I18n.START.translate(toolService.getLanguage()), ToolCommon.SVG_START);
+                Button stop = ToolComponent.stopButton(I18n.STOP.translate(toolService.getLanguage()), ToolCommon.SVG_STOP);
+                Button restart = ToolComponent.button(I18n.RESTART.translate(toolService.getLanguage()), ToolCommon.SVG_RESTART);
                 Button[] operateSingle = {start, stop, restart};
                 operateSingleList.add(operateSingle);
                 List<Node> buttons = Arrays.asList(operateSingle);
                 instanceBox.getChildren().add(createInstance(instance, buttons));
+                start.setOnAction(event -> ToolComponent.tip(primaryStage, root, "报错了！！！"));
             }
         }
 
-        ScrollPane instanceScroll = ToolComponent.scrollPane(toolService.isDark());
+        ScrollPane instanceScroll = ToolComponent.scrollPane();
         instanceScroll.setFitToWidth(true);
         instanceScroll.setContent(instanceBox);
 
@@ -156,24 +157,23 @@ public class ToolApp extends Application {
     }
 
     private void loadBottom() {
-        Label version = ToolComponent.label(ToolCommon.VERSION, toolService.isDark());
+        Label version = ToolComponent.label(ToolCommon.VERSION);
         Region spacer = new Region();
         HBox bottom = new HBox(version, spacer);
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        bottom.setStyle("-fx-spacing: 10px;-fx-alignment: center;");
+        bottom.setStyle("-fx-spacing: 10px;-fx-alignment: center;-fx-padding: 0 15 0 15;");
 
-        VBox bottomBox = new VBox(ToolComponent.line(toolService.isDark()), bottom);
-        bottomBox.setStyle("-fx-spacing: 10px;-fx-padding: 8 15 12 15;");
+        VBox bottomBox = new VBox(ToolComponent.line(), bottom);
+        bottomBox.setStyle("-fx-spacing: 5px;-fx-padding: 10 0 5 0;");
 
         body.setBottom(bottomBox);
     }
 
     private VBox createInstance(ToolConfig.Instance instance, List<Node> buttons) {
-        boolean dark = toolService.isDark();
-        Label portLabel = ToolComponent.label(instance.port.data, dark);
+        Label portLabel = ToolComponent.label(instance.port.data);
         Status status = Status.fromType(instance.status);
-        HBox statusWithDot = ToolComponent.statusWithDot(i18n(status.i18n()), status.color().color(dark), dark);
-        return ToolComponent.instanceInfo(instance.section.data, Arrays.asList(portLabel, statusWithDot), buttons, dark);
+        HBox statusWithDot = ToolComponent.statusWithDot(status.i18n().translate(toolService.getLanguage()), status.color().color());
+        return ToolComponent.instanceInfo(instance.section.data, Arrays.asList(portLabel, statusWithDot), buttons);
     }
 
     private void refreshOperateButton(Button[] operateAll, List<Button[]> operateSingleList) {
@@ -223,7 +223,25 @@ public class ToolApp extends Application {
         }
     }
 
-    private String i18n(I18n i18n) {
-        return ToolCommon.Language.EN_US.type().equals(toolService.getConfig().core.language.data) ? i18n.EN() : i18n.ZH();
+    private void disableOperateButton(Button[] operateAll, List<Button[]> operateSingleList) {
+        for (Button button : operateAll) {
+            button.setDisable(true);
+        }
+        operateSingleList.forEach(btnArr -> {
+            for (Button btn : btnArr) {
+                btn.setDisable(true);
+            }
+        });
+    }
+
+    private void startInstance(ToolConfig.Instance instance, Button[] operateAll, Button[] operateSingle) {
+        List<Button[]> operateSingleList = new ArrayList<>();
+        operateSingleList.add(operateSingle);
+        disableOperateButton(operateAll, operateSingleList);
+        try {
+            toolService.start(instance);
+        } finally {
+            refreshOperateButton(operateAll, operateSingleList);
+        }
     }
 }

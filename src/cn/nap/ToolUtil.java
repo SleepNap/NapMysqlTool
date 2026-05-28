@@ -50,6 +50,9 @@ public class ToolUtil {
         }
     }
 
+    public static interface CloseCallback {
+        void onClose(int trigger);
+    }
 
     public static List<SectionObj> readConfig(String file) {
         if (file == null || file.isEmpty()) {
@@ -109,11 +112,9 @@ public class ToolUtil {
         return null;
     }
 
-
     public static void writeConfig(String file, ToolConfig config) {
 
     }
-
 
     public static ToolConfig.Core parseCoreSection(ToolUtil.SectionObj sectionObj, int index) {
         ToolConfig.Core core = new ToolConfig.Core();
@@ -301,6 +302,26 @@ public class ToolUtil {
             }
             e.printStackTrace();
         }
+        return false;
+    }
+
+    public static String readPidFile(String file) {
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+        if (!Files.exists(Paths.get(file))) {
+            return null;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            return reader.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static boolean isPidRunning(String pid) {
         return false;
     }
 }

@@ -10,9 +10,15 @@ import static cn.nap.ToolCommon.Theme;
 import static cn.nap.ToolCommon.Language;
 
 public class ToolService {
+    private static final ToolService instance = new ToolService();
+
     private ToolConfig config;
     private final AtomicBoolean loading = new AtomicBoolean(false);
     private boolean win11;
+
+    public static ToolService getInstance() {
+        return instance;
+    }
 
     public void loadConfig() {
         if (!loading.compareAndSet(false, true)) {
@@ -43,6 +49,10 @@ public class ToolService {
 
     public boolean isDark() {
         return Theme.DARK.type().equals(config.core.theme.data);
+    }
+
+    public String getLanguage() {
+        return config.core.language.data;
     }
 
     public void changeTheme() {
@@ -83,27 +93,7 @@ public class ToolService {
 
 
     public void start(ToolConfig.Instance instance) {
-        if (MysqlOperator.hasPid(toIniProp(instance))) {
-            return;
-        }
-        try {
-            Process process = MysqlOperator.start(toIniProp(instance));
-            java.io.InputStream inputStream = process.getErrorStream();
-            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(inputStream));
-            long startTime = System.currentTimeMillis();
-            while (System.currentTimeMillis() - startTime < 5000) {
-                String output = reader.readLine();
-                if (output != null && output.contains("ready for connections")) {
-                    instance.status = ToolCommon.Status.STARTED.type();
-                    return;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (MysqlOperator.hasPid(toIniProp(instance))) {
-            instance.status = ToolCommon.Status.STARTED.type();
-        }
+
     }
 
     public void stop(ToolConfig.Instance instance) {

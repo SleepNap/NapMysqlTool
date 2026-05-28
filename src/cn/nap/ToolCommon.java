@@ -9,7 +9,12 @@ public class ToolCommon {
     public static final String SVG_STOP = "M 288 288 L 736 288 L 736 736 L 288 736 Z";
     public static final String SVG_RESTART = "M 512 80 C 273.6 80 80 273.6 80 512 s 193.6 432 432 432 s 432 -193.6 432 -432 h -96 c 0 185.6 -150.4 336 -336 336 S 176 697.6 176 512 S 326.4 176 512 176 c 92.8 0 178.4 37.6 240 98.8 l -144 144 h 320 V 98.8 l -86.4 86.4 C 772 108.8 648 80 512 80 z";
     public static final String VERSION = "3.26.0525";
-
+    public static final double MAX_STAGE_WIDTH = 400;
+    public static final double MAX_STAGE_HEIGHT = 500;
+    public static final double MIN_MODAL_WIDTH = 200;
+    public static final double MIN_MODAL_HEIGHT = 140;
+    public static final double MAX_MODAL_WIDTH = 300;
+    public static final double MAX_MODAL_HEIGHT = 400;
 
     public enum Status {
         STARTED(1, I18n.STARTED, ThemeColor.PRIMARY),
@@ -87,8 +92,8 @@ public class ToolCommon {
             return light;
         }
 
-        public String color(boolean isDark) {
-            return isDark ? dark : light;
+        public String color() {
+            return ToolService.getInstance().isDark() ? dark : light;
         }
     }
 
@@ -151,7 +156,7 @@ public class ToolCommon {
         TOOL_TITLE("MySQL启停工具 by Nap", "MySQL Tool by Nap"),
         TAB_OPERATE("启停功能", "Start/Stop"),
         TAB_EXT("扩展功能", "Extension"),
-        TAB_INI("实例管理", "Instance"),
+        TAB_INSTANCE("实例管理", "Instance"),
         CREATE("添加实例", "CreateInstance"),
 
         START_ALL("启动全部", "StartAll"),
@@ -160,10 +165,12 @@ public class ToolCommon {
         START("启动", "Start"),
         STOP("停止", "Stop"),
         RESTART("重启", "Restart"),
-
         STARTED("已启动", "Started"),
         STOPPED("未启动", "Stopped"),
         STARTING("启动中", "Starting"),
+        OK("确定", "OK"),
+        CANCEL("取消", "Cancel"),
+        CLOSE("关闭", "Close"),
 
         ;
 
@@ -185,6 +192,10 @@ public class ToolCommon {
 
         public String comment() {
             return String.format("; %s(%s)", zh, en);
+        }
+
+        public String translate(String language) {
+            return Language.EN_US.type().equals(language) ? en : zh;
         }
     }
 }
