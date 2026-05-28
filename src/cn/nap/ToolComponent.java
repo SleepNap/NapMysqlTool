@@ -337,7 +337,10 @@ public class ToolComponent {
         Stage stage = createModalStage(primaryStage, modalRoot, true);
         Region mask = mask();
         root.getChildren().add(mask);
-        modalRoot.setCenter(label(text));
+        Label label = label(text);
+        StackPane stackPane = new StackPane(label);
+        stackPane.setStyle("-fx-padding: 10px;");
+        modalRoot.setCenter(stackPane);
 
         Button close = button(I18n.CLOSE.translate(ToolService.getInstance().getLanguage()));
         VBox bottom = commonBottom(close);
@@ -360,7 +363,7 @@ public class ToolComponent {
         if (modalRoot instanceof Region) {
             Region region = ((Region) modalRoot);
             region.setMinSize(ToolCommon.MIN_MODAL_WIDTH, ToolCommon.MIN_MODAL_HEIGHT);
-            region.setPrefWidth(ToolCommon.MIN_MODAL_WIDTH);
+//            region.setPrefWidth(ToolCommon.MIN_MODAL_WIDTH);
             region.setMaxSize(ToolCommon.MAX_MODAL_WIDTH, ToolCommon.MAX_MODAL_HEIGHT);
         }
         Scene scene = new Scene(modalRoot);

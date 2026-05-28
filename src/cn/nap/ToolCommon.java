@@ -13,7 +13,7 @@ public class ToolCommon {
     public static final double MAX_STAGE_HEIGHT = 500;
     public static final double MIN_MODAL_WIDTH = 200;
     public static final double MIN_MODAL_HEIGHT = 140;
-    public static final double MAX_MODAL_WIDTH = 300;
+    public static final double MAX_MODAL_WIDTH = 320;
     public static final double MAX_MODAL_HEIGHT = 400;
 
     public enum Status {
