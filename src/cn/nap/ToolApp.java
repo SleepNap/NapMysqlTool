@@ -17,6 +17,7 @@ import java.util.Objects;
 import static cn.nap.ToolCommon.I18n;
 import static cn.nap.ToolCommon.ThemeColor;
 import static cn.nap.ToolCommon.Status;
+import static cn.nap.ToolCommon.TipType;
 
 public class ToolApp extends Application {
     public static void main(String[] args) {
@@ -141,7 +142,7 @@ public class ToolApp extends Application {
                 operateSingleList.add(operateSingle);
                 List<Node> buttons = Arrays.asList(operateSingle);
                 instanceBox.getChildren().add(createInstance(instance, buttons));
-                start.setOnAction(event -> ToolComponent.tip(primaryStage, root, "报错了！！！"));
+                start.setOnAction(event -> ToolComponent.warning(primaryStage, root, "报错了！！！"));
             }
         }
 

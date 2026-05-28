@@ -8,6 +8,10 @@ public class ToolCommon {
     public static final String SVG_START = "M 280 160 L 800 512 L 280 864 Z";
     public static final String SVG_STOP = "M 288 288 L 736 288 L 736 736 L 288 736 Z";
     public static final String SVG_RESTART = "M 512 80 C 273.6 80 80 273.6 80 512 s 193.6 432 432 432 s 432 -193.6 432 -432 h -96 c 0 185.6 -150.4 336 -336 336 S 176 697.6 176 512 S 326.4 176 512 176 c 92.8 0 178.4 37.6 240 98.8 l -144 144 h 320 V 98.8 l -86.4 86.4 C 772 108.8 648 80 512 80 z";
+    public static final String SVG_TIP_SUCCESS = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z";
+    public static final String SVG_TIP_ERROR = "M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z";
+    public static final String SVG_TIP_WARN = "M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z";
+    public static final String SVG_TIP_INFO = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z";
     public static final String VERSION = "3.26.0525";
     public static final double MAX_STAGE_WIDTH = 400;
     public static final double MAX_STAGE_HEIGHT = 500;
@@ -74,6 +78,8 @@ public class ToolCommon {
         PRIMARY_HOVER("#6ab4ff", "#4096ff"),
         DANGER("#ff4d4f", "#ff4d4f"),
         DANGER_HOVER("#ff7875", "#ff7875"),
+        SUCCESS("#52c41a", "#52c41a"),
+        WARNING("#faad14", "#faad14"),
         ;
 
         private final String dark;
@@ -127,6 +133,29 @@ public class ToolCommon {
         }
     }
 
+
+    public enum TipType {
+        INFO(ThemeColor.PRIMARY, SVG_TIP_INFO),
+        SUCCESS(ThemeColor.SUCCESS, SVG_TIP_SUCCESS),
+        WARNING(ThemeColor.WARNING, SVG_TIP_WARN),
+        ERROR(ThemeColor.DANGER, SVG_TIP_ERROR);
+
+        private final ThemeColor color;
+        private final String svg;
+
+        TipType(ThemeColor color, String svg) {
+            this.color = color;
+            this.svg = svg;
+        }
+
+        public String color() {
+            return color.color();
+        }
+
+        public String svg() {
+            return svg;
+        }
+    }
 
     public enum I18n {
         // command

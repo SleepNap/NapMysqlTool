@@ -24,9 +24,9 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static cn.nap.ToolCommon.ThemeColor;
+import static cn.nap.ToolCommon.TipType;
 import static cn.nap.ToolCommon.I18n;
 
 public class ToolComponent {
@@ -332,15 +332,40 @@ public class ToolComponent {
         return card;
     }
 
-    public static void tip(Stage primaryStage, StackPane root, String text) {
+    public static void info(Stage primaryStage, StackPane root, String text) {
+        tip(TipType.INFO, primaryStage, root, text);
+    }
+
+    public static void warning(Stage primaryStage, StackPane root, String text) {
+        tip(TipType.WARNING, primaryStage, root, text);
+    }
+
+    public static void error(Stage primaryStage, StackPane root, String text) {
+        tip(TipType.ERROR, primaryStage, root, text);
+    }
+
+    public static void tip(TipType type,Stage primaryStage, StackPane root, String text) {
         BorderPane modalRoot = new BorderPane();
         Stage stage = createModalStage(primaryStage, modalRoot, true);
         Region mask = mask();
         root.getChildren().add(mask);
+
+        SVGPath svgPath = new SVGPath();
+        svgPath.setContent(type.svg());
+        Region icon = new Region();
+        icon.setShape(svgPath);
+        icon.setStyle(String.format("-fx-background-color: %s;", type.color()));
+        icon.setPrefSize(18, 18);
+        icon.setMaxSize(18, 18);
+        icon.setMinSize(18, 18);
+
         Label label = label(text);
-        StackPane stackPane = new StackPane(label);
-        stackPane.setStyle("-fx-padding: 10px;");
-        modalRoot.setCenter(stackPane);
+        label.setStyle(String.format("-fx-text-fill: %s;-fx-wrap-text: true;-fx-font-size: 13px;", ThemeColor.FONT_BG.color()));
+
+        HBox center = new HBox(10, icon, label);
+        center.setAlignment(Pos.CENTER_LEFT);
+        center.setPadding(new Insets(20, 24, 12, 24));
+        modalRoot.setCenter(center);
 
         Button close = button(I18n.CLOSE.translate(ToolService.getInstance().getLanguage()));
         VBox bottom = commonBottom(close);
@@ -363,7 +388,6 @@ public class ToolComponent {
         if (modalRoot instanceof Region) {
             Region region = ((Region) modalRoot);
             region.setMinSize(ToolCommon.MIN_MODAL_WIDTH, ToolCommon.MIN_MODAL_HEIGHT);
-//            region.setPrefWidth(ToolCommon.MIN_MODAL_WIDTH);
             region.setMaxSize(ToolCommon.MAX_MODAL_WIDTH, ToolCommon.MAX_MODAL_HEIGHT);
         }
         Scene scene = new Scene(modalRoot);
