@@ -123,7 +123,7 @@ public class ToolService {
         );
     }
 
-    public boolean isRunning(ToolConfig.Instance instance) throws IOException {
+    public boolean isRunning(ToolConfig.Instance instance) {
         Path pidFile = getPidFile(instance);
         if (pidFile == null) {
             return false;
@@ -135,10 +135,12 @@ public class ToolService {
         return false;
     }
 
-    private Path getPidFile(ToolConfig.Instance instance) throws IOException {
+    private Path getPidFile(ToolConfig.Instance instance) {
         Path dataDir = Paths.get(instance.path.data, "data");
         try (Stream<Path> pathStream = Files.list(dataDir)) {
             return pathStream.filter(f -> f.getFileName().toString().endsWith(".pid")).findFirst().orElse(null);
+        } catch (IOException e) {
+            return null;
         }
     }
 
@@ -173,7 +175,7 @@ public class ToolService {
         return false;
     }
 
-    public boolean stop(ToolConfig.Instance instance) throws Exception {
+    public boolean stop(ToolConfig.Instance instance) {
         Path pidFile = getPidFile(instance);
         if (pidFile != null) {
             String pid = ToolUtil.readPidFile(pidFile.toString());
@@ -191,13 +193,6 @@ public class ToolService {
         return true;
     }
 
-    public boolean restart(ToolConfig.Instance instance) throws Exception {
-        if (!stop(instance)) {
-            return false;
-        }
-        return start(instance);
-    }
-
     public void refreshStatus() {
         if (config.instances == null) return;
         for (ToolConfig.Instance instance : config.instances) {
@@ -208,11 +203,7 @@ public class ToolService {
             if (!Files.exists(dir)) {
                 continue;
             }
-            try {
-                instance.status = isRunning(instance) ? ToolCommon.Status.STARTED.type() : ToolCommon.Status.STOPPED.type();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            instance.status = isRunning(instance) ? ToolCommon.Status.STARTED.type() : ToolCommon.Status.STOPPED.type();
         }
     }
 

@@ -10,13 +10,14 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static cn.nap.ToolCommon.I18n;
@@ -35,6 +36,8 @@ public class ToolApp extends Application {
     private Stage primaryStage;
     private StackPane root;
     private BorderPane body;
+    private VBox instanceBox;
+    private final Map<ToolConfig.Instance, VBox> cards = new HashMap<>();
 
     @Override
     public void init() throws Exception {
@@ -139,19 +142,19 @@ public class ToolApp extends Application {
         operateMenus.setStyle("-fx-spacing: 10px;-fx-alignment: center;");
 
 
-        VBox instanceBox = new VBox();
+        instanceBox = new VBox();
         instanceBox.setStyle("-fx-spacing: 10px");
         List<ToolConfig.Instance> instances = toolService.getConfig().instances;
-        List<Button[]> operateSingleList = new ArrayList<>();
         if (instances != null && !instances.isEmpty()) {
             for (ToolConfig.Instance instance : instances) {
                 Button start = ToolComponent.startButton(I18n.START.translate(toolService.getLanguage()), ToolCommon.SVG_START);
                 Button stop = ToolComponent.stopButton(I18n.STOP.translate(toolService.getLanguage()), ToolCommon.SVG_STOP);
                 Button restart = ToolComponent.button(I18n.RESTART.translate(toolService.getLanguage()), ToolCommon.SVG_RESTART);
                 Button[] operateSingle = {start, stop, restart};
-                operateSingleList.add(operateSingle);
                 List<Node> buttons = Arrays.asList(operateSingle);
-                instanceBox.getChildren().add(createInstance(instance, buttons));
+                VBox card = createInstance(instance, buttons);
+                cards.put(instance, card);
+                instanceBox.getChildren().add(card);
 
                 start.setOnAction(event -> startInstance(instance, operateAll, operateSingle));
                 stop.setOnAction(event -> stopInstance(instance, operateAll, operateSingle));
@@ -163,7 +166,11 @@ public class ToolApp extends Application {
         instanceScroll.setFitToWidth(true);
         instanceScroll.setContent(instanceBox);
 
-        refreshOperateButton(operateAll, operateSingleList);
+        startAll.setOnAction(event -> startAllInstance(operateAll));
+        stopAll.setOnAction(event -> stopAllInstance(operateAll));
+        restartAll.setOnAction(event -> restartAllInstance(operateAll));
+
+        refreshOperateButton(operateAll);
         VBox center = new VBox(operateMenus, instanceScroll);
         VBox.setVgrow(instanceScroll, Priority.ALWAYS);
         center.setStyle("-fx-spacing: 10px;-fx-alignment: top_center;-fx-padding: 0 15 0 15;");
@@ -196,35 +203,54 @@ public class ToolApp extends Application {
         return ToolComponent.instanceInfo(instance.section.data, Arrays.asList(portLabel, statusWithDot), buttons);
     }
 
-    private void refreshOperateButton(Button[] operateAll, List<Button[]> operateSingleList) {
+    private void refreshOperateButton(Button[] operateAll) {
         List<ToolConfig.Instance> instances = toolService.getConfig().instances;
+        for (ToolConfig.Instance instance : instances) {
+            refreshCard(instance);
+        }
+        refreshAllButtons(operateAll);
+    }
+
+    private void refreshCard(ToolConfig.Instance instance) {
+        VBox oldCard = cards.get(instance);
+        if (oldCard == null) return;
+        HBox bottomRow = (HBox) oldCard.getChildren().get(1);
+        List<Node> buttons = new ArrayList<>(bottomRow.getChildren());
+        VBox newCard = createInstance(instance, buttons);
+        int index = instanceBox.getChildren().indexOf(oldCard);
+        if (index >= 0) {
+            instanceBox.getChildren().set(index, newCard);
+        }
+        cards.put(instance, newCard);
+
+        boolean isStarted = Status.STARTED.type() == instance.status;
+        boolean isStarting = Status.STARTING.type() == instance.status;
+        boolean isStopping = Status.STOPPING.type() == instance.status;
+        boolean inProgress = isStarting || isStopping;
+        buttons.get(0).setDisable(isStarted || inProgress);
+        buttons.get(1).setDisable(!isStarted || inProgress);
+        buttons.get(2).setDisable(inProgress);
+    }
+
+    private void refreshAllButtons(Button[] operateAll) {
+        List<ToolConfig.Instance> instances = toolService.getConfig().instances;
+        if (instances == null || instances.isEmpty()) return;
         boolean allStarted = true;
         boolean allStopped = true;
-        boolean allStarting = true;
-        for (int i = 0; i < instances.size(); i++) {
-            ToolConfig.Instance instance = instances.get(i);
-            Button[] operateSingle = operateSingleList.get(i);
-            if (Status.STARTED.type() == instance.status) {
+        boolean allInProgress = true;
+        for (ToolConfig.Instance inst : instances) {
+            if (Status.STARTED.type() == inst.status) {
                 allStopped = false;
-                allStarting = false;
-                operateSingle[0].setDisable(true);
-                operateSingle[1].setDisable(false);
-                operateSingle[2].setDisable(false);
-            } else if (Status.STARTING.type() == instance.status) {
+                allInProgress = false;
+            } else if (Status.STARTING.type() == inst.status || Status.STOPPING.type() == inst.status) {
                 allStarted = false;
                 allStopped = false;
-                operateSingle[0].setDisable(true);
-                operateSingle[1].setDisable(true);
-                operateSingle[2].setDisable(true);
             } else {
                 allStarted = false;
-                allStarting = false;
-                operateSingle[0].setDisable(false);
-                operateSingle[1].setDisable(true);
-                operateSingle[2].setDisable(false);
+                allInProgress = false;
             }
         }
-        if (allStarting) {
+        if (allInProgress) {
             operateAll[0].setDisable(true);
             operateAll[1].setDisable(true);
             operateAll[2].setDisable(true);
@@ -243,54 +269,9 @@ public class ToolApp extends Application {
         }
     }
 
-    private void refreshOperateButton(ToolConfig.Instance instance, Button[] operateAll, Button[] operateSingle) {
-        if (Status.STARTED.type() == instance.status) {
-            operateSingle[0].setDisable(true);
-            operateSingle[1].setDisable(false);
-            operateSingle[2].setDisable(false);
-        } else if (Status.STARTING.type() == instance.status) {
-            operateSingle[0].setDisable(true);
-            operateSingle[1].setDisable(true);
-            operateSingle[2].setDisable(true);
-        } else {
-            operateSingle[0].setDisable(false);
-            operateSingle[1].setDisable(true);
-            operateSingle[2].setDisable(false);
-        }
-
-        boolean allStarted = true;
-        boolean allStopped = true;
-        boolean allStarting = true;
-        List<ToolConfig.Instance> instances = toolService.getConfig().instances;
-        for (ToolConfig.Instance inst : instances) {
-            if (Status.STARTED.type() == inst.status) {
-                allStopped = false;
-                allStarting = false;
-            } else if (Status.STARTING.type() == inst.status) {
-                allStarted = false;
-                allStopped = false;
-            } else {
-                allStarted = false;
-                allStarting = false;
-            }
-        }
-        if (allStarting) {
-            operateAll[0].setDisable(true);
-            operateAll[1].setDisable(true);
-            operateAll[2].setDisable(true);
-        } else if (allStarted) {
-            operateAll[0].setDisable(true);
-            operateAll[1].setDisable(false);
-            operateAll[2].setDisable(false);
-        } else if (allStopped) {
-            operateAll[0].setDisable(false);
-            operateAll[1].setDisable(true);
-            operateAll[2].setDisable(false);
-        } else {
-            operateAll[0].setDisable(false);
-            operateAll[1].setDisable(false);
-            operateAll[2].setDisable(false);
-        }
+    private void refreshOperateButton(ToolConfig.Instance instance, Button[] operateAll) {
+        refreshCard(instance);
+        refreshAllButtons(operateAll);
     }
 
     private void disableOperateButton(Button[] operateAll, Button[] ...operateSingle) {
@@ -308,23 +289,19 @@ public class ToolApp extends Application {
         if (!checkPath(instance)) {
             return;
         }
-        try {
-            if (toolService.isRunning(instance)) {
-                instance.status = Status.STARTED.type();
-            } else {
-                instance.status = Status.STOPPED.type();
-            }
-        } catch (IOException e) {
-            ToolComponent.error(primaryStage, root, e.getMessage());
-            return;
+        if (toolService.isRunning(instance)) {
+            instance.status = Status.STARTED.type();
+        } else {
+            instance.status = Status.STOPPED.type();
         }
         String translate = String.format(I18n.CONFIRM_BIND_START.translate(toolService.getLanguage()), instance.port.data);
         if (toolService.isPortOccupied(instance) && !ToolComponent.confirm(primaryStage, root, translate)) {
             return;
         }
+        instance.status = Status.STARTING.type();
+        refreshCard(instance);
         disableOperateButton(operateAll, operateSingle);
         new Thread(() -> {
-            instance.status = Status.STARTING.type();
             try {
                 if (toolService.start(instance)) {
                     instance.status = Status.STARTED.type();
@@ -335,7 +312,7 @@ public class ToolApp extends Application {
                 Platform.runLater(() -> ToolComponent.error(primaryStage, root, e.getMessage()));
                 instance.status = Status.STOPPED.type();
             } finally {
-                Platform.runLater(() -> refreshOperateButton(instance, operateAll, operateSingle));
+                Platform.runLater(() -> refreshOperateButton(instance, operateAll));
             }
         }).start();
 
@@ -345,16 +322,13 @@ public class ToolApp extends Application {
         if (!checkPath(instance)) {
             return;
         }
-        try {
-            if (!toolService.isRunning(instance)) {
-                instance.status = Status.STOPPED.type();
-                refreshOperateButton(instance, operateAll, operateSingle);
-                return;
-            }
-        } catch (IOException e) {
-            ToolComponent.error(primaryStage, root, e.getMessage());
+        if (!toolService.isRunning(instance)) {
+            instance.status = Status.STOPPED.type();
+            refreshOperateButton(instance, operateAll);
             return;
         }
+        instance.status = Status.STOPPING.type();
+        refreshCard(instance);
         disableOperateButton(operateAll, operateSingle);
         new Thread(() -> {
             try {
@@ -363,7 +337,7 @@ public class ToolApp extends Application {
                 Platform.runLater(() -> ToolComponent.error(primaryStage, root, e.getMessage()));
                 instance.status = Status.STARTED.type();
             } finally {
-                Platform.runLater(() -> refreshOperateButton(instance, operateAll, operateSingle));
+                Platform.runLater(() -> refreshOperateButton(instance, operateAll));
             }
         }).start();
     }
@@ -372,12 +346,19 @@ public class ToolApp extends Application {
         if (!checkPath(instance)) {
             return;
         }
+        boolean needStop = Status.STARTED.type() == instance.status;
+        instance.status = needStop ? Status.STOPPING.type() : Status.STARTING.type();
+        refreshCard(instance);
         disableOperateButton(operateAll, operateSingle);
         new Thread(() -> {
             int oldStatus = instance.status;
-            instance.status = Status.STARTING.type();
             try {
-                if (toolService.restart(instance)) {
+                if (needStop) {
+                    toolService.stop(instance);
+                    instance.status = Status.STARTING.type();
+                    Platform.runLater(() -> refreshCard(instance));
+                }
+                if (toolService.start(instance)) {
                     instance.status = Status.STARTED.type();
                 } else {
                     instance.status = Status.STOPPED.type();
@@ -386,7 +367,113 @@ public class ToolApp extends Application {
                 Platform.runLater(() -> ToolComponent.error(primaryStage, root, e.getMessage()));
                 instance.status = oldStatus;
             } finally {
-                Platform.runLater(() -> refreshOperateButton(instance, operateAll, operateSingle));
+                Platform.runLater(() -> refreshOperateButton(instance, operateAll));
+            }
+        }).start();
+    }
+
+    private void startAllInstance(Button[] operateAll) {
+        List<ToolConfig.Instance> instances = toolService.getConfig().instances;
+        if (instances == null || instances.isEmpty()) return;
+        for (ToolConfig.Instance instance : instances) {
+            if (!checkPath(instance)) continue;
+            if (Status.STOPPED.type() == instance.status) {
+                instance.status = Status.STARTING.type();
+                refreshCard(instance);
+            }
+        }
+        disableOperateButton(operateAll);
+        new Thread(() -> {
+            try {
+                for (ToolConfig.Instance instance : instances) {
+                    if (Status.STARTING.type() != instance.status) continue;
+                    try {
+                        if (toolService.start(instance)) {
+                            instance.status = Status.STARTED.type();
+                        } else {
+                            instance.status = Status.STOPPED.type();
+                        }
+                    } catch (Exception e) {
+                        instance.status = Status.STOPPED.type();
+                    }
+                }
+            } finally {
+                Platform.runLater(() -> {
+                    for (ToolConfig.Instance inst : toolService.getConfig().instances) {
+                        refreshCard(inst);
+                    }
+                    refreshAllButtons(operateAll);
+                });
+            }
+        }).start();
+    }
+
+    private void stopAllInstance(Button[] operateAll) {
+        List<ToolConfig.Instance> instances = toolService.getConfig().instances;
+        if (instances == null || instances.isEmpty()) return;
+        for (ToolConfig.Instance instance : instances) {
+            if (!checkPath(instance)) continue;
+            if (Status.STARTED.type() == instance.status) {
+                instance.status = Status.STOPPING.type();
+                refreshCard(instance);
+            }
+        }
+        disableOperateButton(operateAll);
+        new Thread(() -> {
+            try {
+                for (ToolConfig.Instance instance : instances) {
+                    if (Status.STOPPING.type() != instance.status) continue;
+                    toolService.stop(instance);
+                }
+            } finally {
+                Platform.runLater(() -> {
+                    for (ToolConfig.Instance inst : toolService.getConfig().instances) {
+                        refreshCard(inst);
+                    }
+                    refreshAllButtons(operateAll);
+                });
+            }
+        }).start();
+    }
+
+    private void restartAllInstance(Button[] operateAll) {
+        List<ToolConfig.Instance> instances = toolService.getConfig().instances;
+        if (instances == null || instances.isEmpty()) return;
+        for (ToolConfig.Instance instance : instances) {
+            if (!checkPath(instance)) continue;
+            boolean needStop = Status.STARTED.type() == instance.status;
+            instance.status = needStop ? Status.STOPPING.type() : Status.STARTING.type();
+            refreshCard(instance);
+        }
+        disableOperateButton(operateAll);
+        new Thread(() -> {
+            try {
+                for (ToolConfig.Instance instance : instances) {
+                    int s = instance.status;
+                    if (s != Status.STOPPING.type() && s != Status.STARTING.type()) continue;
+                    int oldStatus = instance.status;
+                    try {
+                        if (Status.STOPPING.type() == s) {
+                            toolService.stop(instance);
+                            instance.status = Status.STARTING.type();
+                            Platform.runLater(() -> refreshCard(instance));
+                        }
+                        if (toolService.start(instance)) {
+                            instance.status = Status.STARTED.type();
+                        } else {
+                            instance.status = Status.STOPPED.type();
+                        }
+                    } catch (Exception e) {
+                        instance.status = oldStatus;
+                    }
+                }
+            } finally {
+                Platform.runLater(() -> {
+                    for (ToolConfig.Instance inst : toolService.getConfig().instances) {
+                        refreshCard(inst);
+                    }
+                    refreshAllButtons(operateAll);
+                });
             }
         }).start();
     }

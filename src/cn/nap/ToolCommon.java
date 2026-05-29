@@ -23,7 +23,8 @@ public class ToolCommon {
     public enum Status {
         STARTED(1, I18n.STARTED, ThemeColor.PRIMARY),
         STOPPED(0, I18n.STOPPED, ThemeColor.DANGER),
-        STARTING(2, I18n.STARTING, ThemeColor.FONT_BG);
+        STARTING(2, I18n.STARTING, ThemeColor.WARNING),
+        STOPPING(3, I18n.STOPPING, ThemeColor.WARNING);
 
         private final int type;
         private final I18n i18n;
@@ -196,6 +197,7 @@ public class ToolCommon {
         STARTED("已启动", "Started"),
         STOPPED("未启动", "Stopped"),
         STARTING("启动中", "Starting"),
+        STOPPING("停止中", "Stopping"),
         OK("确定", "OK"),
         CANCEL("取消", "Cancel"),
         CLOSE("关闭", "Close"),
