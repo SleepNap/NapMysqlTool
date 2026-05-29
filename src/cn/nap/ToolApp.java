@@ -1,6 +1,7 @@
 package cn.nap;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -9,6 +10,10 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,7 +22,6 @@ import java.util.Objects;
 import static cn.nap.ToolCommon.I18n;
 import static cn.nap.ToolCommon.ThemeColor;
 import static cn.nap.ToolCommon.Status;
-import static cn.nap.ToolCommon.TipType;
 
 public class ToolApp extends Application {
     public static void main(String[] args) {
@@ -49,6 +53,12 @@ public class ToolApp extends Application {
         primaryStage.setScene(scene);
         primaryStage.setTitle(I18n.TOOL_TITLE.translate(toolService.getLanguage()));
         primaryStage.show();
+    }
+
+    @Override
+    public void stop() throws Exception {
+        toolService.saveConfig();
+        super.stop();
     }
 
     private void loadRoot() {
@@ -142,7 +152,10 @@ public class ToolApp extends Application {
                 operateSingleList.add(operateSingle);
                 List<Node> buttons = Arrays.asList(operateSingle);
                 instanceBox.getChildren().add(createInstance(instance, buttons));
-                start.setOnAction(event -> ToolComponent.warning(primaryStage, root, "报错了！！！"));
+
+                start.setOnAction(event -> startInstance(instance, operateAll, operateSingle));
+                stop.setOnAction(event -> stopInstance(instance, operateAll, operateSingle));
+                restart.setOnAction(event -> restartInstance(instance, operateAll, operateSingle));
             }
         }
 
@@ -159,13 +172,19 @@ public class ToolApp extends Application {
 
     private void loadBottom() {
         Label version = ToolComponent.label(ToolCommon.VERSION);
+        Label language = ToolComponent.label(toolService.getLanguage());
         Region spacer = new Region();
-        HBox bottom = new HBox(version, spacer);
+        HBox bottom = new HBox(version, spacer, language);
         HBox.setHgrow(spacer, Priority.ALWAYS);
         bottom.setStyle("-fx-spacing: 10px;-fx-alignment: center;-fx-padding: 0 15 0 15;");
 
         VBox bottomBox = new VBox(ToolComponent.line(), bottom);
         bottomBox.setStyle("-fx-spacing: 5px;-fx-padding: 10 0 5 0;");
+
+        language.setOnMouseClicked(event -> {
+            toolService.changeLanguage();
+            loadBody();
+        });
 
         body.setBottom(bottomBox);
     }
@@ -224,25 +243,161 @@ public class ToolApp extends Application {
         }
     }
 
-    private void disableOperateButton(Button[] operateAll, List<Button[]> operateSingleList) {
+    private void refreshOperateButton(ToolConfig.Instance instance, Button[] operateAll, Button[] operateSingle) {
+        if (Status.STARTED.type() == instance.status) {
+            operateSingle[0].setDisable(true);
+            operateSingle[1].setDisable(false);
+            operateSingle[2].setDisable(false);
+        } else if (Status.STARTING.type() == instance.status) {
+            operateSingle[0].setDisable(true);
+            operateSingle[1].setDisable(true);
+            operateSingle[2].setDisable(true);
+        } else {
+            operateSingle[0].setDisable(false);
+            operateSingle[1].setDisable(true);
+            operateSingle[2].setDisable(false);
+        }
+
+        boolean allStarted = true;
+        boolean allStopped = true;
+        boolean allStarting = true;
+        List<ToolConfig.Instance> instances = toolService.getConfig().instances;
+        for (ToolConfig.Instance inst : instances) {
+            if (Status.STARTED.type() == inst.status) {
+                allStopped = false;
+                allStarting = false;
+            } else if (Status.STARTING.type() == inst.status) {
+                allStarted = false;
+                allStopped = false;
+            } else {
+                allStarted = false;
+                allStarting = false;
+            }
+        }
+        if (allStarting) {
+            operateAll[0].setDisable(true);
+            operateAll[1].setDisable(true);
+            operateAll[2].setDisable(true);
+        } else if (allStarted) {
+            operateAll[0].setDisable(true);
+            operateAll[1].setDisable(false);
+            operateAll[2].setDisable(false);
+        } else if (allStopped) {
+            operateAll[0].setDisable(false);
+            operateAll[1].setDisable(true);
+            operateAll[2].setDisable(false);
+        } else {
+            operateAll[0].setDisable(false);
+            operateAll[1].setDisable(false);
+            operateAll[2].setDisable(false);
+        }
+    }
+
+    private void disableOperateButton(Button[] operateAll, Button[] ...operateSingle) {
         for (Button button : operateAll) {
             button.setDisable(true);
         }
-        operateSingleList.forEach(btnArr -> {
+        for (Button[] btnArr : operateSingle) {
             for (Button btn : btnArr) {
                 btn.setDisable(true);
             }
-        });
+        }
     }
 
     private void startInstance(ToolConfig.Instance instance, Button[] operateAll, Button[] operateSingle) {
-        List<Button[]> operateSingleList = new ArrayList<>();
-        operateSingleList.add(operateSingle);
-        disableOperateButton(operateAll, operateSingleList);
-        try {
-            toolService.start(instance);
-        } finally {
-            refreshOperateButton(operateAll, operateSingleList);
+        if (!checkPath(instance)) {
+            return;
         }
+        try {
+            if (toolService.isRunning(instance)) {
+                instance.status = Status.STARTED.type();
+            } else {
+                instance.status = Status.STOPPED.type();
+            }
+        } catch (IOException e) {
+            ToolComponent.error(primaryStage, root, e.getMessage());
+            return;
+        }
+        String translate = String.format(I18n.CONFIRM_BIND_START.translate(toolService.getLanguage()), instance.port.data);
+        if (toolService.isPortOccupied(instance) && !ToolComponent.confirm(primaryStage, root, translate)) {
+            return;
+        }
+        disableOperateButton(operateAll, operateSingle);
+        new Thread(() -> {
+            instance.status = Status.STARTING.type();
+            try {
+                if (toolService.start(instance)) {
+                    instance.status = Status.STARTED.type();
+                } else {
+                    instance.status = Status.STOPPED.type();
+                }
+            } catch (Exception e) {
+                Platform.runLater(() -> ToolComponent.error(primaryStage, root, e.getMessage()));
+                instance.status = Status.STOPPED.type();
+            } finally {
+                Platform.runLater(() -> refreshOperateButton(instance, operateAll, operateSingle));
+            }
+        }).start();
+
+    }
+
+    private void stopInstance(ToolConfig.Instance instance, Button[] operateAll, Button[] operateSingle) {
+        if (!checkPath(instance)) {
+            return;
+        }
+        try {
+            if (!toolService.isRunning(instance)) {
+                instance.status = Status.STOPPED.type();
+                refreshOperateButton(instance, operateAll, operateSingle);
+                return;
+            }
+        } catch (IOException e) {
+            ToolComponent.error(primaryStage, root, e.getMessage());
+            return;
+        }
+        disableOperateButton(operateAll, operateSingle);
+        new Thread(() -> {
+            try {
+                toolService.stop(instance);
+            } catch (Exception e) {
+                Platform.runLater(() -> ToolComponent.error(primaryStage, root, e.getMessage()));
+                instance.status = Status.STARTED.type();
+            } finally {
+                Platform.runLater(() -> refreshOperateButton(instance, operateAll, operateSingle));
+            }
+        }).start();
+    }
+
+    private void restartInstance(ToolConfig.Instance instance, Button[] operateAll, Button[] operateSingle) {
+        if (!checkPath(instance)) {
+            return;
+        }
+        disableOperateButton(operateAll, operateSingle);
+        new Thread(() -> {
+            int oldStatus = instance.status;
+            instance.status = Status.STARTING.type();
+            try {
+                if (toolService.restart(instance)) {
+                    instance.status = Status.STARTED.type();
+                } else {
+                    instance.status = Status.STOPPED.type();
+                }
+            } catch (Exception e) {
+                Platform.runLater(() -> ToolComponent.error(primaryStage, root, e.getMessage()));
+                instance.status = oldStatus;
+            } finally {
+                Platform.runLater(() -> refreshOperateButton(instance, operateAll, operateSingle));
+            }
+        }).start();
+    }
+
+    private boolean checkPath(ToolConfig.Instance instance) {
+        Path dir = Paths.get(instance.path.data);
+        if (!Files.exists(dir)) {
+            String translate = String.format(I18n.MYSQL_PATH_ERROR.translate(toolService.getLanguage()), instance.port.data);
+            ToolComponent.error(primaryStage, root, translate);
+            return false;
+        }
+        return true;
     }
 }

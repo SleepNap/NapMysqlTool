@@ -9,15 +9,22 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
+
+import static cn.nap.ToolCommon.I18n;
+import static cn.nap.ToolCommon.Language;
+import static cn.nap.ToolCommon.Theme;
 
 public class ToolUtil {
 
@@ -54,7 +61,7 @@ public class ToolUtil {
         void onClose(int trigger);
     }
 
-    public static List<SectionObj> readConfig(String file) {
+    public static List<ToolUtil.SectionObj> readConfig(String file) {
         if (file == null || file.isEmpty()) {
             return null;
         }
@@ -63,9 +70,9 @@ public class ToolUtil {
         }
 
         String line;
-        SectionObj sectionObj = null;
+        ToolUtil.SectionObj sectionObj = null;
         String lastComment = null;
-        List<SectionObj> sectionList = new ArrayList<>();
+        List<ToolUtil.SectionObj> sectionList = new ArrayList<>();
 
         try (FileReader fr = new FileReader(file);
              BufferedReader reader = new BufferedReader(fr)) {
@@ -82,7 +89,7 @@ public class ToolUtil {
                 }
                 // 获取当前节点
                 if (line.startsWith("[") && line.endsWith("]")) {
-                    sectionObj = new SectionObj();
+                    sectionObj = new ToolUtil.SectionObj();
                     sectionObj.section = line.substring(0, line.length() - 1).substring(1);
                     sectionObj.comment = lastComment;
                     lastComment = null;
@@ -112,8 +119,32 @@ public class ToolUtil {
         return null;
     }
 
-    public static void writeConfig(String file, ToolConfig config) {
-
+    public static void writeConfig(String file, List<ToolUtil.SectionObj> sectionList) {
+        if (sectionList == null) {
+            return;
+        }
+        try (FileWriter fw = new FileWriter(file);
+             BufferedWriter writer = new BufferedWriter(fw)) {
+            for (ToolUtil.SectionObj sectionObj : sectionList) {
+                if (sectionObj.comment != null) {
+                    writer.write(sectionObj.comment);
+                    writer.newLine();
+                }
+                writer.write("[" + sectionObj.section + "]");
+                writer.newLine();
+                for (IniObj iniObj : sectionObj.iniList) {
+                    if (iniObj.comment != null) {
+                        writer.write(iniObj.comment);
+                        writer.newLine();
+                    }
+                    writer.write(iniObj.key + "=" + iniObj.value);
+                    writer.newLine();
+                }
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static ToolConfig.Core parseCoreSection(ToolUtil.SectionObj sectionObj, int index) {
@@ -121,11 +152,18 @@ public class ToolUtil {
         core.section = new ToolConfig.Info<>(sectionObj.section, index, sectionObj.comment);
         for (int i = 0; i < sectionObj.iniList.size(); i++) {
             ToolUtil.IniObj iniObj = sectionObj.iniList.get(i);
-            if (ToolCommon.I18n.CORE_LANGUAGE.ZH().equals(iniObj.key) || ToolCommon.I18n.CORE_LANGUAGE.EN().equals(iniObj.key)) {
+            if (I18n.CORE_LANGUAGE.ZH().equals(iniObj.key) || I18n.CORE_LANGUAGE.EN().equals(iniObj.key)) {
                 core.language = new ToolConfig.Info<>(iniObj.value, i, iniObj.comment);
-            } else if (ToolCommon.I18n.CORE_THEME.ZH().equals(iniObj.key) || ToolCommon.I18n.CORE_THEME.EN().equals(iniObj.key)) {
+            } else if (I18n.CORE_THEME.ZH().equals(iniObj.key) || I18n.CORE_THEME.EN().equals(iniObj.key)) {
                 core.theme = new ToolConfig.Info<>(iniObj.value, i, iniObj.comment);
             }
+        }
+        // 兼容读取旧版本的配置文件
+        if (core.language == null) {
+            core.language = new ToolConfig.Info<>(Language.ZH_CN.type(), 0, I18n.LANGUAGE_COMMAND.comment());
+        }
+        if (core.theme == null) {
+            core.theme = new ToolConfig.Info<>(Theme.LIGHT.type(), 1, I18n.THEME_COMMAND.comment());
         }
         return core;
     }
@@ -133,8 +171,8 @@ public class ToolUtil {
     public static ToolUtil.SectionObj fromCore(ToolConfig.Core core) {
         ToolUtil.SectionObj sectionObj = new ToolUtil.SectionObj(core.section.data, core.section.comment);
         TreeMap<Integer, ToolUtil.IniObj> sortedMap = new TreeMap<>();
-        sortedMap.put(core.language.sort, new ToolUtil.IniObj(ToolCommon.I18n.CORE_LANGUAGE.EN(), core.language.data, core.language.comment));
-        sortedMap.put(core.theme.sort, new ToolUtil.IniObj(ToolCommon.I18n.CORE_THEME.EN(), core.theme.data, core.theme.comment));
+        sortedMap.put(core.language.sort, new ToolUtil.IniObj(I18n.CORE_LANGUAGE.EN(), core.language.data, core.language.comment));
+        sortedMap.put(core.theme.sort, new ToolUtil.IniObj(I18n.CORE_THEME.EN(), core.theme.data, core.theme.comment));
         sectionObj.iniList = new ArrayList<>(sortedMap.values());
         return sectionObj;
     }
@@ -144,17 +182,27 @@ public class ToolUtil {
         instance.section = new ToolConfig.Info<>(sectionObj.section, index, sectionObj.comment);
         for (int i = 0; i < sectionObj.iniList.size(); i++) {
             ToolUtil.IniObj iniObj = sectionObj.iniList.get(i);
-            if (ToolCommon.I18n.INSTANCE_PATH.ZH().equals(iniObj.key) || ToolCommon.I18n.INSTANCE_PATH.EN().equals(iniObj.key)) {
+            if (I18n.INSTANCE_PATH.ZH().equals(iniObj.key) || I18n.INSTANCE_PATH.EN().equals(iniObj.key)) {
                 instance.path = new ToolConfig.Info<>(iniObj.value, i, iniObj.comment);
-            } else if (ToolCommon.I18n.INSTANCE_USERNAME.ZH().equals(iniObj.key) || ToolCommon.I18n.INSTANCE_USERNAME.EN().equals(iniObj.key)) {
+            } else if (I18n.INSTANCE_USERNAME.ZH().equals(iniObj.key) || I18n.INSTANCE_USERNAME.EN().equals(iniObj.key)) {
                 instance.username = new ToolConfig.Info<>(iniObj.value, i, iniObj.comment);
-            } else if (ToolCommon.I18n.INSTANCE_PASSWORD.ZH().equals(iniObj.key) || ToolCommon.I18n.INSTANCE_PASSWORD.EN().equals(iniObj.key)) {
+            } else if (I18n.INSTANCE_PASSWORD.ZH().equals(iniObj.key) || I18n.INSTANCE_PASSWORD.EN().equals(iniObj.key)) {
                 instance.password = new ToolConfig.Info<>(iniObj.value, i, iniObj.comment);
-            } else if (ToolCommon.I18n.INSTANCE_PORT.ZH().equals(iniObj.key) || ToolCommon.I18n.INSTANCE_PORT.EN().equals(iniObj.key)) {
+            } else if (I18n.INSTANCE_PORT.ZH().equals(iniObj.key) || I18n.INSTANCE_PORT.EN().equals(iniObj.key)) {
                 instance.port = new ToolConfig.Info<>(iniObj.value, i, iniObj.comment);
-            } else if (ToolCommon.I18n.INSTANCE_DATABASE.ZH().equals(iniObj.key) || ToolCommon.I18n.INSTANCE_DATABASE.EN().equals(iniObj.key)) {
+            } else if (I18n.INSTANCE_DATABASE.ZH().equals(iniObj.key) || I18n.INSTANCE_DATABASE.EN().equals(iniObj.key)) {
                 instance.database = new ToolConfig.Info<>(iniObj.value, i, iniObj.comment);
             }
+        }
+        // 兼容读取旧版本的配置文件
+        if (instance.path == null || instance.username == null || instance.password == null) {
+            return null;
+        }
+        if (instance.port == null) {
+            instance.port = new ToolConfig.Info<>("3306", 4, I18n.PORT_COMMAND.comment());
+        }
+        if (instance.database == null) {
+            instance.database = new ToolConfig.Info<>("beidou", 5, I18n.DATABASE_COMMAND.comment());
         }
         return instance;
     }
@@ -162,11 +210,11 @@ public class ToolUtil {
     public static ToolUtil.SectionObj fromInstance(ToolConfig.Instance instance) {
         ToolUtil.SectionObj sectionObj = new ToolUtil.SectionObj(instance.section.data, instance.section.comment);
         TreeMap<Integer, ToolUtil.IniObj> sortedMap = new TreeMap<>();
-        sortedMap.put(instance.path.sort, new ToolUtil.IniObj(ToolCommon.I18n.INSTANCE_PATH.EN(), instance.path.data, instance.path.comment));
-        sortedMap.put(instance.username.sort, new ToolUtil.IniObj(ToolCommon.I18n.INSTANCE_USERNAME.EN(), instance.username.data, instance.username.comment));
-        sortedMap.put(instance.password.sort, new ToolUtil.IniObj(ToolCommon.I18n.INSTANCE_PASSWORD.EN(), instance.password.data, instance.password.comment));
-        sortedMap.put(instance.port.sort, new ToolUtil.IniObj(ToolCommon.I18n.INSTANCE_PORT.EN(), instance.port.data, instance.port.comment));
-        sortedMap.put(instance.database.sort, new ToolUtil.IniObj(ToolCommon.I18n.INSTANCE_DATABASE.EN(), instance.database.data, instance.database.comment));
+        sortedMap.put(instance.path.sort, new ToolUtil.IniObj(I18n.INSTANCE_PATH.EN(), instance.path.data, instance.path.comment));
+        sortedMap.put(instance.username.sort, new ToolUtil.IniObj(I18n.INSTANCE_USERNAME.EN(), instance.username.data, instance.username.comment));
+        sortedMap.put(instance.password.sort, new ToolUtil.IniObj(I18n.INSTANCE_PASSWORD.EN(), instance.password.data, instance.password.comment));
+        sortedMap.put(instance.port.sort, new ToolUtil.IniObj(I18n.INSTANCE_PORT.EN(), instance.port.data, instance.port.comment));
+        sortedMap.put(instance.database.sort, new ToolUtil.IniObj(I18n.INSTANCE_DATABASE.EN(), instance.database.data, instance.database.comment));
         sectionObj.iniList = new ArrayList<>(sortedMap.values());
         return sectionObj;
     }
@@ -322,7 +370,57 @@ public class ToolUtil {
     }
 
     public static boolean isPidRunning(String pid) {
-        return false;
+        try {
+            Process p = Runtime.getRuntime().exec(new String[]{"powershell", "-Command", "Get-Process -Id " + pid});
+            return p.waitFor() == 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static boolean killPid(String pid) {
+        try {
+            Process p = Runtime.getRuntime().exec(new String[]{"powershell", "-Command", "Stop-Process -Id " + pid + " -Force"});
+            return p.waitFor() == 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static boolean isPortOccupied(int port) {
+        return findPidByPort(port) != null;
+    }
+
+    public static boolean killPortProcess(int port) {
+        String pid = findPidByPort(port);
+        return pid != null && killPid(pid);
+    }
+
+    private static String findPidByPort(int port) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("cmd", "/C", "netstat -ano | findstr :" + port);
+            Process p = pb.start();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.trim().split("\\s+");
+                    if (parts.length >= 5 && "LISTENING".equals(parts[3])) {
+                        return parts[4];
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static void killAllMysql() {
+        try {
+            Runtime.getRuntime().exec(new String[]{"taskkill", "/F", "/IM", "mysqld.exe"});
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 

@@ -3,3 +3,4 @@ out/
 jre/
 mysql依赖库/
 .claude
+config.ini

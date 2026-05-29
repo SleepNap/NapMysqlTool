@@ -183,10 +183,9 @@ public class ToolCommon {
 
         // ui
         TOOL_TITLE("MySQL启停工具 by Nap", "MySQL Tool by Nap"),
-        TAB_OPERATE("启停功能", "Start/Stop"),
-        TAB_EXT("扩展功能", "Extension"),
-        TAB_INSTANCE("实例管理", "Instance"),
-        CREATE("添加实例", "CreateInstance"),
+        TAB_OPERATE("启停功能", "Control"),
+        TAB_EXT("扩展功能", "More"),
+        TAB_INSTANCE("实例管理", "Instances"),
 
         START_ALL("启动全部", "StartAll"),
         STOP_ALL("停止全部", "StopAll"),
@@ -200,6 +199,9 @@ public class ToolCommon {
         OK("确定", "OK"),
         CANCEL("取消", "Cancel"),
         CLOSE("关闭", "Close"),
+
+        CONFIRM_BIND_START("端口%s已被占用，是否强行启动？", "Port %s is in use. Force startup?"),
+        MYSQL_PATH_ERROR("端口%s的MySQL路径不存在", "MySQL path missing for port %s."),
 
         ;
 

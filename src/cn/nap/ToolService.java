@@ -1,9 +1,16 @@
 package cn.nap;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import static cn.nap.ToolCommon.I18n;
 import static cn.nap.ToolCommon.Theme;
@@ -28,8 +35,10 @@ public class ToolService {
             win11 = ToolUtil.isWin11();
             List<ToolUtil.SectionObj> sectionList = ToolUtil.readConfig(ToolCommon.DEFAULT_CONFIG_FILE);
             config = parseConfig(sectionList);
+            refreshStatus();
         } catch (Exception e) {
             config = initDefaultConfig();
+            refreshStatus();
         } finally {
             loading.set(false);
         }
@@ -37,6 +46,22 @@ public class ToolService {
 
     public boolean isConfigLoading() {
         return loading.get();
+    }
+
+    public void saveConfig() {
+        if (config == null) {
+            return;
+        }
+        TreeMap<Integer, ToolUtil.SectionObj> sortedMap = new TreeMap<>();
+        if (config.core != null) {
+            sortedMap.put(config.core.section.sort, ToolUtil.fromCore(config.core));
+        }
+        if (config.instances != null) {
+            for (ToolConfig.Instance instance : config.instances) {
+                sortedMap.put(instance.section.sort, ToolUtil.fromInstance(instance));
+            }
+        }
+        ToolUtil.writeConfig(ToolCommon.DEFAULT_CONFIG_FILE, new ArrayList<>(sortedMap.values()));
     }
 
     public ToolConfig getConfig() {
@@ -59,6 +84,10 @@ public class ToolService {
         config.core.theme.data = isDark() ? Theme.LIGHT.type() : Theme.DARK.type();
     }
 
+    public void changeLanguage() {
+        config.core.language.data = Language.ZH_CN.type().equals(getLanguage()) ? Language.EN_US.type() : Language.ZH_CN.type();
+    }
+
     private ToolConfig parseConfig(List<ToolUtil.SectionObj> sectionList) {
         if (sectionList == null || sectionList.isEmpty()) {
             return initDefaultConfig();
@@ -70,7 +99,10 @@ public class ToolService {
             if (I18n.CORE_SECTION.ZH().equals(sectionObj.section) || I18n.CORE_SECTION.EN().equals(sectionObj.section)) {
                 config.core = ToolUtil.parseCoreSection(sectionObj, i);
             } else {
-                config.instances.add(ToolUtil.parseInstanceSection(sectionObj, i));
+                ToolConfig.Instance instance = ToolUtil.parseInstanceSection(sectionObj, i);
+                if (instance != null) {
+                    config.instances.add(instance);
+                }
             }
         }
         return config;
@@ -91,51 +123,79 @@ public class ToolService {
         );
     }
 
-
-    public void start(ToolConfig.Instance instance) {
-
+    public boolean isRunning(ToolConfig.Instance instance) throws IOException {
+        Path pidFile = getPidFile(instance);
+        if (pidFile == null) {
+            return false;
+        }
+        String pid = ToolUtil.readPidFile(pidFile.toString());
+        if (pid != null && !pid.isEmpty()) {
+            return ToolUtil.isPidRunning(pid);
+        }
+        return false;
     }
 
-    public void stop(ToolConfig.Instance instance) {
-        for (int i = 0; i < 3; i++) {
+    private Path getPidFile(ToolConfig.Instance instance) throws IOException {
+        Path dataDir = Paths.get(instance.path.data, "data");
+        try (Stream<Path> pathStream = Files.list(dataDir)) {
+            return pathStream.filter(f -> f.getFileName().toString().endsWith(".pid")).findFirst().orElse(null);
+        }
+    }
+
+    public boolean isPortOccupied(ToolConfig.Instance instance) {
+        return ToolUtil.isPortOccupied(Integer.parseInt(instance.port.data));
+    }
+
+    public boolean start(ToolConfig.Instance instance) throws Exception {
+        Path pidFile = getPidFile(instance);
+        if (pidFile != null) {
+            String pid = ToolUtil.readPidFile(pidFile.toString());
+            if (pid != null && !pid.isEmpty()) {
+                ToolUtil.killPid(pid);
+            }
+        }
+
+        ToolUtil.killPortProcess(Integer.parseInt(instance.port.data));
+        Path exeFile = Paths.get(instance.path.data, "bin", "mysqld.exe");
+        Path iniFile = Paths.get(instance.path.data, "my.ini");
+        Process process = Runtime.getRuntime().exec(new String[]{exeFile.toFile().getAbsolutePath(), "--port", instance.port.data, Files.exists(iniFile) ? " --defaults-file=" + iniFile.toFile().getAbsolutePath() : "", "--console"});
+        // 惊了，输出为什么在ErrorStream里？
+        InputStream inputStream = process.getErrorStream();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        long startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - startTime < 5000) {
+            String output = reader.readLine();
+            System.out.println(output);
+            if (output != null && output.contains("ready for connections")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean stop(ToolConfig.Instance instance) throws Exception {
+        Path pidFile = getPidFile(instance);
+        if (pidFile != null) {
+            String pid = ToolUtil.readPidFile(pidFile.toString());
+            if (pid != null && !pid.isEmpty()) {
+                ToolUtil.killPid(pid);
+            }
             try {
-                if (!MysqlOperator.hasPid(toIniProp(instance))) {
-                    instance.status = ToolCommon.Status.STOPPED.type();
-                    return;
-                }
-                MysqlOperator.stop(toIniProp(instance)).waitFor();
-                if (i == 2) {
-                    MysqlOperator.killPid(toIniProp(instance));
-                }
-            } catch (Exception e) {
+                Files.deleteIfExists(pidFile);
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        ToolUtil.killPortProcess(Integer.parseInt(instance.port.data));
         instance.status = ToolCommon.Status.STOPPED.type();
+        return true;
     }
 
-    public void startAll() {
-        if (config.instances == null) return;
-        for (ToolConfig.Instance instance : config.instances) {
-            instance.status = ToolCommon.Status.STARTING.type();
-            start(instance);
+    public boolean restart(ToolConfig.Instance instance) throws Exception {
+        if (!stop(instance)) {
+            return false;
         }
-    }
-
-    public void stopAll() {
-        if (config.instances == null) return;
-        for (ToolConfig.Instance instance : config.instances) {
-            stop(instance);
-        }
-    }
-
-    public void restartAll() {
-        stopAll();
-        startAll();
-    }
-
-    public boolean isRunning(ToolConfig.Instance instance) {
-        return MysqlOperator.hasPid(toIniProp(instance));
+        return start(instance);
     }
 
     public void refreshStatus() {
@@ -144,18 +204,26 @@ public class ToolService {
             if (instance.status == ToolCommon.Status.STARTING.type()) {
                 continue;
             }
-            instance.status = isRunning(instance) ? ToolCommon.Status.STARTED.type() : ToolCommon.Status.STOPPED.type();
+            Path dir = Paths.get(instance.path.data);
+            if (!Files.exists(dir)) {
+                continue;
+            }
+            try {
+                instance.status = isRunning(instance) ? ToolCommon.Status.STARTED.type() : ToolCommon.Status.STOPPED.type();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private java.util.Map<String, java.util.Map<String, String>> toIniProp(ToolConfig.Instance instance) {
-        java.util.Map<String, String> mysqlConf = new java.util.HashMap<>();
+    private Map<String, Map<String, String>> toIniProp(ToolConfig.Instance instance) {
+        Map<String, String> mysqlConf = new HashMap<>();
         mysqlConf.put("mysql路径", instance.path.data);
         mysqlConf.put("mysql账号", instance.username.data);
         mysqlConf.put("mysql密码", instance.password.data);
         mysqlConf.put("mysql.ini路径", "");
 
-        java.util.Map<String, java.util.Map<String, String>> iniProp = new java.util.HashMap<>();
+        Map<String, Map<String, String>> iniProp = new HashMap<>();
         iniProp.put("mysql配置", mysqlConf);
         return iniProp;
     }

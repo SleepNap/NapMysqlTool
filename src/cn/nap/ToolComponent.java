@@ -24,6 +24,7 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static cn.nap.ToolCommon.ThemeColor;
 import static cn.nap.ToolCommon.TipType;
@@ -344,20 +345,19 @@ public class ToolComponent {
         tip(TipType.ERROR, primaryStage, root, text);
     }
 
-    public static void tip(TipType type,Stage primaryStage, StackPane root, String text) {
+    private static void tip(TipType type, Stage primaryStage, StackPane root, String text) {
         BorderPane modalRoot = new BorderPane();
         Stage stage = createModalStage(primaryStage, modalRoot, true);
-        Region mask = mask();
-        root.getChildren().add(mask);
+        Region mask = mask(root);
 
         SVGPath svgPath = new SVGPath();
         svgPath.setContent(type.svg());
         Region icon = new Region();
         icon.setShape(svgPath);
         icon.setStyle(String.format("-fx-background-color: %s;", type.color()));
-        icon.setPrefSize(18, 18);
-        icon.setMaxSize(18, 18);
-        icon.setMinSize(18, 18);
+        icon.setPrefSize(16, 16);
+        icon.setMaxSize(16, 16);
+        icon.setMinSize(16, 16);
 
         Label label = label(text);
         label.setStyle(String.format("-fx-text-fill: %s;-fx-wrap-text: true;-fx-font-size: 13px;", ThemeColor.FONT_BG.color()));
@@ -380,6 +380,49 @@ public class ToolComponent {
         modalRoot.setBottom(bottom);
         stage.sizeToScene();
         stage.show();
+    }
+
+    public static boolean confirm(Stage primaryStage, StackPane root, String text) {
+        BorderPane modalRoot = new BorderPane();
+        Stage stage = createModalStage(primaryStage, modalRoot, true);
+        Region mask = mask(root);
+
+        SVGPath svgPath = new SVGPath();
+        svgPath.setContent(TipType.INFO.svg());
+        Region icon = new Region();
+        icon.setShape(svgPath);
+        icon.setStyle(String.format("-fx-background-color: %s;", TipType.INFO.color()));
+        icon.setPrefSize(16, 16);
+        icon.setMaxSize(16, 16);
+        icon.setMinSize(16, 16);
+
+        Label label = label(text);
+        label.setStyle(String.format("-fx-text-fill: %s;-fx-wrap-text: true;-fx-font-size: 13px;", ThemeColor.FONT_BG.color()));
+
+        HBox center = new HBox(10, icon, label);
+        center.setAlignment(Pos.CENTER_LEFT);
+        center.setPadding(new Insets(20, 24, 12, 24));
+        modalRoot.setCenter(center);
+
+        Button cancel = button(I18n.CANCEL.translate(ToolService.getInstance().getLanguage()));
+        Button ok = primaryButton(I18n.OK.translate(ToolService.getInstance().getLanguage()));
+        VBox bottom = commonBottom(cancel, ok);
+
+        AtomicBoolean result = new AtomicBoolean(false);
+        Runnable runnable = () -> {
+            root.getChildren().remove(mask);
+            stage.close();
+        };
+        cancel.setOnAction(e -> runnable.run());
+        ok.setOnAction(e -> {
+            result.set(true);
+            runnable.run();
+        });
+
+        modalRoot.setBottom(bottom);
+        stage.sizeToScene();
+        stage.showAndWait();
+        return result.get();
     }
 
     private static Stage createModalStage(Stage primaryStage, Parent modalRoot, boolean maskClickable) {
@@ -405,13 +448,14 @@ public class ToolComponent {
         return stage;
     }
 
-    private static Region mask() {
+    private static Region mask(StackPane root) {
         Region mask = new Region();
         mask.setStyle("-fx-background-color: rgba(0, 0, 0, 0.5);");
+        root.getChildren().add(mask);
         return mask;
     }
 
-    private static VBox commonBottom(Button ... buttons) {
+    private static VBox commonBottom(Button... buttons) {
         HBox hBox = new HBox(buttons);
         hBox.setStyle("-fx-alignment: center_right;-fx-spacing: 10px;-fx-padding: 0 15 0 15;");
 
