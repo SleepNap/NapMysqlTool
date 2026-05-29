@@ -8,15 +8,11 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 
 import java.lang.reflect.Method;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -420,6 +416,20 @@ public class ToolUtil {
             Runtime.getRuntime().exec(new String[]{"taskkill", "/F", "/IM", "mysqld.exe"});
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void clearFile(File file) {
+        try (FileWriter fw = new FileWriter(file, false)) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void checkVcRuntime() throws Exception {
+        Path system32 = Paths.get(System.getenv("SystemRoot"), "System32");
+        if (!Files.exists(system32.resolve("vcruntime140.dll"))) {
+            throw new Exception(ToolCommon.I18n.VC_MISSING.translate(ToolService.getInstance().getLanguage()));
         }
     }
 }

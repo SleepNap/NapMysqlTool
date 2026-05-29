@@ -1,6 +1,7 @@
 package cn.nap;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -160,12 +161,20 @@ public class ToolService {
         ToolUtil.killPortProcess(Integer.parseInt(instance.port.data));
         Path exeFile = Paths.get(instance.path.data, "bin", "mysqld.exe");
         Path iniFile = Paths.get(instance.path.data, "my.ini");
-        Process process = Runtime.getRuntime().exec(new String[]{exeFile.toFile().getAbsolutePath(), "--port", instance.port.data, Files.exists(iniFile) ? " --defaults-file=" + iniFile.toFile().getAbsolutePath() : "", "--console"});
+        List<String> cmd = new ArrayList<>();
+        cmd.add(exeFile.toFile().getAbsolutePath());
+        cmd.add("--port");
+        cmd.add(instance.port.data);
+        if (Files.exists(iniFile)) {
+            cmd.add("--defaults-file=" + iniFile.toFile().getAbsolutePath());
+        }
+        cmd.add("--console");
+        Process process = Runtime.getRuntime().exec(cmd.toArray(new String[0]));
         // 惊了，输出为什么在ErrorStream里？
         InputStream inputStream = process.getErrorStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         long startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - startTime < 5000) {
+        while (System.currentTimeMillis() - startTime < 30000) {
             String output = reader.readLine();
             System.out.println(output);
             if (output != null && output.contains("ready for connections")) {
@@ -191,6 +200,59 @@ public class ToolService {
         ToolUtil.killPortProcess(Integer.parseInt(instance.port.data));
         instance.status = ToolCommon.Status.STOPPED.type();
         return true;
+    }
+
+    public void clearBinlog(ToolConfig.Instance instance) throws Exception {
+        Path dataDir = Paths.get(instance.path.data, "data");
+        if (!Files.exists(dataDir) || !Files.isDirectory(dataDir)) return;
+        try (Stream<Path> stream = Files.list(dataDir)) {
+            stream.forEach(f -> {
+                try {
+                    String name = f.getFileName().toString();
+                    if ("binlog.index".equals(name)) {
+                        ToolUtil.clearFile(f.toFile());
+                    } else if (name.startsWith("binlog")) {
+                        Files.deleteIfExists(f);
+                    }
+                } catch (IOException ignored) {
+                }
+            });
+        }
+    }
+
+    public void clearPid(ToolConfig.Instance instance) throws Exception {
+        Path dataDir = Paths.get(instance.path.data, "data");
+        if (!Files.exists(dataDir) || !Files.isDirectory(dataDir)) return;
+        try (Stream<Path> stream = Files.list(dataDir)) {
+            stream.filter(f -> f.getFileName().toString().endsWith(".pid"))
+                    .forEach(f -> {
+                        try {
+                            Files.deleteIfExists(f);
+                        } catch (IOException ignored) {
+                        }
+                    });
+        }
+    }
+
+    public void exportDb(ToolConfig.Instance instance) throws Exception {
+        String path = instance.path.data;
+        String user = instance.username.data;
+        String pass = instance.password.data;
+        String dbs = instance.database.data;
+        String file = "output_" + instance.port.data + ".sql";
+        Runtime.getRuntime().exec(new String[]{"cmd.exe", "/C",
+                path + File.separator + "bin" + File.separator + "mysqldump.exe"
+                + " -u" + user + " -p" + pass + " --databases " + dbs + " --hex-blob > " + file}).waitFor();
+    }
+
+    public void importDb(ToolConfig.Instance instance, String file) throws Exception {
+        String path = instance.path.data;
+        String user = instance.username.data;
+        String pass = instance.password.data;
+        String db = instance.database.data;
+        Runtime.getRuntime().exec(new String[]{"cmd.exe", "/C",
+                path + File.separator + "bin" + File.separator + "mysql.exe"
+                + " -u" + user + " -p" + pass + " " + db + " < " + file}).waitFor();
     }
 
     public void refreshStatus() {

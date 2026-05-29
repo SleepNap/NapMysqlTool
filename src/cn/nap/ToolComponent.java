@@ -3,8 +3,8 @@ package cn.nap;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.event.Event;
-import javafx.event.EventHandler;
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -12,7 +12,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -440,10 +439,14 @@ public class ToolComponent {
         stage.initOwner(primaryStage);
         stage.initStyle(StageStyle.TRANSPARENT);
         stage.setOnShown(e -> {
-            double x = primaryStage.getX() + (primaryStage.getWidth() - stage.getWidth()) / 2;
-            double y = primaryStage.getY() + (primaryStage.getHeight() - stage.getHeight()) / 2;
-            stage.setX(x);
-            stage.setY(y);
+            centerOnPrimary(primaryStage, stage);
+            ChangeListener<Number> l = (obs, o, n) -> centerOnPrimary(primaryStage, stage);
+            primaryStage.xProperty().addListener(l);
+            primaryStage.yProperty().addListener(l);
+            stage.setOnHidden(he -> {
+                primaryStage.xProperty().removeListener(l);
+                primaryStage.yProperty().removeListener(l);
+            });
         });
         return stage;
     }
@@ -455,6 +458,11 @@ public class ToolComponent {
         return mask;
     }
 
+    private static void centerOnPrimary(Stage primaryStage, Stage stage) {
+        stage.setX(primaryStage.getX() + (primaryStage.getWidth() - stage.getWidth()) / 2);
+        stage.setY(primaryStage.getY() + (primaryStage.getHeight() - stage.getHeight()) / 2);
+    }
+
     private static VBox commonBottom(Button... buttons) {
         HBox hBox = new HBox(buttons);
         hBox.setStyle("-fx-alignment: center_right;-fx-spacing: 10px;-fx-padding: 0 15 0 15;");
@@ -462,5 +470,99 @@ public class ToolComponent {
         VBox vbox = new VBox(line(), hBox);
         vbox.setStyle("-fx-spacing: 8px;-fx-padding: 10 0 8 0;");
         return vbox;
+    }
+
+    public interface RepairAction {
+        void run() throws Exception;
+    }
+
+    public static class RepairStep {
+        public final String desc;
+        public final RepairAction action;
+        public Circle dot;
+        public Label descLabel;
+
+        public RepairStep(String desc, RepairAction action) {
+            this.desc = desc;
+            this.action = action;
+        }
+    }
+
+    public static void repairProgress(Stage primaryStage, StackPane root, List<RepairStep> steps, Runnable onClose) {
+        BorderPane modalRoot = new BorderPane();
+        Stage stage = createModalStage(primaryStage, modalRoot, false);
+        Region mask = mask(root);
+        modalRoot.setPrefWidth(ToolCommon.MIN_PROGRESS_WIDTH);
+
+        VBox stepBox = new VBox(8);
+        stepBox.setPadding(new Insets(16, 20, 8, 20));
+
+        for (RepairStep step : steps) {
+            step.dot = new Circle(4);
+            step.dot.setFill(Color.web(ThemeColor.FONT_BG.color()));
+
+            step.descLabel = new Label(step.desc);
+            step.descLabel.setWrapText(true);
+            step.descLabel.maxWidthProperty().bind(stepBox.widthProperty().subtract(32));
+            step.descLabel.setStyle(String.format("-fx-text-fill: %s;", ThemeColor.FONT_BG.color()));
+            HBox.setHgrow(step.descLabel, Priority.ALWAYS);
+
+            HBox row = new HBox(8, step.dot, step.descLabel);
+            row.setAlignment(Pos.CENTER_LEFT);
+            stepBox.getChildren().add(row);
+        }
+
+        modalRoot.setCenter(stepBox);
+
+        Button closeBtn = button(I18n.CLOSE.translate(ToolService.getInstance().getLanguage()));
+        closeBtn.setDisable(true);
+        modalRoot.setBottom(commonBottom(closeBtn));
+
+        Runnable close = () -> {
+            root.getChildren().remove(mask);
+            stage.close();
+        };
+        closeBtn.setOnAction(e -> {
+            close.run();
+            if (onClose != null) onClose.run();
+        });
+
+        stage.setTitle(I18n.REPAIR.translate(ToolService.getInstance().getLanguage()));
+        stage.show();
+        Platform.runLater(() -> {
+            stage.sizeToScene();
+            centerOnPrimary(primaryStage, stage);
+        });
+
+        new Thread(() -> {
+            for (RepairStep step : steps) {
+                try {
+                    step.action.run();
+                    Platform.runLater(() -> {
+                        step.dot.setFill(Color.web(ThemeColor.SUCCESS.color()));
+                        DropShadow glow = new DropShadow();
+                        glow.setColor(Color.web(ThemeColor.SUCCESS.color()));
+                        glow.setRadius(4);
+                        glow.setSpread(0.3);
+                        step.dot.setEffect(glow);
+                        step.descLabel.setText(step.desc + "  " + I18n.STEP_DONE.translate(ToolService.getInstance().getLanguage()));
+                    });
+                } catch (Exception e) {
+                    String msg = e.getMessage() != null ? e.getMessage() : I18n.STEP_FAIL.translate(ToolService.getInstance().getLanguage());
+                    Platform.runLater(() -> {
+                        step.dot.setFill(Color.web(ThemeColor.DANGER.color()));
+                        DropShadow glow = new DropShadow();
+                        glow.setColor(Color.web(ThemeColor.DANGER.color()));
+                        glow.setRadius(4);
+                        glow.setSpread(0.3);
+                        step.dot.setEffect(glow);
+                        step.descLabel.setText(step.desc + "  " + msg);
+                        closeBtn.setDisable(false);
+                    });
+                    return;
+                }
+            }
+            Platform.runLater(() -> closeBtn.setDisable(false));
+        }).start();
     }
 }

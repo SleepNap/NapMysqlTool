@@ -8,6 +8,9 @@ public class ToolCommon {
     public static final String SVG_START = "M 280 160 L 800 512 L 280 864 Z";
     public static final String SVG_STOP = "M 288 288 L 736 288 L 736 736 L 288 736 Z";
     public static final String SVG_RESTART = "M 512 80 C 273.6 80 80 273.6 80 512 s 193.6 432 432 432 s 432 -193.6 432 -432 h -96 c 0 185.6 -150.4 336 -336 336 S 176 697.6 176 512 S 326.4 176 512 176 c 92.8 0 178.4 37.6 240 98.8 l -144 144 h 320 V 98.8 l -86.4 86.4 C 772 108.8 648 80 512 80 z";
+    public static final String SVG_REPAIR = "M 512 160 C 317.6 160 160 317.6 160 512 s 157.6 352 352 352 c 160 0 294.4 -107.2 337.6 -256 h -108.8 C 712 700.8 620.8 768 512 768 c -140.8 0 -256 -115.2 -256 -256 s 115.2 -256 256 -256 c 70.4 0 134.4 28.8 180.8 75.2 L 576 448 h 256 V 192 l -64 64 C 704 192 624 160 512 160 z";
+    public static final String SVG_IMPORT = "M512 256L320 448h128v160h128V448h128L512 256z M288 736h448v80H288z";
+    public static final String SVG_EXPORT = "M288 208h448v80H288z M512 768L320 576h128V416h128v160h128L512 768z";
     public static final String SVG_TIP_SUCCESS = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z";
     public static final String SVG_TIP_ERROR = "M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z";
     public static final String SVG_TIP_WARN = "M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z";
@@ -19,6 +22,8 @@ public class ToolCommon {
     public static final double MIN_MODAL_HEIGHT = 140;
     public static final double MAX_MODAL_WIDTH = 320;
     public static final double MAX_MODAL_HEIGHT = 400;
+    public static final double MIN_PROGRESS_WIDTH = 280;
+    public static final double MAX_PROGRESS_WIDTH = 360;
 
     public enum Status {
         STARTED(1, I18n.STARTED, ThemeColor.PRIMARY),
@@ -194,10 +199,34 @@ public class ToolCommon {
         START("启动", "Start"),
         STOP("停止", "Stop"),
         RESTART("重启", "Restart"),
+        REPAIR("修复", "Repair"),
+        IMPORT("导入", "Import"),
+        EXPORT("导出", "Export"),
+        REPAIR_ALL("修复全部", "RepairAll"),
+        IMPORT_ALL("导入全部", "ImportAll"),
+        EXPORT_ALL("导出全部", "ExportAll"),
         STARTED("已启动", "Started"),
         STOPPED("未启动", "Stopped"),
         STARTING("启动中", "Starting"),
         STOPPING("停止中", "Stopping"),
+        REPAIRING("修复中...", "Repairing..."),
+        IMPORTING("导入中...", "Importing..."),
+        EXPORTING("导出中...", "Exporting..."),
+        REPAIR_SUCCESS("修复完成", "Repair success."),
+        REPAIR_ERR1("修复失败，MySQL未停止", "Repair failed, MySQL did not stop."),
+        EXPORT_SUCCESS("导出完成", "Export success."),
+        EXPORT_ERR1("导出失败，MySQL未启动", "Export failed, MySQL did not start."),
+        IMPORT_SUCCESS("导入完成", "Import success."),
+        IMPORT_ERR1("导入失败，MySQL未启动", "Import failed, MySQL did not start."),
+        IMPORT_ERR2("导入失败，导入文件output.sql不存在", "Import failed, output.sql not found."),
+        REPAIR_STEP_VC("检查VC++环境依赖", "Check VC++ Runtime"),
+        REPAIR_STEP_STOP("停止服务", "Stop Service"),
+        REPAIR_STEP_BINLOG("清空binlog", "Clear Binlog"),
+        REPAIR_STEP_PID("删除pid文件", "Delete PID"),
+        REPAIR_STEP_PORT("解除端口占用", "Release Port"),
+        STEP_DONE("完成", "Done"),
+        STEP_FAIL("失败", "Failed"),
+        VC_MISSING("缺少VC++ 2015-2022运行库，请到mysql依赖库目录安装VC_redist.x64_2015_2022.exe", "VC++ 2015-2022 missing. Install VC_redist.x64_2015_2022.exe from mysql依赖库/."),
         OK("确定", "OK"),
         CANCEL("取消", "Cancel"),
         CLOSE("关闭", "Close"),
