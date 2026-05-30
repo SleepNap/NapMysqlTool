@@ -253,7 +253,7 @@ public class ToolCommon {
         REPAIR_STEP_PORT("解除端口占用", "Release Port"),
         STEP_DONE("完成", "Done"),
         STEP_FAIL("失败", "Failed"),
-        VC_MISSING("缺少VC++ 2015-2022运行库，请到mysql依赖库目录安装VC_redist.x64_2015_2022.exe", "VC++ 2015-2022 missing. Install VC_redist.x64_2015_2022.exe from mysql依赖库/."),
+        VC_MISSING("缺少VC++运行库，请到mysql依赖库目录安装VC_redist", "VC++ Runtime missing. Install VC_redist from mysql-lib/."),
         OK("确定", "OK"),
         CANCEL("取消", "Cancel"),
         CLOSE("关闭", "Close"),
