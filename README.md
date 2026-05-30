@@ -1,11 +1,32 @@
 ## NapMysqlTool
 
-### 介绍
-mysql启停软件，这个项目诞生其实是因为我的另一个项目HeavenMS-Nap。  
-冒险岛的服务端依赖mysql，但是我又不想用PHPStudy，所以就弄了一个这个东西。
+### UI 演变
 
-gitee不能上传大于100M的东西，但是github可以。对不起，github太香了。  
-整个项目已经迁移到了github，下载链接：https://github.com/SleepNap/NapMysqlTool/releases/latest  
+**1.x** — 简陋的 UI，只有一种模式
 
-补充：  
-mysql文件夹可以是我项目下的mysql文件夹，我项目的文件夹版本为MySQL5.7.40，也是mysql5.7最新的版本，取自于mysql官方。同时也支持PHPStudy下的mysql文件夹，PHPStudy下的mysql文件夹更精简。  
+![1.x](docs/screenshots/1.x.jpg)
+
+**2.x** — 新增暗黑模式、i18n 国际化、启停导入导出功能优化，UI 初步美化
+
+![2.x](docs/screenshots/2.x-1.jpg)
+![2.x](docs/screenshots/2.x-2.jpg)
+
+**3.x** — 现代化卡片式 UI，按实例管理支持同时管理多个实例，修复上一版启动失败的各种问题，启动速度提升
+
+![3.x](docs/screenshots/3.x-1.jpg)
+![3.x](docs/screenshots/3.x-2.jpg)
+
+
+### 常见启动失败问题
+
+1. **缺少 VC++ 运行库** — MySQL 依赖此库，不安装会导致启动报错。工具已自带，在 `mysql-lib/` 目录下
+2. **端口被占用** — 之前装过 MySQL 并注册了系统服务，开机自启占用了 3306 端口，需手动关掉服务自启
+3. **下载不完整** — 部分人只下了 `NapMysqlTool.exe`，缺少以下文件：
+   - `jre/` Java 运行环境
+   - `mysql-5.7.44-winx64/` MySQL 5.7
+   - `mysql-8.0.39-winx64/` MySQL 8.0
+   - `mysql-lib/` MySQL 依赖库
+   - `NapMysqlTool.exe` 可执行文件
+4. **未正常停止就关机** — 下次开机 MySQL 无法启动，到扩展功能里点"修复"即可
+
+> 以上问题 3.x 均已解决
