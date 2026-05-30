@@ -59,6 +59,7 @@ public class ToolApp extends Application {
         Scene scene = new Scene(root, ToolCommon.MAX_STAGE_WIDTH, ToolCommon.MAX_STAGE_HEIGHT);
         primaryStage.setScene(scene);
         primaryStage.setTitle(I18n.TOOL_TITLE.translate(toolService.getLanguage()));
+        primaryStage.setResizable(false);
         primaryStage.show();
     }
 
