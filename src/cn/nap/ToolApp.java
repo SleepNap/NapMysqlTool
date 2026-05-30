@@ -29,7 +29,7 @@ import static cn.nap.ToolCommon.TipType;
 
 public class ToolApp extends Application {
     public static void main(String[] args) {
-        System.setProperty("prism.allowhidpi", "false");
+//        System.setProperty("prism.allowhidpi", "false");
         System.setProperty("prism.lcdtext", "false");
         launch(args);
     }
@@ -904,10 +904,7 @@ public class ToolApp extends Application {
             if (passField.getText().trim().isEmpty()) { setFieldError(passField); valid = false; } else clearFieldError(passField);
             if (port.isEmpty()) { setFieldError(portField); valid = false; } else clearFieldError(portField);
             if (db.isEmpty()) { setFieldError(dbField); valid = false; } else clearFieldError(dbField);
-            if (!valid) {
-                ToolComponent.error(primaryStage, root, I18n.FIELD_REQUIRED.translate(toolService.getLanguage()));
-                return;
-            }
+            if (!valid) return;
 
             if (isEdit) {
                 existing.section.data = name;

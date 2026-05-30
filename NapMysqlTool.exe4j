@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <exe4j version="9.0" transformSequenceNumber="3">
-  <directoryPresets config="E:/LocalGit/OpenSource/NapMysqlTool/out/artifacts/NapMysqlTool" />
-  <application name="NapMysqlTool2" distributionSourceDir="C:/Users/CN/Desktop" />
-  <executable name="NapMysqlTool2" wrapperType="embed" executableDir="." redirectStderr="false" executableMode="gui" />
-  <java mainClass="cn.nap.MysqlToolApp" minVersion="1.8" maxVersion="1.8">
+  <directoryPresets config="E:/LocalGit/GitHub/NapMysqlTool/out/artifacts/NapMysqlTool" />
+  <application name="NapMysqlTool3" distributionSourceDir="C:/Users/CN/Desktop" />
+  <executable name="NapMysqlTool3" wrapperType="embed" executableDir="." redirectStderr="false" executableMode="gui" />
+  <java mainClass="cn.nap.ToolApp" minVersion="1.8" maxVersion="1.8">
     <searchSequence>
       <directory location="./jre" />
       <registry />
@@ -11,10 +11,9 @@
       <envVar name="JDK_HOME" />
     </searchSequence>
     <classPath>
-      <archive location="E:/LocalGit/OpenSource/NapMysqlTool/out/artifacts/NapMysqlTool/mysql-connector-java-8.0.28.jar" failOnError="false" />
-      <archive location="E:/LocalGit/OpenSource/NapMysqlTool/out/artifacts/NapMysqlTool/NapMysqlTool.jar" failOnError="false" />
-      <archive location="E:/LocalGit/OpenSource/NapMysqlTool/out/artifacts/NapMysqlTool/jna-5.16.0.jar" failOnError="false" />
-      <archive location="E:/LocalGit/OpenSource/NapMysqlTool/out/artifacts/NapMysqlTool/jna-platform-5.16.0.jar" failOnError="false" />
+      <archive location="E:/LocalGit/GitHub/NapMysqlTool/out/artifacts/NapMysqlTool/jna-5.16.0.jar" failOnError="false" />
+      <archive location="E:/LocalGit/GitHub/NapMysqlTool/out/artifacts/NapMysqlTool/jna-platform-5.16.0.jar" failOnError="false" />
+      <archive location="E:/LocalGit/GitHub/NapMysqlTool/out/artifacts/NapMysqlTool/NapMysqlTool.jar" failOnError="false" />
     </classPath>
   </java>
 </exe4j>
