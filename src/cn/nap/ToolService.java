@@ -163,11 +163,11 @@ public class ToolService {
         Path iniFile = Paths.get(instance.path.data, "my.ini");
         List<String> cmd = new ArrayList<>();
         cmd.add(exeFile.toFile().getAbsolutePath());
-        cmd.add("--port");
-        cmd.add(instance.port.data);
         if (Files.exists(iniFile)) {
             cmd.add("--defaults-file=" + iniFile.toFile().getAbsolutePath());
         }
+        cmd.add("--port");
+        cmd.add(instance.port.data);
         cmd.add("--console");
         Process process = Runtime.getRuntime().exec(cmd.toArray(new String[0]));
         // 惊了，输出为什么在ErrorStream里？
