@@ -618,11 +618,11 @@ public class ToolApp extends Application {
         steps.add(new ToolComponent.RepairStep(
                 I18n.REPAIR_STEP_VC.translate(toolService.getLanguage()),
                 ToolUtil::checkVcRuntime));
+        steps.add(new ToolComponent.RepairStep(
+                I18n.REPAIR_STEP_STOP.translate(toolService.getLanguage()),
+                ToolUtil::killAllMysql));
         for (ToolConfig.Instance inst : validInstances) {
             String pre = inst.port.data + ":";
-            steps.add(new ToolComponent.RepairStep(
-                    pre + I18n.REPAIR_STEP_STOP.translate(toolService.getLanguage()),
-                    () -> { if (toolService.isRunning(inst)) toolService.stop(inst); }));
             steps.add(new ToolComponent.RepairStep(
                     pre + I18n.REPAIR_STEP_BINLOG.translate(toolService.getLanguage()),
                     () -> toolService.clearBinlog(inst)));
