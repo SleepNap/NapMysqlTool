@@ -3,6 +3,7 @@ package cn.nap;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -24,6 +25,7 @@ import java.util.Objects;
 import static cn.nap.ToolCommon.I18n;
 import static cn.nap.ToolCommon.ThemeColor;
 import static cn.nap.ToolCommon.Status;
+import static cn.nap.ToolCommon.TipType;
 
 public class ToolApp extends Application {
     public static void main(String[] args) {
@@ -39,6 +41,7 @@ public class ToolApp extends Application {
     private BorderPane body;
     private VBox instanceBox;
     private final Map<ToolConfig.Instance, VBox> cards = new HashMap<>();
+    private javafx.scene.control.ToggleButton instanceTab;
 
     @Override
     public void init() throws Exception {
@@ -89,10 +92,12 @@ public class ToolApp extends Application {
         ToggleButton operate = ToolComponent.menu(topGroup, I18n.TAB_OPERATE.translate(toolService.getLanguage()));
         ToggleButton other = ToolComponent.menu(topGroup, I18n.TAB_EXT.translate(toolService.getLanguage()));
         ToggleButton instance = ToolComponent.menu(topGroup, I18n.TAB_INSTANCE.translate(toolService.getLanguage()));
+        instanceTab = instance;
 
         Region spacer = new Region();
 
         Button create = ToolComponent.icon(ToolCommon.SVG_ADD);
+        create.setOnAction(event -> showInstanceForm(null));
         Button theme = ToolComponent.themeIcon();
 
         topGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
@@ -102,7 +107,7 @@ public class ToolApp extends Application {
             if (Objects.equals(newVal, other)) {
                 loadExtMenu();
             } else if (Objects.equals(newVal, instance)) {
-
+                loadInstanceMenu();
             } else {
                 loadOperateMenu();
             }
@@ -810,6 +815,305 @@ public class ToolApp extends Application {
     private void enableButtons(Button... buttons) {
         for (Button button : buttons) {
             button.setDisable(false);
+        }
+    }
+
+    // ==================== 实例管理 ====================
+
+    private void loadInstanceMenu() {
+        instanceBox = buildInstanceBox((instance, allBtns) -> {
+            Button editIni = ToolComponent.button(I18n.EDIT_INI.translate(toolService.getLanguage()));
+            Button modify = ToolComponent.button(I18n.MODIFY_INSTANCE.translate(toolService.getLanguage()));
+            Button delete = ToolComponent.stopButton(I18n.DELETE_INSTANCE.translate(toolService.getLanguage()));
+            Button[] btns = {editIni, modify, delete};
+
+            boolean isStarted = Status.STARTED.type() == instance.status;
+            boolean inProgress = Status.STARTING.type() == instance.status || Status.STOPPING.type() == instance.status;
+            for (Button btn : btns) btn.setDisable(isStarted || inProgress);
+
+            editIni.setOnAction(e -> {
+                if (checkPath(instance)) showIniEditor(instance);
+            });
+            modify.setOnAction(e -> {
+                if (checkPath(instance)) showInstanceForm(instance);
+            });
+            delete.setOnAction(e -> deleteInstance(instance));
+            return btns;
+        });
+
+        ScrollPane scroll = ToolComponent.scrollPane();
+        scroll.setFitToWidth(true);
+        scroll.setContent(instanceBox);
+
+        VBox center = new VBox(scroll);
+        VBox.setVgrow(scroll, Priority.ALWAYS);
+        center.setStyle("-fx-alignment: top_center;-fx-padding: 0 15 0 15;");
+        body.setCenter(center);
+    }
+
+    private void showInstanceForm(ToolConfig.Instance existing) {
+        BorderPane modalRoot = new BorderPane();
+        Stage stage = ToolComponent.createModalStage(primaryStage, modalRoot, false);
+        Region mask = ToolComponent.mask(root);
+
+        boolean isEdit = existing != null;
+        String title = isEdit ? I18n.MODIFY_INSTANCE.translate(toolService.getLanguage()) : I18n.ADD_INSTANCE.translate(toolService.getLanguage());
+
+        TextField nameField = textField(isEdit ? existing.section.data : "");
+        TextField pathField = textField(isEdit ? existing.path.data : "");
+        TextField userField = textField(isEdit ? existing.username.data : "root");
+        TextField passField = textField(isEdit ? existing.password.data : "");
+        TextField portField = textField(isEdit ? existing.port.data : toolService.getDefaultPort());
+        TextField dbField = textField(isEdit ? existing.database.data : "");
+
+        VBox form = new VBox(8);
+        form.setPadding(new Insets(16, 20, 8, 20));
+        form.getChildren().addAll(
+                formRow(I18n.INSTANCE_NAME_LABEL, nameField, true),
+                formRow(I18n.INSTANCE_PATH_LABEL, pathField, true),
+                formRow(I18n.INSTANCE_USERNAME_LABEL, userField, true),
+                formRow(I18n.INSTANCE_PASSWORD_LABEL, passField, true),
+                formRow(I18n.INSTANCE_PORT_LABEL, portField, true),
+                formRow(I18n.INSTANCE_DATABASE_LABEL, dbField, true)
+        );
+
+        Label titleLabel = ToolComponent.label(title);
+        titleLabel.setStyle(String.format("-fx-text-fill: %s;-fx-font-size: 15px;-fx-font-weight: bold;", ThemeColor.FONT_HOVER.color()));
+        modalRoot.setTop(titleLabel);
+        BorderPane.setMargin(modalRoot.getTop(), new Insets(12, 20, 0, 20));
+        modalRoot.setCenter(form);
+
+        Button cancel = ToolComponent.button(I18n.CANCEL.translate(toolService.getLanguage()));
+        Button save = ToolComponent.primaryButton(I18n.OK.translate(toolService.getLanguage()));
+        VBox bottom = ToolComponent.commonBottom(cancel, save);
+
+        Runnable close = () -> {
+            root.getChildren().remove(mask);
+            stage.close();
+        };
+        cancel.setOnAction(e -> close.run());
+        save.setOnAction(e -> {
+            String name = nameField.getText().trim();
+            String path = pathField.getText().trim();
+            String port = portField.getText().trim();
+            String db = dbField.getText().trim();
+            boolean valid = true;
+            if (name.isEmpty()) { setFieldError(nameField); valid = false; } else clearFieldError(nameField);
+            if (path.isEmpty()) { setFieldError(pathField); valid = false; } else clearFieldError(pathField);
+            if (userField.getText().trim().isEmpty()) { setFieldError(userField); valid = false; } else clearFieldError(userField);
+            if (passField.getText().trim().isEmpty()) { setFieldError(passField); valid = false; } else clearFieldError(passField);
+            if (port.isEmpty()) { setFieldError(portField); valid = false; } else clearFieldError(portField);
+            if (db.isEmpty()) { setFieldError(dbField); valid = false; } else clearFieldError(dbField);
+            if (!valid) {
+                ToolComponent.error(primaryStage, root, I18n.FIELD_REQUIRED.translate(toolService.getLanguage()));
+                return;
+            }
+
+            if (isEdit) {
+                existing.section.data = name;
+                existing.path.data = path;
+                existing.username.data = userField.getText().trim();
+                existing.password.data = passField.getText().trim();
+                existing.port.data = port;
+                existing.database.data = db;
+            } else {
+                ToolConfig.Instance inst = new ToolConfig.Instance();
+                int sort = toolService.getNextInstanceSort();
+                inst.section = new ToolConfig.Info<>(name, sort, I18n.NAME_COMMAND.comment());
+                inst.path = new ToolConfig.Info<>(path, 0, I18n.PATH_COMMAND.comment());
+                inst.username = new ToolConfig.Info<>(userField.getText().trim(), 1, I18n.USERNAME_COMMAND.comment());
+                inst.password = new ToolConfig.Info<>(passField.getText().trim(), 2, I18n.PASSWORD_COMMAND.comment());
+                inst.port = new ToolConfig.Info<>(port, 3, I18n.PORT_COMMAND.comment());
+                inst.database = new ToolConfig.Info<>(db, 4, I18n.DATABASE_COMMAND.comment());
+                toolService.getConfig().instances.add(inst);
+            }
+            toolService.saveConfig();
+            close.run();
+            if (instanceTab.isSelected()) loadInstanceMenu();
+        });
+
+        modalRoot.setBottom(bottom);
+        stage.sizeToScene();
+        stage.show();
+    }
+
+    private void deleteInstance(ToolConfig.Instance instance) {
+        String text = String.format(I18n.CONFIRM_DELETE.translate(toolService.getLanguage()), instance.section.data);
+        if (ToolComponent.confirm(primaryStage, root, text, TipType.WARNING)) {
+            toolService.getConfig().instances.remove(instance);
+            toolService.saveConfig();
+            if (instanceTab.isSelected()) loadInstanceMenu();
+        }
+    }
+
+    private void showIniEditor(ToolConfig.Instance instance) {
+        BorderPane modalRoot = new BorderPane();
+        Stage stage = ToolComponent.createModalStage(primaryStage, modalRoot, false);
+        modalRoot.setPrefSize(ToolCommon.MAX_MODAL_WIDTH, ToolCommon.MAX_MODAL_HEIGHT);
+        Region mask = ToolComponent.mask(root);
+
+        Label warn = ToolComponent.label(I18n.INI_WARN.translate(toolService.getLanguage()));
+        warn.setStyle(String.format("-fx-text-fill: %s;-fx-font-size: 12px;", ThemeColor.DANGER.color()));
+        warn.setWrapText(true);
+        warn.setMaxWidth(Double.MAX_VALUE);
+        BorderPane.setMargin(warn, new Insets(12, 20, 0, 20));
+        modalRoot.setTop(warn);
+
+        TextArea textArea = new TextArea();
+        String bg = ThemeColor.CARD_BG.color();
+        String fg = ThemeColor.FONT_HOVER.color();
+        String borderColor = ThemeColor.BUTTON_BORDER.color();
+        textArea.setStyle(String.format(
+                "-fx-background-insets: 0; " +
+                "-fx-background-color: transparent; " +
+                "-fx-control-inner-background: %s; " +
+                "-fx-text-fill: %s; " +
+                "-fx-font-family: monospace; " +
+                "-fx-font-size: 13px; " +
+                "-fx-focus-color: %s; " +
+                "-fx-faint-focus-color: transparent; " +
+                "-fx-border-color: %s; " +
+                "-fx-border-radius: 6px; " +
+                "-fx-background-radius: 6px; " +
+                "-fx-padding: 0; " +
+                "-fx-highlight-fill: %s; " +
+                "-fx-highlight-text-fill: #fff;",
+                bg, fg, borderColor, borderColor, ThemeColor.PRIMARY.color()));
+
+        // 给.content加padding，并美化滚动条，修复内部节点白色漏出
+        textArea.skinProperty().addListener((obs, oldSkin, newSkin) -> {
+            if (newSkin == null) return;
+            Node scrollPane = textArea.lookup(".scroll-pane");
+            if (scrollPane != null) {
+                scrollPane.setStyle("-fx-background-color: transparent; -fx-background-radius: 6px;");
+            }
+            Node content = textArea.lookup(".content");
+            if (content != null) {
+                content.setStyle("-fx-background-color: transparent; -fx-padding: 8px;");
+            }
+            // 延迟确保scroll-bar节点已创建
+            javafx.application.Platform.runLater(() -> styleTextAreaScrollBars(textArea));
+        });
+
+        try {
+            textArea.setText(toolService.readMyIni(instance));
+        } catch (Exception ex) {
+            textArea.setText("");
+        }
+        BorderPane.setMargin(textArea, new Insets(8, 20, 0, 20));
+        modalRoot.setCenter(textArea);
+
+        Runnable close = () -> {
+            root.getChildren().remove(mask);
+            stage.close();
+        };
+
+        Button deleteIni = ToolComponent.stopButton(I18n.DELETE_INSTANCE.translate(toolService.getLanguage()));
+        deleteIni.setOnAction(e -> {
+            try {
+                toolService.deleteMyIni(instance);
+            } catch (Exception ex) {
+                ToolComponent.error(primaryStage, root, ex.getMessage());
+            }
+            close.run();
+        });
+
+        Button importTpl = ToolComponent.button(I18n.INI_IMPORT_TEMPLATE.translate(toolService.getLanguage()));
+        importTpl.setOnAction(e -> {
+            String l = toolService.getLanguage();
+            textArea.setText(
+                "[mysqld]\n" +
+                I18n.INI_TPL_CHARSET.translate(l) + "\n" +
+                "character-set-server=utf8mb4\n" +
+                I18n.INI_TPL_COLLATION.translate(l) + "\n" +
+                "collation-server=utf8mb4_general_ci\n" +
+                I18n.INI_TPL_ENGINE.translate(l) + "\n" +
+                "default-storage-engine=INNODB\n" +
+                I18n.INI_TPL_MAX_CONN.translate(l) + "\n" +
+                "max_connections=200\n" +
+                I18n.INI_TPL_CONN_ERR.translate(l) + "\n" +
+                "max_connect_errors=10\n" +
+                I18n.INI_TPL_TMP_TABLE.translate(l) + "\n" +
+                "tmp_table_size=64M\n" +
+                I18n.INI_TPL_MAX_PACKET.translate(l) + "\n" +
+                "max_allowed_packet=1024M\n" +
+                I18n.INI_TPL_LOWER_CASE.translate(l) + "\n" +
+                "lower_case_table_names=1\n" +
+                I18n.INI_TPL_BUFFER.translate(l) + "\n" +
+                "innodb_buffer_pool_size=1G\n");
+        });
+        Button cancel = ToolComponent.button(I18n.CANCEL.translate(toolService.getLanguage()));
+        Button save = ToolComponent.primaryButton(I18n.OK.translate(toolService.getLanguage()));
+        VBox bottom = ToolComponent.commonBottom(cancel, save);
+        HBox btnRow = (HBox) bottom.getChildren().get(1);
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        btnRow.getChildren().addAll(0, Arrays.asList(deleteIni, importTpl, spacer));
+
+        cancel.setOnAction(e -> close.run());
+        save.setOnAction(e -> {
+            try {
+                toolService.writeMyIni(instance, textArea.getText());
+                close.run();
+                ToolComponent.info(primaryStage, root, String.format(I18n.INI_SAVE_SUCCESS.translate(toolService.getLanguage()), instance.port.data));
+            } catch (Exception ex) {
+                ToolComponent.error(primaryStage, root, ex.getMessage());
+            }
+        });
+
+        modalRoot.setBottom(bottom);
+        stage.sizeToScene();
+        stage.show();
+    }
+
+    private TextField textField(String text) {
+        TextField tf = new TextField(text);
+        tf.setMaxWidth(Double.MAX_VALUE);
+        clearFieldError(tf);
+        return tf;
+    }
+
+    private void setFieldError(TextField tf) {
+        tf.setStyle(String.format("-fx-background-color: %s;-fx-text-fill: %s;-fx-border-color: %s;-fx-border-radius: 6px;-fx-background-radius: 6px;",
+                ThemeColor.CARD_BG.color(), ThemeColor.FONT_BG.color(), ThemeColor.DANGER.color()));
+    }
+
+    private void clearFieldError(TextField tf) {
+        tf.setStyle(String.format("-fx-background-color: %s;-fx-text-fill: %s;-fx-border-color: %s;-fx-border-radius: 6px;-fx-background-radius: 6px;",
+                ThemeColor.CARD_BG.color(), ThemeColor.FONT_BG.color(), ThemeColor.BUTTON_BORDER.color()));
+    }
+
+    private HBox formRow(I18n labelKey, TextField field, boolean required) {
+        HBox row = new HBox(10);
+        row.setAlignment(Pos.CENTER_LEFT);
+        Label text = ToolComponent.label(labelKey.translate(toolService.getLanguage()));
+        if (required) {
+            Label star = new Label("*");
+            star.setStyle(String.format("-fx-text-fill: %s;", ThemeColor.DANGER.color()));
+            HBox labelBox = new HBox(0, text, star);
+            labelBox.setPrefWidth(90);
+            labelBox.setAlignment(Pos.CENTER_LEFT);
+            row.getChildren().addAll(labelBox, field);
+        } else {
+            text.setMinWidth(80);
+            row.getChildren().addAll(text, field);
+        }
+        HBox.setHgrow(field, Priority.ALWAYS);
+        return row;
+    }
+
+    private void styleTextAreaScrollBars(TextArea textArea) {
+        for (Node child : textArea.lookupAll(".scroll-bar")) {
+            if (child instanceof ScrollBar) {
+                ScrollBar bar = (ScrollBar) child;
+                if (bar.getOrientation() == javafx.geometry.Orientation.VERTICAL) {
+                    bar.setStyle("-fx-background-color: transparent;-fx-pref-width: 10px;-fx-max-width: 10px;");
+                } else {
+                    bar.setStyle("-fx-background-color: transparent;-fx-pref-height: 10px;-fx-max-height: 10px;");
+                }
+                Node thumb = bar.lookup(".thumb");
+                if (thumb != null) thumb.setStyle("-fx-background-color: #B0B0B0;-fx-background-insets: 2px;-fx-background-radius: 5px;");
+            }
         }
     }
 }

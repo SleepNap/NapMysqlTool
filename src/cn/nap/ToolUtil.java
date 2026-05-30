@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -216,20 +217,31 @@ public class ToolUtil {
     }
 
     public interface DwmApi extends Library {
-        NapTheme.DwmApi INSTANCE = Native.load("dwmapi", NapTheme.DwmApi.class);
+        DwmApi INSTANCE = Native.load("dwmapi", DwmApi.class);
         WinNT.HRESULT DwmSetWindowAttribute(WinDef.HWND hwnd, int dwAttribute, PointerType pvAttribute, int cbAttribute);
+    }
+
+    public static class WindowCompositionAttributeData extends Structure implements Structure.ByReference {
+        public int Attribute;
+        public Pointer Data;
+        public int SizeOfData;
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return Arrays.asList("Attribute", "Data", "SizeOfData");
+        }
     }
 
     public static void setWindowFrameColor(Stage primaryStage, int rgb) {
         if (primaryStage.isShowing()) {
-            NapTheme.DwmApi.INSTANCE.DwmSetWindowAttribute(
+            DwmApi.INSTANCE.DwmSetWindowAttribute(
                     getWindowHWND(primaryStage),
                     35,
                     new WinDef.DWORDByReference(new WinDef.DWORD(rgb)),
                     4
             );
         } else {
-            primaryStage.setOnShown(e -> NapTheme.DwmApi.INSTANCE.DwmSetWindowAttribute(
+            primaryStage.setOnShown(e -> DwmApi.INSTANCE.DwmSetWindowAttribute(
                     getWindowHWND(primaryStage),
                     35,
                     new WinDef.DWORDByReference(new WinDef.DWORD(rgb)),
@@ -241,14 +253,14 @@ public class ToolUtil {
     public static void setWindowDarkMode(boolean isWin11, Stage primaryStage, boolean dark) {
         if (isWin11) {
             if (primaryStage.isShowing()) {
-                NapTheme.DwmApi.INSTANCE.DwmSetWindowAttribute(
+                DwmApi.INSTANCE.DwmSetWindowAttribute(
                         getWindowHWND(primaryStage),
                         20,
                         new WinDef.BOOLByReference(new WinDef.BOOL(dark)),
                         4
                 );
             } else {
-                primaryStage.setOnShown(e -> NapTheme.DwmApi.INSTANCE.DwmSetWindowAttribute(
+                primaryStage.setOnShown(e -> DwmApi.INSTANCE.DwmSetWindowAttribute(
                         getWindowHWND(primaryStage),
                         20,
                         new WinDef.BOOLByReference(new WinDef.BOOL(dark)),
@@ -264,7 +276,7 @@ public class ToolUtil {
         Kernel32 kernel32 = Native.load(Kernel32.class);
         Function kernel32Function = Function.getFunction(kernel32.GetProcAddress(hmodule, 133));
         kernel32Function.invoke(new Object[]{getWindowHWND(primaryStage), new WinDef.BOOL(dark)});
-        NapTheme.WindowCompositionAttributeData data = new NapTheme.WindowCompositionAttributeData();
+        WindowCompositionAttributeData data = new WindowCompositionAttributeData();
         data.Attribute = 26;
         data.Data = new WinDef.BOOLByReference(new WinDef.BOOL(dark)).getPointer();
         data.SizeOfData = 4;

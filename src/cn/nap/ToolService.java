@@ -239,6 +239,7 @@ public class ToolService {
         String user = instance.username.data;
         String pass = instance.password.data;
         String dbs = instance.database.data;
+        if (dbs == null || dbs.trim().isEmpty()) throw new Exception("database is empty");
         String file = "output_" + instance.port.data + ".sql";
         Runtime.getRuntime().exec(new String[]{"cmd.exe", "/C",
                 path + File.separator + "bin" + File.separator + "mysqldump.exe"
@@ -250,6 +251,7 @@ public class ToolService {
         String user = instance.username.data;
         String pass = instance.password.data;
         String db = instance.database.data;
+        if (db == null || db.trim().isEmpty()) throw new Exception("database is empty");
         Runtime.getRuntime().exec(new String[]{"cmd.exe", "/C",
                 path + File.separator + "bin" + File.separator + "mysql.exe"
                 + " -u" + user + " -p" + pass + " " + db + " < " + file}).waitFor();
@@ -307,4 +309,47 @@ public class ToolService {
         return instanceList;
     }
 
+    public int getNextInstanceSort() {
+        if (config.instances == null || config.instances.isEmpty()) return 1;
+        int maxSort = 0;
+        for (ToolConfig.Instance inst : config.instances) {
+            if (inst.section.sort > maxSort) maxSort = inst.section.sort;
+        }
+        return maxSort + 1;
+    }
+
+    public String getDefaultPort() {
+        if (config.instances == null || config.instances.isEmpty()) return "3306";
+        int maxPort = 0;
+        for (ToolConfig.Instance inst : config.instances) {
+            try {
+                int p = Integer.parseInt(inst.port.data);
+                if (p > maxPort) maxPort = p;
+            } catch (NumberFormatException ignored) {}
+        }
+        return String.valueOf(maxPort + 1);
+    }
+
+    private void checkInstancePath(ToolConfig.Instance instance) throws Exception {
+        Path dir = Paths.get(instance.path.data);
+        if (!Files.isDirectory(dir)) {
+            throw new Exception(String.format(I18n.MYSQL_PATH_ERROR.translate(getLanguage()), instance.port.data));
+        }
+    }
+
+    public String readMyIni(ToolConfig.Instance instance) throws Exception {
+        Path iniFile = Paths.get(instance.path.data, "my.ini");
+        if (!Files.exists(iniFile)) return "";
+        return new String(Files.readAllBytes(iniFile));
+    }
+
+    public void writeMyIni(ToolConfig.Instance instance, String content) throws Exception {
+        Path iniFile = Paths.get(instance.path.data, "my.ini");
+        Files.write(iniFile, content.getBytes());
+    }
+
+    public void deleteMyIni(ToolConfig.Instance instance) throws Exception {
+        Path iniFile = Paths.get(instance.path.data, "my.ini");
+        Files.deleteIfExists(iniFile);
+    }
 }

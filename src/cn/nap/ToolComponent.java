@@ -156,7 +156,7 @@ public class ToolComponent {
 
     public static Button themeIcon() {
         // 黑色展示太阳，白色展示月亮
-        final String svg = ToolService.getInstance().isDark() ? ToolCommon.SVG_LIGHT : ToolCommon.SVG_DARK;
+        final String svg = ToolService.getInstance().isDark() ? ToolCommon.SVG_DARK : ToolCommon.SVG_LIGHT;
         return icon(svg);
     }
 
@@ -382,15 +382,19 @@ public class ToolComponent {
     }
 
     public static boolean confirm(Stage primaryStage, StackPane root, String text) {
+        return confirm(primaryStage, root, text, TipType.INFO);
+    }
+
+    public static boolean confirm(Stage primaryStage, StackPane root, String text, TipType tipType) {
         BorderPane modalRoot = new BorderPane();
         Stage stage = createModalStage(primaryStage, modalRoot, true);
         Region mask = mask(root);
 
         SVGPath svgPath = new SVGPath();
-        svgPath.setContent(TipType.INFO.svg());
+        svgPath.setContent(tipType.svg());
         Region icon = new Region();
         icon.setShape(svgPath);
-        icon.setStyle(String.format("-fx-background-color: %s;", TipType.INFO.color()));
+        icon.setStyle(String.format("-fx-background-color: %s;", tipType.color()));
         icon.setPrefSize(16, 16);
         icon.setMaxSize(16, 16);
         icon.setMinSize(16, 16);
@@ -412,6 +416,7 @@ public class ToolComponent {
             root.getChildren().remove(mask);
             stage.close();
         };
+        mask.setOnMouseClicked(e -> runnable.run());
         cancel.setOnAction(e -> runnable.run());
         ok.setOnAction(e -> {
             result.set(true);
@@ -424,7 +429,7 @@ public class ToolComponent {
         return result.get();
     }
 
-    private static Stage createModalStage(Stage primaryStage, Parent modalRoot, boolean maskClickable) {
+    public static Stage createModalStage(Stage primaryStage, Parent modalRoot, boolean maskClickable) {
         Stage stage = new Stage();
         modalRoot.setStyle(String.format("-fx-background-color: %s;-fx-background-radius: 8px;-fx-border-radius: 8px", ThemeColor.ROOT_BG.color()));
         if (modalRoot instanceof Region) {
@@ -451,7 +456,7 @@ public class ToolComponent {
         return stage;
     }
 
-    private static Region mask(StackPane root) {
+    public static Region mask(StackPane root) {
         Region mask = new Region();
         mask.setStyle("-fx-background-color: rgba(0, 0, 0, 0.5);");
         root.getChildren().add(mask);
@@ -463,7 +468,7 @@ public class ToolComponent {
         stage.setY(primaryStage.getY() + (primaryStage.getHeight() - stage.getHeight()) / 2);
     }
 
-    private static VBox commonBottom(Button... buttons) {
+    public static VBox commonBottom(Button... buttons) {
         HBox hBox = new HBox(buttons);
         hBox.setStyle("-fx-alignment: center_right;-fx-spacing: 10px;-fx-padding: 0 15 0 15;");
 
