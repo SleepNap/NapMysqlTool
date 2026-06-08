@@ -15,7 +15,7 @@ public class ToolCommon {
     public static final String SVG_TIP_ERROR = "M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z";
     public static final String SVG_TIP_WARN = "M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z";
     public static final String SVG_TIP_INFO = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z";
-    public static final String VERSION = "3.26.0530";
+    public static final String VERSION = "3.26.0609";
     public static final double MAX_STAGE_WIDTH = 400;
     public static final double MAX_STAGE_HEIGHT = 500;
     public static final double MIN_MODAL_WIDTH = 200;
