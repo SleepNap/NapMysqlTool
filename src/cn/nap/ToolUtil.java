@@ -378,12 +378,25 @@ public class ToolUtil {
     }
 
     public static boolean isPidRunning(String pid) {
-        try {
-            Process p = Runtime.getRuntime().exec(new String[]{"powershell", "-Command", "Get-Process -Id " + pid});
-            return p.waitFor() == 0;
-        } catch (Exception e) {
+        if (pid == null || pid.isEmpty()) {
             return false;
         }
+        // 用 tasklist 比 powershell Get-Process 快很多（PowerShell 启动慢，轮询时不能用）
+        try {
+            Process p = Runtime.getRuntime().exec(new String[]{"tasklist", "/FI", "PID eq " + pid, "/NH", "/FO", "CSV"});
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // 命中时形如 "mysqld.exe","12345","Console","1","123,456 K"
+                    if (line.contains("\"" + pid + "\"")) {
+                        return true;
+                    }
+                }
+            }
+            p.waitFor();
+        } catch (Exception ignored) {
+        }
+        return false;
     }
 
     public static boolean killPid(String pid) {
@@ -392,6 +405,22 @@ public class ToolUtil {
             return p.waitFor() == 0;
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    /**
+     * 判断路径是否为纯 ASCII（无中文/全角等非 ASCII 字符）。
+     * mysqld 在含非 ASCII 字符的路径下可能启动失败，用此方法做预检查。
+     */
+    public static void checkAsciiPath(String path) throws Exception {
+        if (path == null || path.isEmpty()) {
+            throw new Exception();
+        }
+        String abs = Paths.get(path).toAbsolutePath().toString();
+        for (int i = 0; i < abs.length(); i++) {
+            if (abs.charAt(i) > 0x7F) {
+                throw new Exception();
+            }
         }
     }
 
@@ -441,7 +470,7 @@ public class ToolUtil {
     public static void checkVcRuntime() throws Exception {
         Path system32 = Paths.get(System.getenv("SystemRoot"), "System32");
         if (!Files.exists(system32.resolve("vcruntime140.dll"))) {
-            throw new Exception(ToolCommon.I18n.VC_MISSING.translate(ToolService.getInstance().getLanguage()));
+            throw new Exception();
         }
     }
 }

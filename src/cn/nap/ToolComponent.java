@@ -220,6 +220,7 @@ public class ToolComponent {
 
     public static ScrollPane scrollPane() {
         ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setFitToWidth(true);
         scrollPane.skinProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == null) {
                 return;
@@ -248,7 +249,7 @@ public class ToolComponent {
                 verticalScrollBar.setOnMouseExited((e) -> verticalScrollBar.setStyle(exitStyle));
             }
         });
-        scrollPane.setStyle(String.format("-fx-background-color: %s;-fx-border-color: %s;", ThemeColor.SCROLL_BG.color(), ThemeColor.SCROLL_BG.color()));
+        scrollPane.setStyle(String.format("-fx-background-color: %s;-fx-border-color: %s;-fx-background-radius: 8px;-fx-border-radius: 8px;", ThemeColor.SCROLL_BG.color(), ThemeColor.SCROLL_BG.color()));
         return scrollPane;
     }
 
@@ -517,7 +518,9 @@ public class ToolComponent {
             stepBox.getChildren().add(row);
         }
 
-        modalRoot.setCenter(stepBox);
+        ScrollPane stepScroll = scrollPane();
+        stepScroll.setContent(stepBox);
+        modalRoot.setCenter(stepScroll);
 
         Button closeBtn = button(I18n.CLOSE.translate(ToolService.getInstance().getLanguage()));
         closeBtn.setDisable(true);
@@ -553,7 +556,7 @@ public class ToolComponent {
                         step.descLabel.setText(step.desc + "  " + I18n.STEP_DONE.translate(ToolService.getInstance().getLanguage()));
                     });
                 } catch (Exception e) {
-                    String msg = e.getMessage() != null ? e.getMessage() : I18n.STEP_FAIL.translate(ToolService.getInstance().getLanguage());
+                    String msg = e.getMessage();
                     Platform.runLater(() -> {
                         step.dot.setFill(Color.web(ThemeColor.DANGER.color()));
                         DropShadow glow = new DropShadow();
@@ -561,7 +564,7 @@ public class ToolComponent {
                         glow.setRadius(4);
                         glow.setSpread(0.3);
                         step.dot.setEffect(glow);
-                        step.descLabel.setText(step.desc + "  " + msg);
+                        step.descLabel.setText(step.desc + "  " + (msg != null ? msg : I18n.STEP_FAIL.translate(ToolService.getInstance().getLanguage())));
                         closeBtn.setDisable(false);
                     });
                     return;

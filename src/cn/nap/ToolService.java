@@ -159,25 +159,48 @@ public class ToolService {
         }
 
         ToolUtil.killPortProcess(Integer.parseInt(instance.port.data));
-        Path exeFile = Paths.get(instance.path.data, "bin", "mysqld.exe");
-        Path iniFile = Paths.get(instance.path.data, "my.ini");
-        List<String> cmd = new ArrayList<>();
-        cmd.add(exeFile.toFile().getAbsolutePath());
+
+        Path baseDir = Paths.get(instance.path.data).toAbsolutePath().normalize();
+        Path iniFile = baseDir.resolve("my.ini");
+        // mysqld 不支持中文路径
+        StringBuilder shell = new StringBuilder("bin\\mysqld.exe");
         if (Files.exists(iniFile)) {
-            cmd.add("--defaults-file=" + iniFile.toFile().getAbsolutePath());
+            shell.append(" --defaults-file=my.ini");
         }
-        cmd.add("--port");
-        cmd.add(instance.port.data);
-        cmd.add("--console");
-        Process process = Runtime.getRuntime().exec(cmd.toArray(new String[0]));
+        shell.append(" --port ").append(instance.port.data);
+        shell.append(" --console");
+        ProcessBuilder pb = new ProcessBuilder();
+        pb.directory(baseDir.toFile());
+        pb.command("cmd", "/c", shell.toString());
+        Process process = pb.start();
         // 惊了，输出为什么在ErrorStream里？
-        InputStream inputStream = process.getErrorStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        long startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - startTime < 30000) {
-            String output = reader.readLine();
-            System.out.println(output);
-            if (output != null && output.contains("ready for connections")) {
+        InputStream errStream = process.getErrorStream();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(errStream));
+
+        // 30s 拆 3 段，每段 10s 优先等 "ready for connections"
+        for (int i = 0; i < 3; i++) {
+            long segEnd = System.currentTimeMillis() + 10000;
+            while (System.currentTimeMillis() < segEnd) {
+                if (errStream.available() > 0) {
+                    String output = reader.readLine();
+                    System.out.println(output);
+                    if (output == null) {
+                        return false;
+                    }
+                    if (output.contains("ready for connections")) {
+                        return true;
+                    }
+                } else {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return false;
+                    }
+                }
+            }
+            // 10s 没等到 ready 字样，用进程存活+pid 兜底；任一为真即视作启动成功
+            if (isRunning(instance)) {
                 return true;
             }
         }

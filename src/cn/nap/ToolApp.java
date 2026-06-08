@@ -3,6 +3,7 @@ package cn.nap;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -20,7 +21,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static cn.nap.ToolCommon.I18n;
 import static cn.nap.ToolCommon.ThemeColor;
@@ -29,7 +29,6 @@ import static cn.nap.ToolCommon.TipType;
 
 public class ToolApp extends Application {
     public static void main(String[] args) {
-//        System.setProperty("prism.allowhidpi", "false");
         System.setProperty("prism.lcdtext", "false");
         launch(args);
     }
@@ -41,7 +40,7 @@ public class ToolApp extends Application {
     private BorderPane body;
     private VBox instanceBox;
     private final Map<ToolConfig.Instance, VBox> cards = new HashMap<>();
-    private javafx.scene.control.ToggleButton instanceTab;
+    private ToggleGroup menuGroup;
 
     @Override
     public void init() throws Exception {
@@ -89,11 +88,10 @@ public class ToolApp extends Application {
     }
 
     private void loadTop() {
-        ToggleGroup topGroup = new ToggleGroup();
-        ToggleButton operate = ToolComponent.menu(topGroup, I18n.TAB_OPERATE.translate(toolService.getLanguage()));
-        ToggleButton other = ToolComponent.menu(topGroup, I18n.TAB_EXT.translate(toolService.getLanguage()));
-        ToggleButton instance = ToolComponent.menu(topGroup, I18n.TAB_INSTANCE.translate(toolService.getLanguage()));
-        instanceTab = instance;
+        menuGroup = new ToggleGroup();
+        ToggleButton operate = ToolComponent.menu(menuGroup, I18n.TAB_OPERATE.translate(toolService.getLanguage()));
+        ToggleButton other = ToolComponent.menu(menuGroup, I18n.TAB_EXT.translate(toolService.getLanguage()));
+        ToggleButton instance = ToolComponent.menu(menuGroup, I18n.TAB_INSTANCE.translate(toolService.getLanguage()));
 
         Region spacer = new Region();
 
@@ -101,17 +99,12 @@ public class ToolApp extends Application {
         create.setOnAction(event -> showInstanceForm(null));
         Button theme = ToolComponent.themeIcon();
 
-        topGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+        menuGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == null) {
-                topGroup.selectToggle(oldVal);
+                menuGroup.selectToggle(oldVal);
             }
-            if (Objects.equals(newVal, other)) {
-                loadExtMenu();
-            } else if (Objects.equals(newVal, instance)) {
-                loadInstanceMenu();
-            } else {
-                loadOperateMenu();
-            }
+            int index = menuGroup.getToggles().indexOf(newVal);
+            loadMenuWithIndex(index);
         });
 
         theme.setOnAction(event -> {
@@ -119,7 +112,7 @@ public class ToolApp extends Application {
             loadRoot();
         });
 
-        topGroup.selectToggle(operate);
+        menuGroup.selectToggle(operate);
         HBox top = new HBox(operate, other, instance, spacer, create, theme);
         HBox.setHgrow(spacer, Priority.ALWAYS);
         top.setStyle("-fx-spacing: 10px;-fx-alignment: center;-fx-padding: 0 15 0 15;");
@@ -209,7 +202,6 @@ public class ToolApp extends Application {
         allRow.setStyle("-fx-spacing: 10px;-fx-alignment: center;");
 
         ScrollPane scroll = ToolComponent.scrollPane();
-        scroll.setFitToWidth(true);
         scroll.setContent(instanceBox);
 
         VBox center = new VBox();
@@ -546,6 +538,9 @@ public class ToolApp extends Application {
                 pre + I18n.REPAIR_STEP_STOP.translate(toolService.getLanguage()),
                 () -> { if (toolService.isRunning(instance)) toolService.stop(instance); }));
         steps.add(new ToolComponent.RepairStep(
+                I18n.REPAIR_STEP_ASCII.translate(toolService.getLanguage()),
+                () -> ToolUtil.checkAsciiPath(instance.path.data)));
+        steps.add(new ToolComponent.RepairStep(
                 pre + I18n.REPAIR_STEP_BINLOG.translate(toolService.getLanguage()),
                 () -> toolService.clearBinlog(instance)));
         steps.add(new ToolComponent.RepairStep(
@@ -629,6 +624,9 @@ public class ToolApp extends Application {
                 ToolUtil::killAllMysql));
         for (ToolConfig.Instance inst : validInstances) {
             String pre = inst.port.data + ":";
+            steps.add(new ToolComponent.RepairStep(
+                    pre + I18n.REPAIR_STEP_ASCII.translate(toolService.getLanguage()),
+                    () -> ToolUtil.checkAsciiPath(inst.path.data)));
             steps.add(new ToolComponent.RepairStep(
                     pre + I18n.REPAIR_STEP_BINLOG.translate(toolService.getLanguage()),
                     () -> toolService.clearBinlog(inst)));
@@ -835,15 +833,12 @@ public class ToolApp extends Application {
             editIni.setOnAction(e -> {
                 if (checkPath(instance)) showIniEditor(instance);
             });
-            modify.setOnAction(e -> {
-                if (checkPath(instance)) showInstanceForm(instance);
-            });
+            modify.setOnAction(e -> showInstanceForm(instance));
             delete.setOnAction(e -> deleteInstance(instance));
             return btns;
         });
 
         ScrollPane scroll = ToolComponent.scrollPane();
-        scroll.setFitToWidth(true);
         scroll.setContent(instanceBox);
 
         VBox center = new VBox(scroll);
@@ -927,7 +922,7 @@ public class ToolApp extends Application {
             }
             toolService.saveConfig();
             close.run();
-            if (instanceTab.isSelected()) loadInstanceMenu();
+            loadMenuWithIndex(menuGroup.getToggles().indexOf(menuGroup.getSelectedToggle()));
         });
 
         modalRoot.setBottom(bottom);
@@ -940,7 +935,7 @@ public class ToolApp extends Application {
         if (ToolComponent.confirm(primaryStage, root, text, TipType.WARNING)) {
             toolService.getConfig().instances.remove(instance);
             toolService.saveConfig();
-            if (instanceTab.isSelected()) loadInstanceMenu();
+            loadMenuWithIndex(menuGroup.getToggles().indexOf(menuGroup.getSelectedToggle()));
         }
     }
 
@@ -990,7 +985,7 @@ public class ToolApp extends Application {
                 content.setStyle("-fx-background-color: transparent; -fx-padding: 8px;");
             }
             // 延迟确保scroll-bar节点已创建
-            javafx.application.Platform.runLater(() -> styleTextAreaScrollBars(textArea));
+            Platform.runLater(() -> styleTextAreaScrollBars(textArea));
         });
 
         try {
@@ -1104,7 +1099,7 @@ public class ToolApp extends Application {
         for (Node child : textArea.lookupAll(".scroll-bar")) {
             if (child instanceof ScrollBar) {
                 ScrollBar bar = (ScrollBar) child;
-                if (bar.getOrientation() == javafx.geometry.Orientation.VERTICAL) {
+                if (bar.getOrientation() == Orientation.VERTICAL) {
                     bar.setStyle("-fx-background-color: transparent;-fx-pref-width: 10px;-fx-max-width: 10px;");
                 } else {
                     bar.setStyle("-fx-background-color: transparent;-fx-pref-height: 10px;-fx-max-height: 10px;");
@@ -1112,6 +1107,16 @@ public class ToolApp extends Application {
                 Node thumb = bar.lookup(".thumb");
                 if (thumb != null) thumb.setStyle("-fx-background-color: #B0B0B0;-fx-background-insets: 2px;-fx-background-radius: 5px;");
             }
+        }
+    }
+
+    private void loadMenuWithIndex(int index) {
+        if (index == 1) {
+            loadExtMenu();
+        } else if (index == 2) {
+            loadInstanceMenu();
+        } else {
+            loadOperateMenu();
         }
     }
 }
