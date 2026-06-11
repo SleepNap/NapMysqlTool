@@ -258,26 +258,58 @@ public class ToolService {
     }
 
     public void exportDb(ToolConfig.Instance instance) throws Exception {
-        String path = instance.path.data;
         String user = instance.username.data;
         String pass = instance.password.data;
         String dbs = instance.database.data;
-        if (dbs == null || dbs.trim().isEmpty()) throw new Exception("database is empty");
-        String file = "output_" + instance.port.data + ".sql";
-        Runtime.getRuntime().exec(new String[]{"cmd.exe", "/C",
-                path + File.separator + "bin" + File.separator + "mysqldump.exe"
-                + " -u" + user + " -p" + pass + " --databases " + dbs + " --hex-blob > " + file}).waitFor();
+        // 输出到项目根目录（findImportFile 在此查找）
+        String file = new File("output_" + instance.port.data + ".sql").getAbsolutePath();
+        StringBuilder cmd = new StringBuilder();
+        cmd.append("bin\\mysqldump.exe");
+        cmd.append(" -u").append(user);
+        cmd.append(" -P").append(instance.port.data);
+        if (pass != null && !pass.trim().isEmpty()) {
+            cmd.append(" -p").append(pass);
+        }
+        if (dbs != null && !dbs.trim().isEmpty()) {
+            cmd.append(" --databases ").append(dbs);
+        }
+        cmd.append(" --hex-blob > \"").append(file).append("\"");
+        execMysqlTool(instance, cmd.toString(), "mysqldump");
     }
 
     public void importDb(ToolConfig.Instance instance, String file) throws Exception {
-        String path = instance.path.data;
         String user = instance.username.data;
         String pass = instance.password.data;
-        String db = instance.database.data;
-        if (db == null || db.trim().isEmpty()) throw new Exception("database is empty");
-        Runtime.getRuntime().exec(new String[]{"cmd.exe", "/C",
-                path + File.separator + "bin" + File.separator + "mysql.exe"
-                + " -u" + user + " -p" + pass + " " + db + " < " + file}).waitFor();
+        StringBuilder cmd = new StringBuilder();
+        cmd.append("bin\\mysql.exe");
+        cmd.append(" -u").append(user);
+        cmd.append(" -P").append(instance.port.data);
+        if (pass != null && !pass.trim().isEmpty()) {
+            cmd.append(" -p").append(pass);
+        }
+        // 不指定数据库名：SQL 文件里已有 CREATE DATABASE / USE 语句
+        cmd.append(" < \"").append(file).append("\"");
+        execMysqlTool(instance, cmd.toString(), "mysql");
+    }
+
+    private void execMysqlTool(ToolConfig.Instance instance, String cmd, String toolName) throws Exception {
+        System.out.println(toolName + " cmd: " + cmd);
+        Path baseDir = Paths.get(instance.path.data).toAbsolutePath().normalize();
+        ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/C", cmd);
+        pb.directory(baseDir.toFile());
+        Process p = pb.start();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getErrorStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println("[" + toolName + "] " + line);
+            }
+        }
+        p.waitFor();
+        int exitCode = p.exitValue();
+        System.out.println(toolName + " exit code: " + exitCode);
+        if (exitCode != 0) {
+            throw new Exception(toolName + " failed with exit code " + exitCode);
+        }
     }
 
     public void refreshStatus() {

@@ -558,6 +558,10 @@ public class ToolApp extends Application {
 
     private void importSingle(ToolConfig.Instance instance, Button[] extAll, Button[] extSingle) {
         if (!checkPath(instance)) return;
+        if (instance.database.data == null || instance.database.data.trim().isEmpty()) {
+            ToolComponent.error(primaryStage, root, String.format(I18n.DATABASE_EMPTY.translate(toolService.getLanguage()), instance.port.data));
+            return;
+        }
         File sqlFile = findImportFile(instance);
         if (sqlFile == null) {
             ToolComponent.error(primaryStage, root, I18n.IMPORT_ERR2.translate(toolService.getLanguage()));
@@ -584,6 +588,10 @@ public class ToolApp extends Application {
 
     private void exportSingle(ToolConfig.Instance instance, Button[] extAll, Button[] extSingle) {
         if (!checkPath(instance)) return;
+        if (instance.database.data == null || instance.database.data.trim().isEmpty()) {
+            ToolComponent.error(primaryStage, root, String.format(I18n.DATABASE_EMPTY.translate(toolService.getLanguage()), instance.port.data));
+            return;
+        }
         disableOperateButton(extAll, extSingle);
         boolean needStart = !toolService.isRunning(instance);
         String desc = String.format("%s:%s/%s", I18n.EXPORT.translate(toolService.getLanguage()), instance.port.data, instance.database.data);
@@ -660,6 +668,11 @@ public class ToolApp extends Application {
         List<ToolComponent.RepairStep> steps = new ArrayList<>();
         for (ToolConfig.Instance instance : instances) {
             if (!checkPathSilent(instance)) continue;
+            if (instance.database.data == null || instance.database.data.trim().isEmpty()) {
+                String desc = String.format("%s:%s/ -", I18n.IMPORT.translate(toolService.getLanguage()), instance.port.data);
+                steps.add(new ToolComponent.RepairStep(desc, () -> { throw new Exception(); }));
+                continue;
+            }
             if (Status.STARTING.type() != instance.status && Status.STARTED.type() != instance.status) continue;
             String desc = String.format("%s:%s/%s", I18n.IMPORT.translate(toolService.getLanguage()), instance.port.data, instance.database.data);
             steps.add(new ToolComponent.RepairStep(desc, () -> {
@@ -693,6 +706,11 @@ public class ToolApp extends Application {
 
         List<ToolComponent.RepairStep> steps = new ArrayList<>();
         for (ToolConfig.Instance instance : instances) {
+            if (instance.database.data == null || instance.database.data.trim().isEmpty()) {
+                String desc = String.format("%s:%s/ -", I18n.EXPORT.translate(toolService.getLanguage()), instance.port.data);
+                steps.add(new ToolComponent.RepairStep(desc, () -> { throw new Exception(); }));
+                continue;
+            }
             if (Status.STARTING.type() != instance.status && Status.STARTED.type() != instance.status) continue;
             String desc = String.format("%s:%s/%s", I18n.EXPORT.translate(toolService.getLanguage()), instance.port.data, instance.database.data);
             steps.add(new ToolComponent.RepairStep(desc, () -> {
@@ -868,9 +886,9 @@ public class ToolApp extends Application {
                 formRow(I18n.INSTANCE_NAME_LABEL, nameField, true),
                 formRow(I18n.INSTANCE_PATH_LABEL, pathField, true),
                 formRow(I18n.INSTANCE_USERNAME_LABEL, userField, true),
-                formRow(I18n.INSTANCE_PASSWORD_LABEL, passField, true),
+                formRow(I18n.INSTANCE_PASSWORD_LABEL, passField, false),
                 formRow(I18n.INSTANCE_PORT_LABEL, portField, true),
-                formRow(I18n.INSTANCE_DATABASE_LABEL, dbField, true)
+                formRow(I18n.INSTANCE_DATABASE_LABEL, dbField, false)
         );
 
         Label titleLabel = ToolComponent.label(title);
@@ -897,9 +915,7 @@ public class ToolApp extends Application {
             if (name.isEmpty()) { setFieldError(nameField); valid = false; } else clearFieldError(nameField);
             if (path.isEmpty()) { setFieldError(pathField); valid = false; } else clearFieldError(pathField);
             if (userField.getText().trim().isEmpty()) { setFieldError(userField); valid = false; } else clearFieldError(userField);
-            if (passField.getText().trim().isEmpty()) { setFieldError(passField); valid = false; } else clearFieldError(passField);
             if (port.isEmpty()) { setFieldError(portField); valid = false; } else clearFieldError(portField);
-            if (db.isEmpty()) { setFieldError(dbField); valid = false; } else clearFieldError(dbField);
             if (!valid) return;
 
             if (isEdit) {
@@ -1080,17 +1096,17 @@ public class ToolApp extends Application {
         HBox row = new HBox(10);
         row.setAlignment(Pos.CENTER_LEFT);
         Label text = ToolComponent.label(labelKey.translate(toolService.getLanguage()));
+        HBox labelBox = new HBox(0);
+        labelBox.setPrefWidth(90);
+        labelBox.setAlignment(Pos.CENTER_LEFT);
         if (required) {
             Label star = new Label("*");
             star.setStyle(String.format("-fx-text-fill: %s;", ThemeColor.DANGER.color()));
-            HBox labelBox = new HBox(0, text, star);
-            labelBox.setPrefWidth(90);
-            labelBox.setAlignment(Pos.CENTER_LEFT);
-            row.getChildren().addAll(labelBox, field);
+            labelBox.getChildren().addAll(text, star);
         } else {
-            text.setMinWidth(80);
-            row.getChildren().addAll(text, field);
+            labelBox.getChildren().add(text);
         }
+        row.getChildren().addAll(labelBox, field);
         HBox.setHgrow(field, Priority.ALWAYS);
         return row;
     }
