@@ -4,18 +4,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-NapMysqlTool 是一个 Windows 平台的 MySQL 多实例启停管理工具，基于 JavaFX 8 构建桌面 GUI。为 HeavenMS-Nap（冒险岛服务端）项目提供 MySQL 的便捷管理，支持多 MySQL 实例的启动/停止/重启/修复/导入/导出，含亮/暗主题切换和中英文国际化。
+NapMysqlTool 是一个 Windows 平台的 MySQL 多实例启停管理工具，基于 JavaFX 21（Liberica Full JDK 内置）构建桌面 GUI。为 HeavenMS-Nap（冒险岛服务端）项目提供 MySQL 的便捷管理，支持多 MySQL 实例的启动/停止/重启/修复/导入/导出，含亮/暗主题切换和中英文国际化。
 
 ## 构建与运行
 
 - **IDE**: IntelliJ IDEA 项目，无 Maven/Gradle，依赖手动管理（JAR 放在 `lib/` 目录）
-- **JDK**: 1.8
-- **构建**: IDEA → Build → Build Artifacts → NapMysqlTool.jar，输出到 `out/artifacts/NapMysqlTool/`
-- **EXE 打包**: exe4j 配置文件 `NapMysqlTool.exe4j`，入口类 `cn.nap.ToolApp`，需 JRE 1.8
-- **运行**: `java -jar out/artifacts/NapMysqlTool/NapMysqlTool.jar`，项目目录下需有 MySQL 文件夹
+- **JDK**: [Liberica Native Image Kit Full 23.1.11+1](https://bell-sw.com/pages/downloads/native-image-kit/?version=23&version-annual=21&vtabs=true)（内置 JavaFX 和 Native Image）
+- **编译**: IDEA → Build → Build Project，class 输出到 `out/production/NapMysqlTool/`
+- **运行** (开发调试): `java -cp "out/production/NapMysqlTool;lib/*" cn.nap.ToolApp`，项目目录下需有 MySQL 文件夹
+- **EXE 打包**: 通过 `native/build-native.ps1` 进行 Native Image 编译（详见下方"Native Image 打包"）
 - **依赖** (手动放在 `lib/`):
   - `jna-5.16.0.jar` / `jna-platform-5.16.0.jar` — Windows 原生 API 调用（DWM 窗口暗色模式、标题栏着色）
-  - `mysql-connector-java-8.0.28.jar` — JDBC 连接检测（声明在 IDEA artifact 配置中，不在 module `.iml` 中）
+
+### Native Image 打包
+
+- 打包脚本 `native/build-native.ps1`，需先安装 **Visual Studio**（MSVC v143 生成工具）和 **Liberica NIK Full**，脚本顶部硬编码了 `$NIK` 和 `$VS` 路径，需按实际安装位置修改
+- 打包前需先确保 `out/production/NapMysqlTool` 中的 class 已更新；脚本 classpath 为 `out/production/NapMysqlTool;lib/*`
+- 默认构建 GUI 版：`.\native\build-native.ps1` 或 `.\native\build-native.ps1 -Mode gui`
+- 调试构建 console 版：`.\native\build-native.ps1 -Mode console`；console 版通过 `cmd .\NapMysqlTool3.exe` 启动时可看到 `System.out`/`System.err`
+- GUI 版去控制台依赖 native linker 参数 `/SUBSYSTEM:WINDOWS` 与 `/ENTRY:mainCRTStartup`；缺少入口参数会因找不到 `WinMain` 链接失败
+- 脚本末尾会读取 PE 头校验 Subsystem：GUI 期望 `2`，console 期望 `3`
+- `out/native` 下的 JDK/JavaFX 伴随 DLL（如 `java.dll`、`jvm.dll`、`fontmanager.dll`、`freetype.dll`、`lcms.dll` 等）发布时建议与 exe 同目录保留；本机单 exe 能跑不代表干净机器也稳定
+- 干净 Windows 环境上若出现 `MissingReflectionRegistrationError`、`NoSuchMethodException`、`NoSuchMethodError`，优先检查 `native/*-config.json`。JNA 的 `Kernel32` 需要 proxy metadata；Win10 暗色模式链路需要 `HMODULE`/`HINSTANCE`/`HANDLE` 等反射 metadata；Windows UIA/Accessibility 触发时需要 `WinAccessible`/`WinTextRangeProvider`/`WinVariant` 的 JNI metadata
 
 ## 架构
 
@@ -62,6 +72,7 @@ ToolApp ──(写)──> ToolService.getInstance().saveConfig() ──(ToolUti
 - 所有 UI 使用内联 `setStyle()` 而非 CSS 文件
 - Win11 暗色模式通过 JNA 调用 `DwmSetWindowAttribute`（属性 20）设置；Win10 通过 `SetWindowCompositionAttribute`（属性 26）+ 窗口宽度 ±1 强制重绘
 - Win11 标题栏着色通过 DWM 属性 35
+- Native Image 下获取窗口 HWND 仍走 JavaFX peer：`ToolUtil.getWindowHWND()` 优先用 `Unsafe` 读取 `javafx.stage.Window.peer`，再调用 peer 的 `getRawHandle()`；仅在 `reflect-config.json` 注册 `Window.getPeer` 或只加 `--add-opens` 不足以避免 native exe 中的 `IllegalAccessException`
 - 语言切换：`ToolService.changeLanguage()` 切换 zh-CN ↔ en-US，通过 `I18n.translate(language)` 获取对应文本
 
 ## 关键约定

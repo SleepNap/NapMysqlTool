@@ -30,3 +30,15 @@
 4. **未正常停止就关机** — 下次开机 MySQL 无法启动，到扩展功能里点"修复"即可
 
 > 以上问题 3.x 均已解决
+
+
+### 构建环境 (full-jfx21-nativeimage 分支)
+
+本分支使用 Liberica Native Image Kit Full 版本进行 Native Image 打包，替代原先的 Java 8 + 自带 JavaFX + exe4j 方案。
+
+**所需工具：**
+
+1. **[Liberica Native Image Kit Full 23.1.11+1 x86 64-bit](https://bell-sw.com/pages/downloads/native-image-kit/?version=23&version-annual=21&vtabs=true)** — 下载页面选择 **Full** 版本（自带 JavaFX 和 Native Image），安装后确保 `bin` 目录已加入 `PATH`
+2. **[Visual Studio](https://visualstudio.microsoft.com/zh-hans/downloads/)** — 需安装 **MSVC v143 生成工具**（含 `vcvarsall.bat`），Native Image 编译依赖 MSVC 工具链
+
+> `native/build-native.ps1` 脚本会自动调用 `vcvarsall.bat` 初始化 MSVC 环境

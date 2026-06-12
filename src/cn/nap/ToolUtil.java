@@ -10,6 +10,7 @@ import javafx.stage.Window;
 
 import java.io.*;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -292,16 +293,38 @@ public class ToolUtil {
     public static WinDef.HWND getWindowHWND(Window window) {
         long ptr = 0L;
         try {
-            final Method getPeer = Window.class.getDeclaredMethod("impl_getPeer");
-            getPeer.setAccessible(true);
-            final Object tkStage = getPeer.invoke(window);
-            final Method getRawHandle = tkStage.getClass().getMethod("getRawHandle");
-            getRawHandle.setAccessible(true);
-            ptr = (Long) getRawHandle.invoke(tkStage);
+            final Object tkStage = getWindowPeer(window);
+            if (tkStage != null) {
+                final Method getRawHandle = tkStage.getClass().getMethod("getRawHandle");
+                getRawHandle.setAccessible(true);
+                ptr = (Long) getRawHandle.invoke(tkStage);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return new WinDef.HWND(new Pointer(ptr));
+    }
+
+    private static Object getWindowPeer(Window window) throws Exception {
+        try {
+            Field peerField = Window.class.getDeclaredField("peer");
+            Object unsafe = getUnsafe();
+            Method objectFieldOffset = unsafe.getClass().getMethod("objectFieldOffset", Field.class);
+            Method getObject = unsafe.getClass().getMethod("getObject", Object.class, long.class);
+            long offset = (Long) objectFieldOffset.invoke(unsafe, peerField);
+            return getObject.invoke(unsafe, window, offset);
+        } catch (Exception ignored) {
+            final Method getPeer = Window.class.getDeclaredMethod("getPeer");
+            getPeer.setAccessible(true);
+            return getPeer.invoke(window);
+        }
+    }
+
+    private static Object getUnsafe() throws Exception {
+        Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
+        Field theUnsafe = unsafeClass.getDeclaredField("theUnsafe");
+        theUnsafe.setAccessible(true);
+        return theUnsafe.get(null);
     }
 
     public static int toRGBInt(final Color color) {
