@@ -1,22 +1,6 @@
 ## NapMysqlTool
 
-### UI 演变
-
-**1.x** — 简陋的 UI，只有一种模式
-
-![1.x](docs/screenshots/1.x.jpg)
-
-**2.x** — 新增暗黑模式、i18n 国际化、启停导入导出功能优化，UI 初步美化
-
-![2.x](docs/screenshots/2.x-1.jpg)
-![2.x](docs/screenshots/2.x-2.jpg)
-
-**3.x** — 现代化卡片式 UI，按实例管理支持同时管理多个实例，修复上一版启动失败的各种问题，启动速度提升
-
-![3.x](docs/screenshots/3.x-1.jpg)
-![3.x](docs/screenshots/3.x-2.jpg)
-
-**4.x** — 基于 JavaFX 21 重构，使用 Native Image 打包。单、双实例采用独立操作面板，支持拖动排序、主题配色及 my.ini 编辑管理。
+### UI
 
 ![4.x](docs/screenshots/4.x-1.png)
 ![4.x](docs/screenshots/4.x-2.png)

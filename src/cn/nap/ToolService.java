@@ -174,6 +174,7 @@ public class ToolService {
         );
         core.render = new ToolConfig.Info<>("auto", 2, I18n.RENDER_COMMAND.comment());
         core.iniEditor = new ToolConfig.Info<>("default", 3, I18n.INI_EDITOR_COMMAND.comment());
+        core.accent = new ToolConfig.Info<>("blue", 4, I18n.ACCENT_COMMAND.comment());
         return core;
     }
 
