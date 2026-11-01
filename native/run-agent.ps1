@@ -11,7 +11,7 @@ $CP = "$PROJECT_DIR\out\production\NapMysqlTool;$PROJECT_DIR\lib\*"
 New-Item -ItemType Directory -Force -Path $CONFIG_OUT | Out-Null
 
 $javaArgs = @(
-    "-agentlib:native-image-agent=config-output-dir=$CONFIG_OUT",
+    "-agentlib:native-image-agent=config-merge-dir=$CONFIG_OUT",
     "--add-exports", "javafx.graphics/com.sun.javafx.tk.quantum=ALL-UNNAMED",
     "--add-opens", "javafx.graphics/javafx.stage=ALL-UNNAMED",
     "--add-opens", "javafx.graphics/com.sun.javafx.tk=ALL-UNNAMED",

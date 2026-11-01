@@ -25,6 +25,9 @@ public class ToolConfig {
         public Info<String> section;
         public Info<String> language;
         public Info<String> theme;
+        public Info<String> render;
+        public Info<String> iniEditor;
+        public Info<String> accent;
 
         public Core() {
         }

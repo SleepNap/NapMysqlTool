@@ -6,3 +6,4 @@ mysql依赖库/
 config.ini
 output_*.sql
 init
+tmp

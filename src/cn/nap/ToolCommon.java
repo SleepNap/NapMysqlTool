@@ -2,34 +2,94 @@ package cn.nap;
 
 public class ToolCommon {
     public static final String DEFAULT_CONFIG_FILE = "config.ini";
-    public static final String SVG_DARK = "M593.054 120.217C483.656 148.739 402.91 248.212 402.91 366.546c0 140.582 113.962 254.544 254.544 254.544 118.334 0 217.808-80.746 246.328-190.144C909.17 457.12 912 484.23 912 512c0 220.914-179.086 400-400 400S112 732.914 112 512s179.086-400 400-400c27.77 0 54.88 2.83 81.054 8.217z";
-    public static final String SVG_LIGHT = "M512 831.508c16.264 0 29.792 11.72 32.597 27.176l0.534 5.955v62.23C545.13 945.167 530.298 960 512 960c-16.265 0-29.792-11.72-32.597-27.175l-0.534-5.956v-62.23c0-18.298 14.833-33.13 33.131-33.13z m267.584-97.826l5.197 4.245 44.002 44.002c12.938 12.938 12.938 33.916 0 46.854-11.321 11.321-28.797 12.736-41.656 4.245l-5.198-4.245-44.002-44.002c-12.938-12.938-12.938-33.915 0-46.854 11.321-11.32 28.797-12.736 41.657-4.245z m-493.511 4.246c11.32 11.32 12.736 28.796 4.245 41.656l-4.246 5.197-44.002 44.002c-12.939 12.938-33.916 12.938-46.854 0-11.32-11.321-12.736-28.797-4.245-41.657l4.245-5.197 44.003-44.002c12.938-12.938 33.916-12.938 46.854 0zM512 274.932c130.929 0 237.068 106.14 237.068 237.068 0 130.929-106.14 237.068-237.068 237.068-130.929 0-237.068-106.14-237.068-237.068 0-130.929 106.14-237.068 237.068-237.068z m414.87 203.937c18.297 0 33.13 14.833 33.13 33.131 0 16.264-11.72 29.792-27.175 32.597l-5.956 0.534h-62.23c-18.298 0-33.13-14.833-33.13-33.131 0-16.265 11.72-29.792 27.175-32.597l5.955-0.534h62.23z m-767.509 0c18.298 0 33.13 14.833 33.13 33.131 0 16.264-11.72 29.792-27.175 32.597l-5.955 0.534h-62.23C78.833 545.13 64 530.298 64 512c0-16.265 11.72-29.792 27.175-32.597l5.956-0.534h62.23z m669.422-283.653c11.321 11.32 12.736 28.797 4.246 41.656l-4.246 5.198-44.002 44.002c-12.938 12.939-33.915 12.94-46.853 0-11.322-11.32-12.737-28.796-4.246-41.656l4.245-5.197 44.002-44.003c12.938-12.938 33.915-12.938 46.854 0z m-591.91-4.245l5.197 4.245 44.003 44.003c12.938 12.938 12.938 33.915 0 46.854-11.321 11.32-28.797 12.736-41.657 4.245l-5.197-4.245-44.003-44.003c-12.938-12.938-12.938-33.915 0-46.854 11.321-11.32 28.797-12.736 41.657-4.245zM512 64c16.264 0 29.792 11.72 32.597 27.175l0.534 5.956v62.23c0 18.298-14.833 33.13-33.131 33.13-16.265 0-29.792-11.72-32.597-27.175l-0.534-5.955v-62.23C478.87 78.833 493.702 64 512 64z";
-    public static final String SVG_ADD = "M105 480a8 8 0 0 1 8-8h799a8 8 0 0 1 8 8v64a8 8 0 0 1-8 8H113a8 8 0 0 1-8-8v-64z M480 920a8 8 0 0 1-8-8V112a8 8 0 0 1 8-8h64a8 8 0 0 1 8 8v800a8 8 0 0 1-8 8h-64z";
-    public static final String SVG_START = "M 280 160 L 800 512 L 280 864 Z";
-    public static final String SVG_STOP = "M 288 288 L 736 288 L 736 736 L 288 736 Z";
-    public static final String SVG_RESTART = "M 512 80 C 273.6 80 80 273.6 80 512 s 193.6 432 432 432 s 432 -193.6 432 -432 h -96 c 0 185.6 -150.4 336 -336 336 S 176 697.6 176 512 S 326.4 176 512 176 c 92.8 0 178.4 37.6 240 98.8 l -144 144 h 320 V 98.8 l -86.4 86.4 C 772 108.8 648 80 512 80 z";
-    public static final String SVG_REPAIR = "M 512 160 C 317.6 160 160 317.6 160 512 s 157.6 352 352 352 c 160 0 294.4 -107.2 337.6 -256 h -108.8 C 712 700.8 620.8 768 512 768 c -140.8 0 -256 -115.2 -256 -256 s 115.2 -256 256 -256 c 70.4 0 134.4 28.8 180.8 75.2 L 576 448 h 256 V 192 l -64 64 C 704 192 624 160 512 160 z";
-    public static final String SVG_IMPORT = "M512 256L320 448h128v160h128V448h128L512 256z M288 736h448v80H288z";
-    public static final String SVG_EXPORT = "M288 208h448v80H288z M512 768L320 576h128V416h128v160h128L512 768z";
-    public static final String SVG_TIP_SUCCESS = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z";
-    public static final String SVG_TIP_ERROR = "M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z";
-    public static final String SVG_TIP_WARN = "M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z";
-    public static final String SVG_TIP_INFO = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z";
-    public static final String VERSION = "3.26.0611";
-    public static final double MAX_STAGE_WIDTH = 400;
-    public static final double MAX_STAGE_HEIGHT = 500;
-    public static final double MIN_MODAL_WIDTH = 200;
-    public static final double MIN_MODAL_HEIGHT = 140;
-    public static final double MAX_MODAL_WIDTH = 320;
-    public static final double MAX_MODAL_HEIGHT = 400;
-    public static final double MIN_PROGRESS_WIDTH = 280;
-    public static final double MAX_PROGRESS_WIDTH = 360;
+
+    // 同一套 24×24 SVG：2 单位圆头描边，四周留白固定，不按各自包围盒拉伸。
+    public static final String LINE_PLUS = "M12 5v14M5 12h14";
+    public static final String LINE_CLOSE = "M5 5l14 14M19 5L5 19";
+    public static final String LINE_MIN = "M4 12h16";
+    public static final String LINE_MAX = "M5 5h14v14H5z";
+    public static final String LINE_SUN = "M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5";
+    public static final String LINE_MOON = "M20 14.2A8.4 8.4 0 0 1 9.8 4a8.5 8.5 0 1 0 10.2 10.2z";
+    public static final String LINE_ZH = "M3 6h8L3 18h8M14 6v12M14 13a3 3 0 0 1 6 0v5";
+    public static final String LINE_EN = "M11 6H3v12h8M3 12h6M14 18v-8M14 13a3 3 0 0 1 6 0v5";
+    public static final String SVG_WINDOWS = "M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z";
+    public static final String LINE_FILE = "M13 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9l-6-6zM13 3v6h6M9 13h6M9 17h4";
+    public static final String LINE_CLOCK = "M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0zM12 7v5l3.5 2";
+    public static final String LINE_RESTART = "M20 10a8 8 0 1 0-1.7 7M20 4v6h-6";
+    public static final String LINE_REPAIR = "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94L14.7 6.3z";
+    public static final String LINE_IMPORT = "M12 3v12M8 11l4 4 4-4M4 16v4h16v-4";
+    public static final String LINE_EXPORT = "M12 15V3M8 7l4-4 4 4M4 16v4h16v-4";
+    public static final String LINE_DELETE = "M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7";
+    public static final String LINE_EDIT = "M15.5 6l3 3M4 20l4.5-1 12-12a2.12 2.12 0 0 0-3-3l-12 12L4 20z";
+    public static final String LINE_SETTINGS = "M4 7h9M17 7h3M4 17h3M11 17h9M15 4v6M9 14v6";
+
+    public static final String LINE_MARK = "M6 18V6l6 8 6-8v12";
+
+    // Windows 记事本 11.2607.14.0 的原生 24px 透明图标，内嵌以兼容普通编译和 Native Image。
+    // SHA-256: 5f32b9eedc1f8586ba122ca3ff001ebf5cac7446c5a28c3c82c8c58eac3c770a
+    public static final String NOTEPAD_PNG =
+            "iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAACMUlEQVRIx6WUv2sTcRjGP7lr7tILpBUHpeCYTUGkg4WKtFAQXUoL"
+            + "JYOSDg6CFbSLi4P/QRfFtdXBwcEfQ4fuLoJDwEFwdhEqhTYpJOT7ONxd8r3L5XKt73L3fvN+n+fe58n7TkkiHd6zV0cA3Z2t2fPk"
+            + "dkzZyctfnV2gGecvfh4n+J//OJKxDrZbh4l86/sfSdp7PX9pM5NAUlMSvucBYIwwCN8rh7mEkfCivG8MEnjl6HdjEGoC2QQxwJPN"
+            + "BpLoS0ji0f2NMI8AHzbWB7WSaG6sIisfK1EMoKgwviCBQZnnWWdjCYyJihBmzOVknl07nsAq2v3wmeOTNkWiGgSs3VsJO80lMCYi"
+            + "gYuzM1R8LzI/CSgE1lnFr1ie5EjUt1q/s7SYaF0WgNCIVH0zfM/tYETnAViaLMMjipgcAb7/tM9Ju1PIgyCY5u7K0tlMvjBTGwxc"
+            + "qLv1lrQA3/cj/5gsUazz8q2FEZ3HyoQSg5fbgSmoc2IWUrUTJjkE+Lh/QLtzWsiD6ekKy7cXC5hsfW0QBHiWB9EyTM1DGK7jJu5O"
+            + "XBVGYv76NXq9Xth6PF4xgIQYSuK47tBkJpkctVmtBimdR/dQXGtv3nwPlLMxSW3X85h81evROnVDMGvo0oAj29Va5TeqOSY3LpdZ"
+            + "63YHX1H0CSWghOM4I3+MBMFh64ArC6tjQChE9vvbF+r1ejbB1zfb/N15ijh7lAC3VMIvw831x9kEczXn3VzNecB/hFvirZ3/Azah"
+            + "/GB9hAxqAAAAAElFTkSuQmCC";
+
+    public static final String VERSION = "4.26.1101";
+
+    // v2 尺寸（含 36px 标题栏）
+    public static final double WIN_WIDTH = 680;
+    public static final double WIN_HEIGHT = 400;
+    public static final double WIN_MIN_WIDTH = 520;
+    public static final double WIN_MIN_HEIGHT = 184;
+    public static final double COMPACT_WIN_WIDTH = 540;
+    public static final double TITLE_BAR_HEIGHT = 36;
+    public static final double CONTENT_PAD = 32;
+    public static final double ROW_HEIGHT = 80;
+    public static final double LIST_TOP = 26;
+    public static final double BAR_HEIGHT = 36;
+    public static final double ACTION_COLUMN = 90;
+    public static final double ACTION_BUTTON = 56;
+    public static final double MORE_BUTTON = 28;
+    public static final double DIALOG_WIDTH = 500;
+    public static final double RESIZE_EDGE = 4;
+
+    public static final String FONT = "Microsoft YaHei UI";
+
+    /** 少量实例按内容收紧窗口，三个以上使用滚动列表。 */
+    public static double windowHeightFor(int instanceCount) {
+        if (instanceCount == 1) {
+            return 220;
+        }
+        if (instanceCount == 2) {
+            return 338;
+        }
+        if (isCompactCount(instanceCount)) {
+            return Math.max(WIN_MIN_HEIGHT, TITLE_BAR_HEIGHT + 24 + instanceCount * ROW_HEIGHT + BAR_HEIGHT + 2);
+        }
+        int rows = Math.max(1, Math.min(instanceCount, 3));
+        return Math.max(WIN_MIN_HEIGHT, TITLE_BAR_HEIGHT + 48 + BAR_HEIGHT + 2 + rows * (ROW_HEIGHT + 8));
+    }
+
+    public static boolean isCompactCount(int instanceCount) {
+        return instanceCount > 0 && instanceCount <= 2;
+    }
+
+    public static double windowWidthFor(int instanceCount) {
+        if (instanceCount == 1) {
+            return 520;
+        }
+        return isCompactCount(instanceCount) ? COMPACT_WIN_WIDTH : WIN_WIDTH;
+    }
 
     public enum Status {
-        STARTED(1, I18n.STARTED, ThemeColor.PRIMARY),
-        STOPPED(0, I18n.STOPPED, ThemeColor.DANGER),
-        STARTING(2, I18n.STARTING, ThemeColor.WARNING),
-        STOPPING(3, I18n.STOPPING, ThemeColor.WARNING);
+        STARTED(1, I18n.STARTED, ThemeColor.GREEN_TEXT),
+        STOPPED(0, I18n.STOPPED, ThemeColor.TEXT_3),
+        STARTING(2, I18n.STARTING, ThemeColor.AMBER_TEXT),
+        STOPPING(3, I18n.STOPPING, ThemeColor.AMBER_TEXT);
 
         private final int type;
         private final I18n i18n;
@@ -64,47 +124,51 @@ public class ToolCommon {
     }
 
     public enum ThemeColor {
-        WINDOW_BG("#1f2d3d", "#5c5c5c"),
+        BACKGROUND("#f2f3f6", "#121418"),
+        TITLE_BAR("#ffffff", "#242931"),
+        CARD("#ffffff", "#1d2024"),
+        CARD_BORDER("#e5e7ec", "#2b2f35"),
+        HOVER_2("#e4e7ec", "#343b44"),
+        TRACK("#e8ebef", "#2b3139"),
+        THUMB("#ffffff", "#3b424c"),
+        PANEL("#ffffff", "#23262b"),
+        PANEL_BORDER("#dfe2e8", "#3a3f46"),
+        TEXT("#1a1c1f", "#e8e9eb"),
+        TEXT_2("#6b7075", "#9aa0a6"),
+        TEXT_3("#a3a8ae", "#6b7178"),
+        LINE("#e5e9ef", "#3b424d"),
+        LINE_2("#e1e6ed", "#414955"),
+        BORDER("#ccd2d9", "#2a2c2e"),
+        BLUE("#1677ff", "#4c9aff"),
+        GREEN("#16a34a", "#3fb950"),
+        GREEN_TEXT("#15803d", "#56d364"),
+        AMBER("#d97706", "#d29922"),
+        AMBER_TEXT("#b45309", "#e3b341"),
+        RED("#d92d20", "#f85149"),
+        HOVER("#fafbfc", "#1d1f21"),
+        FILL("#f7f8fa", "#222426"),
+        WHITE("#ffffff", "#ffffff");
 
-        ROOT_BG("#2b3a4f", "#fff"),
-
-        BUTTON_BG("#3a4d66", "#f5f5f5"),
-        BUTTON_HOVER("#4a6080", "#eee"),
-        BUTTON_BORDER("#4a6080", "#999"),
-        BUTTON_BORDER_HOVER("#5a7090", "#999"),
-
-        CARD_BG("#334560", "#f8f9fa"),
-
-        FONT_BG("#c8d6e5", "#555"),
-        FONT_HOVER("#fff", "#000"),
-
-        SCROLL_BG("#2b3a4f", "#fff"),
-
-        PRIMARY("#4a9eff", "#1677ff"),
-        PRIMARY_HOVER("#6ab4ff", "#4096ff"),
-        DANGER("#ff4d4f", "#ff4d4f"),
-        DANGER_HOVER("#ff7875", "#ff7875"),
-        SUCCESS("#52c41a", "#52c41a"),
-        WARNING("#faad14", "#faad14"),
-        ;
-
-        private final String dark;
         private final String light;
+        private final String dark;
 
-        ThemeColor(String dark, String light) {
-            this.dark = dark;
+        ThemeColor(String light, String dark) {
             this.light = light;
-        }
-
-        public String dark() {
-            return dark;
+            this.dark = dark;
         }
 
         public String light() {
             return light;
         }
 
+        public String dark() {
+            return dark;
+        }
+
         public String color() {
+            if (this == BLUE) {
+                return ToolService.getInstance().getAccentColor();
+            }
             return ToolService.getInstance().isDark() ? dark : light;
         }
     }
@@ -139,73 +203,29 @@ public class ToolCommon {
         }
     }
 
-
-    public enum TipType {
-        INFO(ThemeColor.PRIMARY, SVG_TIP_INFO),
-        SUCCESS(ThemeColor.SUCCESS, SVG_TIP_SUCCESS),
-        WARNING(ThemeColor.WARNING, SVG_TIP_WARN),
-        ERROR(ThemeColor.DANGER, SVG_TIP_ERROR);
-
-        private final ThemeColor color;
-        private final String svg;
-
-        TipType(ThemeColor color, String svg) {
-            this.color = color;
-            this.svg = svg;
-        }
-
-        public String color() {
-            return color.color();
-        }
-
-        public String svg() {
-            return svg;
-        }
-    }
-
     public enum I18n {
         // command
         TOOL_CONFIG_COMMAND("工具配置", "Tool Configuration"),
         LANGUAGE_COMMAND("语言，zh-CN中文，en-US英文", "Language, zh-CN or en-US"),
         THEME_COMMAND("主题颜色，dark深色，light浅色", "Theme Color, dark or light"),
+        RENDER_COMMAND("渲染方式，auto自动，sw软件，d3d硬件加速", "Render pipeline, auto/sw/d3d"),
+        ACCENT_COMMAND("界面配色，blue/green/purple/slate/orange", "Accent color, blue/green/purple/slate/orange"),
+        INI_EDITOR_COMMAND("打开my.ini的程序，default系统默认，notepad记事本，或可执行文件路径",
+                "Program to open my.ini, default/notepad/executable path"),
         NAME_COMMAND("实例名称", "Instance Name"),
         PATH_COMMAND("实例路径", "Instance Path"),
         USERNAME_COMMAND("用户名", "Username"),
         PASSWORD_COMMAND("密码", "Password"),
         PORT_COMMAND("端口", "Port"),
         DATABASE_COMMAND("数据库", "Database"),
-        ADD_INSTANCE("添加", "Add"),
-        MODIFY_INSTANCE("修改", "Edit"),
-        DELETE_INSTANCE("删除", "Delete"),
-        CONFIRM_DELETE("确定删除实例 %s？", "Delete instance \"%s\"?"),
-        EDIT_INI("编辑INI", "Edit INI"),
-        INI_WARN("请谨慎编辑my.ini，错误配置可能导致MySQL无法启动", "Edit my.ini with caution. Misconfiguration may prevent MySQL startup."),
-        INI_SAVE_SUCCESS("端口%s的my.ini已保存", "my.ini for port %s saved."),
-        INI_IMPORT_TEMPLATE("导入模板", "Template"),
-        INI_DELETE_FILE("删除my.ini", "Delete my.ini"),
-        INI_TPL_CHARSET("# 字符集", "# Character set"),
-        INI_TPL_COLLATION("# 排序规则", "# Collation"),
-        INI_TPL_ENGINE("# 默认存储引擎", "# Default storage engine"),
-        INI_TPL_MAX_CONN("# 允许最大连接数（根据服务器配置调整）", "# Max connections (adjust based on server)"),
-        INI_TPL_CONN_ERR("# 允许连接失败的次数，防止暴力破解", "# Max connect errors to prevent brute force"),
-        INI_TPL_TMP_TABLE("# 临时表大小", "# Temporary table size"),
-        INI_TPL_MAX_PACKET("# 最大包大小，防止导入大文件报错", "# Max packet size for large imports"),
-        INI_TPL_LOWER_CASE("# 表名不区分大小写（1=不区分，0=区分，Windows建议1）", "# Case-insensitive table names (1=insensitive, 0=sensitive, Windows: 1)"),
-        INI_TPL_BUFFER("# InnoDB缓冲池（建议设置为物理内存的50%~70%）", "# InnoDB buffer pool (recommend 50-70%% of RAM)"),
-        INI_DELETE_CONFIRM("确定删除 my.ini？删除后MySQL将使用默认配置启动", "Delete my.ini? MySQL will start with defaults."),
-        INI_DELETE_SUCCESS("my.ini已删除", "my.ini deleted."),
-        FIELD_REQUIRED("必填项不能为空", "Required fields cannot be empty"),
-        INSTANCE_NAME_LABEL("实例名称", "InstanceName"),
-        INSTANCE_PATH_LABEL("MySQL路径", "MySQL Path"),
-        INSTANCE_USERNAME_LABEL("用户名", "Username"),
-        INSTANCE_PASSWORD_LABEL("密码", "Password"),
-        INSTANCE_PORT_LABEL("端口", "Port"),
-        INSTANCE_DATABASE_LABEL("数据库", "Database"),
 
         // section
         CORE_SECTION("工具配置", "ToolConfiguration"),
         CORE_LANGUAGE("语言", "language"),
         CORE_THEME("主题", "theme"),
+        CORE_RENDER("渲染", "render"),
+        CORE_INI_EDITOR("INI编辑器", "ini_editor"),
+        CORE_ACCENT("配色", "accent"),
         MYSQL8_SECTION("MySQL8.0", "MySQL8.0"),
         MYSQL5_SECTION("MySQL5.7", "MySQL5.7"),
         INSTANCE_PATH("路径", "path"),
@@ -214,55 +234,149 @@ public class ToolCommon {
         INSTANCE_PORT("端口", "port"),
         INSTANCE_DATABASE("数据库", "database"),
 
-        // ui
+        // 窗口与列表
         TOOL_TITLE("MySQL启停工具 by Nap", "MySQL Tool by Nap"),
-        TAB_OPERATE("启停功能", "Control"),
-        TAB_EXT("扩展功能", "More"),
-        TAB_INSTANCE("实例管理", "Instances"),
+        LOG("日志", "Log"),
+        SETTINGS("设置", "Settings"),
+        MORE_ACTIONS("更多操作", "More actions"),
+        DRAG_TO_REORDER("拖动调整顺序", "Drag to reorder"),
+        REORDER_SAVE_FAILED("无法保存实例顺序，已恢复原顺序。请检查配置文件是否可写。",
+                "Could not save the instance order. The original order was restored. Check that the configuration file is writable."),
+        THEME_LABEL("主题", "Theme"),
+        LANGUAGE_LABEL("语言", "Language"),
+        OPEN_INI_WITH("打开 my.ini", "Open my.ini"),
+        SYSTEM_DEFAULT("系统默认", "System default"),
+        INI_FALLBACK_HINT("无关联时用记事本", "Falls back to Notepad"),
+        LIGHT("浅色", "Light"),
+        DARK("深色", "Dark"),
+        DONE("完成", "Done"),
+        BROWSE("浏览", "Browse"),
+        FOLDER("目录", "Folder"),
+        CHOOSE_FOLDER("选择目录", "Choose folder"),
+        MESSAGE("提示", "Notice"),
+        ACCENT("界面配色", "Accent"),
+        ACCENT_BLUE("蓝色", "Blue"),
+        ACCENT_GREEN("绿色", "Green"),
+        ACCENT_PURPLE("紫色", "Purple"),
+        ACCENT_SLATE("石板灰", "Slate"),
+        ACCENT_ORANGE("橙色", "Orange"),
+        ADD_INSTANCE_BTN("添加实例", "Add instance"),
+        SAVE("保存", "Save"),
+        CANCEL("取消", "Cancel"),
+        CLOSE("关闭", "Close"),
 
-        START_ALL("启动全部", "StartAll"),
-        STOP_ALL("停止全部", "StopAll"),
-        RESTART_ALL("重启全部", "RestartAll"),
+        ADD_INSTANCE_ROW("添加实例", "Add instance"),
+        INSTANCE_SUMMARY("%s 个实例 · %s 个运行中", "%s instances · %s running"),
+        INSTANCE_SUMMARY_SINGLE("%s 个实例 · %s 个运行中", "%s instance · %s running"),
         START("启动", "Start"),
         STOP("停止", "Stop"),
         RESTART("重启", "Restart"),
         REPAIR("修复", "Repair"),
-        IMPORT("导入", "Import"),
-        EXPORT("导出", "Export"),
-        REPAIR_ALL("修复全部", "RepairAll"),
-        IMPORT_ALL("导入全部", "ImportAll"),
-        EXPORT_ALL("导出全部", "ExportAll"),
-        STARTED("已启动", "Started"),
+        IMPORT_DB("导入数据库", "Import database"),
+        EXPORT_DB("导出数据库", "Export database"),
+        EXPORT_CONFIRM_WARNING("导出实例「%s」的数据库期间会锁表，可能影响正在运行的业务。是否继续导出？",
+                "Exporting the database of instance \"%s\" locks tables and may affect running services. Continue exporting?"),
+        EXPORT_NOT_RUNNING("无法确认实例「%s」正在运行，已取消导出。不会自动启动或重启数据库。",
+                "Cannot confirm that instance \"%s\" is running. Export cancelled; the database will not be started or restarted automatically."),
+        EDIT_MY_INI("编辑 my.ini", "Edit my.ini"),
+        MODIFY_INSTANCE("修改实例", "Edit instance"),
+        DELETE_INSTANCE("移除实例", "Remove instance"),
+        CONFIRM_DELETE("确定移除实例「%s」吗？仅移除配置，不会删除数据库文件。",
+                "Remove instance \"%s\"? Only its configuration will be removed. Database files will be kept."),
         STOPPED("未启动", "Stopped"),
+        STARTED("已启动", "Started"),
         STARTING("启动中", "Starting"),
         STOPPING("停止中", "Stopping"),
-        REPAIRING("修复中...", "Repairing..."),
-        IMPORTING("导入中...", "Importing..."),
-        EXPORTING("导出中...", "Exporting..."),
-        REPAIR_SUCCESS("修复完成", "Repair success."),
-        REPAIR_ERR1("修复失败，MySQL未停止", "Repair failed, MySQL did not stop."),
-        EXPORT_SUCCESS("导出完成", "Export success."),
-        EXPORT_ERR1("导出失败，MySQL未启动", "Export failed, MySQL did not start."),
-        IMPORT_SUCCESS("导入完成", "Import success."),
-        IMPORT_ERR1("导入失败，MySQL未启动", "Import failed, MySQL did not start."),
-        IMPORT_ERR2("导入失败，导入文件output.sql不存在", "Import failed, output.sql not found."),
+        STARTING_HINT("%s · 正在启动，已用时 %s 秒", "%s · starting, %s s"),
+        STOPPING_HINT("%s · 正在停止，已用时 %s 秒", "%s · stopping, %s s"),
+        RUNNING_LOG("已运行 %s", "up %s"),
+        LAST_STOP("上次停止 %s", "stopped %s"),
+
+        // 底栏
+        VIEW_LOG("查看日志", "View log"),
+        OP_STARTING("正在启动 %s", "Starting %s"),
+        OP_STOPPING("正在停止 %s", "Stopping %s"),
+        OP_REPAIRING("正在修复 %s", "Repairing %s"),
+        OP_IMPORTING("正在导入 %s", "Importing %s"),
+        OP_EXPORTING("正在导出 %s", "Exporting %s"),
+        ELAPSED("已用时 %s 秒", "%s s elapsed"),
+        INI_OPENED("my.ini 已在%s打开", "my.ini opened in %s"),
+        INI_EDITING("编辑 my.ini", "Editing my.ini"),
+        INI_SAVED("已保存 %s", "Saved %s"),
+        INI_RESTART_HINT("重启 MySQL 实例后生效", "Restart MySQL instance to apply"),
+        INI_NEXT_START_HINT("下次启动 MySQL 实例时生效", "Applies on next MySQL instance start"),
+        RELOAD("重新读取", "Reload"),
+        RESTART_INSTANCE("重启实例", "Restart"),
+        END_SESSION("关闭提示", "Dismiss"),
+        NOTEPAD("记事本", "Notepad"),
+
+        // 操作与提示
+        CONFIRM_BIND_START("实例「%s」的端口 %s 已被占用，是否强行启动？",
+                "Port %2$s for instance \"%1$s\" is in use. Force startup?"),
+        MYSQL_PATH_ERROR("实例「%s」的 MySQL 路径不存在。", "MySQL path missing for instance \"%s\"."),
+        DATABASE_EMPTY("实例「%s」尚未配置数据库名称。", "Database name not configured for instance \"%s\"."),
+        FIELD_REQUIRED("必填项不能为空", "Required fields cannot be empty"),
+        PORT_INVALID("端口需在 1-65535 之间", "Port must be 1-65535"),
+        PORT_DUPLICATE("端口 %s 已被实例「%s」使用。", "Port %s is already used by instance \"%s\"."),
+        INI_WARN("修改 my.ini 后需重启 MySQL 实例才生效", "Restart the MySQL instance after editing my.ini to apply changes"),
+        INI_MISSING("my.ini 不存在：%s", "my.ini not found: %s"),
+        INI_OPEN_FAILED("无法打开实例「%s」的 my.ini", "Failed to open my.ini for instance \"%s\""),
+        INI_OPEN_RUNNING("实例「%s」正在运行，修改配置后需要重启。先停止再编辑吗？",
+                "Instance \"%s\" is running. Changes require a restart. Stop it before editing?"),
+        STOP_AND_EDIT("停止并编辑", "Stop and edit"),
+        EDIT_ONLY("仅编辑", "Edit anyway"),
+        LOG_EMPTY("暂无日志", "No log entries"),
+
+        // 兼容旧调用
+        ADD_INSTANCE("添加", "Add"),
+        EDIT_INI("编辑INI", "Edit INI"),
+        INI_SAVE_SUCCESS("端口%s的my.ini已保存", "my.ini for port %s saved."),
+        INI_IMPORT_TEMPLATE("模板", "Template"),
+        INI_DELETE_FILE("删除 my.ini", "Delete my.ini"),
+        INI_DELETE_CONFIRM("确定删除实例「%s」的 my.ini 吗？\n%s", "Delete my.ini for instance \"%s\"?\n%s"),
+        INI_DELETE_SUCCESS("实例「%s」的 my.ini 已删除。", "my.ini deleted for instance \"%s\"."),
+        INI_DELETE_FAILED("无法删除实例「%s」的 my.ini", "Failed to delete my.ini for instance \"%s\""),
+        INI_TPL_CHARSET("# 字符集", "# Character set"),
+        INI_TPL_COLLATION("# 排序规则", "# Collation"),
+        INI_TPL_ENGINE("# 默认存储引擎", "# Default storage engine"),
+        INI_TPL_MAX_CONN("# 允许最大连接数", "# Max connections"),
+        INI_TPL_CONN_ERR("# 允许连接失败的次数", "# Max connect errors"),
+        INI_TPL_TMP_TABLE("# 临时表大小", "# Temporary table size"),
+        INI_TPL_MAX_PACKET("# 最大包大小", "# Max packet size"),
+        INI_TPL_LOWER_CASE("# 表名不区分大小写", "# Case-insensitive table names"),
+        INI_TPL_BUFFER("# InnoDB缓冲池", "# InnoDB buffer pool"),
+        INSTANCE_NAME_LABEL("名称", "Name"),
+        INSTANCE_PATH_LABEL("MySQL 路径", "MySQL path"),
+        INSTANCE_USERNAME_LABEL("用户名", "Username"),
+        INSTANCE_PASSWORD_LABEL("密码", "Password"),
+        INSTANCE_PORT_LABEL("端口", "Port"),
+        INSTANCE_DATABASE_LABEL("数据库", "Database"),
+
+        // 任务
         REPAIR_STEP_VC("检查VC++环境依赖", "Check VC++ Runtime"),
         REPAIR_STEP_ASCII("检查英文路径", "Check ASCII Path"),
         REPAIR_STEP_STOP("停止服务", "Stop Service"),
         REPAIR_STEP_BINLOG("清空binlog", "Clear Binlog"),
         REPAIR_STEP_PID("删除pid文件", "Delete PID"),
         REPAIR_STEP_PORT("解除端口占用", "Release Port"),
+        REPAIR_STEP_START("启动服务", "Start Service"),
         STEP_DONE("完成", "Done"),
         STEP_FAIL("失败", "Failed"),
-        OK("确定", "OK"),
-        CANCEL("取消", "Cancel"),
-        CLOSE("关闭", "Close"),
-
-        CONFIRM_BIND_START("端口%s已被占用，是否强行启动？", "Port %s is in use. Force startup?"),
-        MYSQL_PATH_ERROR("端口%s的MySQL路径不存在", "MySQL path missing for port %s."),
-        DATABASE_EMPTY("端口%s数据库名未配置", "Database name not configured for port %s."),
-
-        ;
+        REPAIR_SUCCESS("修复完成", "Repair success."),
+        REPAIR_ERR1("修复失败，MySQL未停止", "Repair failed, MySQL did not stop."),
+        EXPORT_SUCCESS("导出完成", "Export success."),
+        EXPORT_ERR1("导出失败，MySQL未启动", "Export failed, MySQL did not start."),
+        IMPORT_SUCCESS("导入完成", "Import success."),
+        IMPORT_ERR1("实例「%s」未能启动，已取消导入。", "Instance \"%s\" did not start. Import cancelled."),
+        IMPORT_ERR2("无法导入实例「%s」：找不到文件 %s。", "Cannot import into instance \"%s\": file %s not found."),
+        TAB_OPERATE("启停功能", "Control"),
+        TAB_EXT("扩展功能", "More"),
+        TAB_INSTANCE("实例管理", "Instances"),
+        REPAIR_ALL("修复全部", "Repair all"),
+        IMPORT_ALL("导入全部", "Import all"),
+        EXPORT_ALL("导出全部", "Export all"),
+        REPAIRING("修复中", "Repairing"),
+        OK("确定", "OK");
 
         private final String zh;
         private final String en;

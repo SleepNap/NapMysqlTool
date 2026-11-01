@@ -16,8 +16,14 @@
 ![3.x](docs/screenshots/3.x-1.jpg)
 ![3.x](docs/screenshots/3.x-2.jpg)
 
+**4.x** — 基于 JavaFX 21 重构，使用 Native Image 打包。单、双实例采用独立操作面板，支持拖动排序、主题配色及 my.ini 编辑管理。
 
-### 常见启动失败问题
+![4.x](docs/screenshots/4.x-1.png)
+![4.x](docs/screenshots/4.x-2.png)
+
+Native 版本无需额外安装 Java。发布时需保留 EXE 同目录下的 DLL，MySQL 程序目录按实例配置。
+
+### 历史版本常见启动失败问题
 
 1. **缺少 VC++ 运行库** — MySQL 依赖此库，不安装会导致启动报错。工具已自带，在 `mysql-lib/` 目录下
 2. **端口被占用** — 之前装过 MySQL 并注册了系统服务，开机自启占用了 3306 端口，需手动关掉服务自启
@@ -32,7 +38,7 @@
 > 以上问题 3.x 均已解决
 
 
-### 构建环境 (full-jfx21-nativeimage 分支)
+### 构建环境（4.x 分支）
 
 本分支使用 Liberica Native Image Kit Full 版本进行 Native Image 打包，替代原先的 Java 8 + 自带 JavaFX + exe4j 方案。
 

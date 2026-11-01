@@ -23,6 +23,7 @@ public class ToolService {
     private ToolConfig config;
     private final AtomicBoolean loading = new AtomicBoolean(false);
     private boolean win11;
+    private boolean loadFailed;
 
     public static ToolService getInstance() {
         return instance;
@@ -32,12 +33,18 @@ public class ToolService {
         if (!loading.compareAndSet(false, true)) {
             return;
         }
+        boolean exists = Files.exists(Paths.get(ToolCommon.DEFAULT_CONFIG_FILE));
         try {
             win11 = ToolUtil.isWin11();
             List<ToolUtil.SectionObj> sectionList = ToolUtil.readConfig(ToolCommon.DEFAULT_CONFIG_FILE);
+            if (sectionList == null && exists) {
+                // 文件存在却读不出来：宁可本次只读，也不能用默认配置覆盖用户数据
+                throw new IllegalStateException("config.ini unreadable");
+            }
             config = parseConfig(sectionList);
             refreshStatus();
         } catch (Exception e) {
+            loadFailed = true;
             config = initDefaultConfig();
             refreshStatus();
         } finally {
@@ -49,9 +56,10 @@ public class ToolService {
         return loading.get();
     }
 
-    public void saveConfig() {
-        if (config == null) {
-            return;
+    public boolean saveConfig() {
+        // 读取失败时禁止回写，避免把用户的 config.ini 覆盖成默认值
+        if (config == null || loadFailed) {
+            return false;
         }
         TreeMap<Integer, ToolUtil.SectionObj> sortedMap = new TreeMap<>();
         if (config.core != null) {
@@ -62,7 +70,45 @@ public class ToolService {
                 sortedMap.put(instance.section.sort, ToolUtil.fromInstance(instance));
             }
         }
-        ToolUtil.writeConfig(ToolCommon.DEFAULT_CONFIG_FILE, new ArrayList<>(sortedMap.values()));
+        return ToolUtil.writeConfig(ToolCommon.DEFAULT_CONFIG_FILE, new ArrayList<>(sortedMap.values()));
+    }
+
+    /** position 是移动后的索引；同步 section 排序值，确保重启后顺序不变。 */
+    public boolean moveInstance(ToolConfig.Instance moving, int position) {
+        if (config == null || loadFailed || config.instances == null
+                || position < 0 || position >= config.instances.size()) {
+            return false;
+        }
+        int from = config.instances.indexOf(moving);
+        if (from < 0) {
+            return false;
+        }
+        if (from == position) {
+            return true;
+        }
+        List<ToolConfig.Instance> previous = new ArrayList<>(config.instances);
+        int[] previousSort = previous.stream().mapToInt(item -> item.section.sort).toArray();
+        int coreSort = config.core == null ? 0 : config.core.section.sort;
+        config.instances.remove(from);
+        config.instances.add(position, moving);
+        if (config.core != null) {
+            config.core.section.sort = 0;
+        }
+        for (int index = 0; index < config.instances.size(); index++) {
+            config.instances.get(index).section.sort = index + 1;
+        }
+        if (saveConfig()) {
+            return true;
+        }
+        config.instances.clear();
+        config.instances.addAll(previous);
+        for (int index = 0; index < previous.size(); index++) {
+            previous.get(index).section.sort = previousSort[index];
+        }
+        if (config.core != null) {
+            config.core.section.sort = coreSort;
+        }
+        return false;
     }
 
     public ToolConfig getConfig() {
@@ -71,6 +117,10 @@ public class ToolService {
 
     public boolean isWin11() {
         return win11;
+    }
+
+    public boolean isLoadFailed() {
+        return loadFailed;
     }
 
     public boolean isDark() {
@@ -117,11 +167,76 @@ public class ToolService {
     }
 
     private ToolConfig.Core initDefaultCore() {
-        return new ToolConfig.Core(
+        ToolConfig.Core core = new ToolConfig.Core(
                 new ToolConfig.Info<>(I18n.CORE_SECTION.EN(), 0, I18n.TOOL_CONFIG_COMMAND.comment()),
                 new ToolConfig.Info<>(Language.ZH_CN.type(), 0, I18n.LANGUAGE_COMMAND.comment()),
                 new ToolConfig.Info<>(Theme.LIGHT.type(), 1, I18n.THEME_COMMAND.comment())
         );
+        core.render = new ToolConfig.Info<>("auto", 2, I18n.RENDER_COMMAND.comment());
+        core.iniEditor = new ToolConfig.Info<>("default", 3, I18n.INI_EDITOR_COMMAND.comment());
+        return core;
+    }
+
+    /** auto / sw / d3d */
+    public String getRenderMode() {
+        return config == null || config.core == null || config.core.render == null
+                ? "auto" : config.core.render.data;
+    }
+
+    /** default / notepad / 可执行文件路径 */
+    public String getIniEditor() {
+        return config == null || config.core == null || config.core.iniEditor == null
+                ? "default" : config.core.iniEditor.data;
+    }
+
+    /** blue / green / purple / slate / orange */
+    public String getAccent() {
+        if (config == null || config.core == null || config.core.accent == null) {
+            return "blue";
+        }
+        return config.core.accent.data;
+    }
+
+    public void setAccent(String accent) {
+        if (config != null && config.core != null && config.core.accent != null) {
+            config.core.accent.data = accent;
+        }
+    }
+
+    /** 主色 hex；ThemeColor.BLUE 直接取这里。 */
+    public String getAccentColor() {
+        return switch (getAccent()) {
+            case "green" -> "#16a34a";
+            case "purple" -> "#7c3aed";
+            case "slate" -> "#475569";
+            case "orange" -> "#ea580c";
+            default -> "#1677ff";
+        };
+    }
+
+    public void setIniEditor(String editor) {
+        if (config != null && config.core != null && config.core.iniEditor != null) {
+            config.core.iniEditor.data = editor;
+        }
+    }
+
+    /** 实例当前 PID，取 data 目录下的 *.pid。 */
+    public String getPid(ToolConfig.Instance instance) {
+        Path pidFile = getPidFile(instance);
+        return pidFile == null ? null : ToolUtil.readPidFile(pidFile.toString());
+    }
+
+    /** pid 文件的修改时间当作启动时刻，取不到返回 -1。 */
+    public long getStartTime(ToolConfig.Instance instance) {
+        Path pidFile = getPidFile(instance);
+        if (pidFile == null) {
+            return -1;
+        }
+        try {
+            return Files.getLastModifiedTime(pidFile).toMillis();
+        } catch (IOException e) {
+            return -1;
+        }
     }
 
     public boolean isRunning(ToolConfig.Instance instance) {
@@ -388,8 +503,18 @@ public class ToolService {
     private void checkInstancePath(ToolConfig.Instance instance) throws Exception {
         Path dir = Paths.get(instance.path.data);
         if (!Files.isDirectory(dir)) {
-            throw new Exception(String.format(I18n.MYSQL_PATH_ERROR.translate(getLanguage()), instance.port.data));
+            throw new Exception(String.format(I18n.MYSQL_PATH_ERROR.translate(getLanguage()), instance.section.data));
         }
+    }
+
+    /** 缺少时创建零字节文件；已存在时不改动原内容，禁止覆盖现有配置。 */
+    public File createMyIniIfMissing(ToolConfig.Instance instance) throws IOException {
+        File file = new File(instance.path.data, "my.ini");
+        file.createNewFile();
+        if (!file.isFile()) {
+            throw new IOException("Not a regular file: " + file.getAbsolutePath());
+        }
+        return file;
     }
 
     public String readMyIni(ToolConfig.Instance instance) throws Exception {
@@ -405,6 +530,9 @@ public class ToolService {
 
     public void deleteMyIni(ToolConfig.Instance instance) throws Exception {
         Path iniFile = Paths.get(instance.path.data, "my.ini");
+        if (Files.isDirectory(iniFile)) {
+            throw new IOException("Not a regular file: " + iniFile.toAbsolutePath());
+        }
         Files.deleteIfExists(iniFile);
     }
 }
